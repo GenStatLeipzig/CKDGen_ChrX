@@ -37,15 +37,54 @@ You will need to customize a source file, indicating
     * cond
     * LD via PLINK2 between independent SNPs per locus
 6) Credible Set Analyses
-7) Coloc with eQTLs --> conditioned 
+7) Coloc with eQTLs
+    * all 22 unconditioned loci of script 01
+    * perform  extra check for the XXX loci with independent signals using their conditioned statistics
 8) Overlapping eGFR and UA loci
     * LD via PLINK2
-    * Coloc --> unconditioned?
+    * Coloc --> unconditioned; check locus definition --> we only want a pairwise comparision
 9) Replication in HUNT of top loci
-10) GCTA - heritability (reusing input of 5 a)
-11) Genetic Correlation (not yet done, compare / read publication of Yong Li)
-12) Lookup of candidate genes of other publications
-    
+10) GCTA - heritability (reusing input of 5a)
+11) Lookup of candidate SNPs of other publications
+12) MR-Mega - check filter!!
+
+## To discuss: Main/Sub Figures:
+
+F1) Main Figure 1: Miami Plot (UA vs eGFR, mark fem-/mal-spec) min(p_fem, p_mal, p_all), known/novel in italic
+      * color 1: new gene & new locus
+      * color 2: new gene & known locus
+      * color 3: known gene & known locus
+      * italic, bold, normal for sex-specifity
+F2) Main Figure 2: RA region 7 (all, male, female as panel)
+F3) Supplemental Figures:
+      * RA Plots (male, female, all, all regions?)
+      * beta-beta HUNT compare?
+      * beta-beta male-female IA?
+      * Cred Set size vs CADD variants as in publication Wuttke et al (2019) Fig 4? Cred Set size vs PP per SNP, mark the missense mutations --> maybe main figure?
+      * Forest Plots? (MR-Mega color by ethnic origin)
+      * Heatmap like phytopaper for eGFR - CKD/BUN comparison? all settings --> 9 traits x 15 loci Panel --> maybe main figure
+      * Coloc Plot of eQTL results (UMOD plot in Wuttke?) 
+      * Study design (Powerpoint --> Markus)
+
+## To discuss: Main/Sub Tables:
+
+T1) Main Table 1: Top-SNPs (22 loci of script 01) --> typical information of SNP annotation (not tracked in git)
+T2) Main Table 2: eGFR vs UA per overlapping regions (results/combination of scripts 08) & add region start/stop
+T3) Main Table 3: Candidate Genes and their function (manual search for interesting genes)
+T4) Supplemental Tables:
+      * Desctiption of Studies
+      * Genotyping & Imputation of Studies
+      * Study Sample Sizes & SNP Numbers per phenotype
+      * Lambda of GWAMA
+      * Cred Set Annotation for eGFR & UA in settings with genome-wide sig hits (--> 5 traits)
+      * Interaction + Coloc for male-female comparison (check effective N)
+      * Coloc eQTLs
+      * Replication HUNT
+      * CKD/BUN/Gout cross-phenotype comparison
+      * Look-up of Graham, X and Y
+      * MR-Mega
+
+
 # Not included (reason)
 
 1) Generate summary statistics per phenotype and setting (result of primary analyses; internal data)
