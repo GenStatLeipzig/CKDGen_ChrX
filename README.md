@@ -50,13 +50,13 @@ You will need to customize a source file, indicating
 
 ## To discuss: Main/Sub Figures:
 
-F1) Main Figure 1: Miami Plot (UA vs eGFR, mark fem-/mal-spec) min(p_fem, p_mal, p_all), known/novel in italic
+1) Main Figure 1: Miami Plot (UA vs eGFR, mark fem-/mal-spec) min(p_fem, p_mal, p_all), known/novel in italic
       * color 1: new gene & new locus
       * color 2: new gene & known locus
       * color 3: known gene & known locus
       * italic, bold, normal for sex-specifity
-F2) Main Figure 2: RA region 7 (all, male, female as panel)
-F3) Supplemental Figures:
+2) Main Figure 2: RA region 7 (all, male, female as panel)
+3) Supplemental Figures:
       * RA Plots (male, female, all, all regions?)
       * beta-beta HUNT compare?
       * beta-beta male-female IA?
@@ -68,10 +68,10 @@ F3) Supplemental Figures:
 
 ## To discuss: Main/Sub Tables:
 
-T1) Main Table 1: MANUALLY Top-SNPs (22 loci of script 01) --> typical information of SNP annotation (not tracked in git)
-T2) Main Table 2: eGFR vs UA per overlapping regions (results/combination of scripts 08) & add region start/stop
-T3) Main Table 3: Candidate Genes and their function (manual search for interesting genes)
-T4) Supplemental Tables:
+1) Main Table 1: MANUALLY Top-SNPs (22 loci of script 01) --> typical information of SNP annotation (not tracked in git)
+2) Main Table 2: eGFR vs UA per overlapping regions (results/combination of scripts 08) & add region start/stop
+3) Main Table 3: Candidate Genes and their function (manual search for interesting genes)
+4) Supplemental Tables:
       * Desctiption of Studies
       * Genotyping & Imputation of Studies
       * Study Sample Sizes & SNP Numbers per phenotype
