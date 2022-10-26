@@ -27,12 +27,12 @@ You will need to customize a source file, indicating
 
 # Included (tbc)
 
-1) Locus definition (check if programmable or just done via excel sheets - maybe shift to *not included*)
-2) Interaction analysis (should be no problem, because data sets will not be filtered!) 
+1) **DONE**: Locus definition 
+2) Interaction analysis 
 3) Coloc between males and females --> unconditioned 
 4) Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available)
 5) GCTA - cojo:
-    * create input UKBB (in helperscripts)
+    * **DONE**: create input UKBB (in helperscripts)
     * select
     * cond
     * LD via PLINK2 between independent SNPs per locus
@@ -68,7 +68,7 @@ F3) Supplemental Figures:
 
 ## To discuss: Main/Sub Tables:
 
-T1) Main Table 1: Top-SNPs (22 loci of script 01) --> typical information of SNP annotation (not tracked in git)
+T1) Main Table 1: MANUALLY Top-SNPs (22 loci of script 01) --> typical information of SNP annotation (not tracked in git)
 T2) Main Table 2: eGFR vs UA per overlapping regions (results/combination of scripts 08) & add region start/stop
 T3) Main Table 3: Candidate Genes and their function (manual search for interesting genes)
 T4) Supplemental Tables:
