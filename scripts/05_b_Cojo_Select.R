@@ -21,7 +21,7 @@
 rm(list=ls())
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(projectpath_main)
 
@@ -41,7 +41,7 @@ UA_all = UA_all[invalid_assoc == F, ]
 UA_male = fread("../data/CKDGen_ChrX_sumStat_UA_MALE.gz")
 UA_male = UA_male[invalid_assoc == F, ]
 UA_female = fread("../data/CKDGen_ChrX_sumStat_UA_FEMALE.gz")
-UA_female = UA_male[invalid_assoc == F, ]
+UA_female = UA_female[invalid_assoc == F, ]
 
 #' ## Load loci definition
 loci = fread("../results/01_Locus_Definitions.txt")
