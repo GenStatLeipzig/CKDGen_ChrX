@@ -13,7 +13,7 @@
 #'
 #' # Introduction ####
 #' ***
-#' I want to check if these loci co-localise between the sexes (best phenotype was mainly ALL, but coloc does not require genome-wide significant results)
+#' I want to check if these loci co-localise between the sexes (best phenotype was mainly ALL, but coloc does not require genome-wide significant results).
 #' 
 #' # Initialize ####
 #' ***
@@ -86,22 +86,22 @@ sumStat_union = rbind(sumStat_1, sumStat_2, sumStat_3,
 
 
 
-##### Directories
-# path_load_step10_1  = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/04_Annotation/gwasresults_1.7_nstud10_V2/"
-# path_load_toplist_1 = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/04_Annotation/gwasresults_1.7_nstud10_V2/synopsis/"
-path_load_toplist_1 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_stratified/04_Annotation/male/gwasresults_1.7_nstud10/synopsis/"
-# path_load_cojo_1    = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/07_cojo/"
-# path_load_step10_2  = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/04_Annotation/gwasresults_1.7_NStudies10/"
-# path_load_toplist_2 = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/04_Annotation/gwasresults_1.7_NStudies10/synopsis/"
-path_load_toplist_2 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_stratified/04_Annotation/female/gwasresults_1.7_nstud10/synopsis/"
-# path_load_cojo_2    = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/05_cojo/"
-# path_load_loci      = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/_results_combined/"
-# path_load_ukbb      = "J:/genstat/02_projekte/1911_CKDgen_chrX/09_meta_FileQC/"
-# path_save_coloc     = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_comb_strat/09_coloc/"
-path_load_toplist_3 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/04_Annotation/gwasresults_1.7_nstud10_V2/synopsis/"
-path_load_toplist_4 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_stratified/04_Annotation/male/gwasresults_1.7_nstud10/synopsis/"
-path_load_toplist_5 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_stratified/04_Annotation/female/gwasresults_1.7_nstud10/synopsis/"
-path_load_toplist_6 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/04_Annotation/gwasresults_1.7_NStudies10/synopsis/"
+# ##### Directories
+# # path_load_step10_1  = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/04_Annotation/gwasresults_1.7_nstud10_V2/"
+# # path_load_toplist_1 = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/04_Annotation/gwasresults_1.7_nstud10_V2/synopsis/"
+# path_load_toplist_1 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_stratified/04_Annotation/male/gwasresults_1.7_nstud10/synopsis/"
+# # path_load_cojo_1    = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/07_cojo/"
+# # path_load_step10_2  = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/04_Annotation/gwasresults_1.7_NStudies10/"
+# # path_load_toplist_2 = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/04_Annotation/gwasresults_1.7_NStudies10/synopsis/"
+# path_load_toplist_2 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_stratified/04_Annotation/female/gwasresults_1.7_nstud10/synopsis/"
+# # path_load_cojo_2    = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/05_cojo/"
+# # path_load_loci      = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/_results_combined/"
+# # path_load_ukbb      = "J:/genstat/02_projekte/1911_CKDgen_chrX/09_meta_FileQC/"
+# # path_save_coloc     = "J:/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_comb_strat/09_coloc/"
+# path_load_toplist_3 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/01_eGFR_allEth_sex_combined/04_Annotation/gwasresults_1.7_nstud10_V2/synopsis/"
+# path_load_toplist_4 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_stratified/04_Annotation/male/gwasresults_1.7_nstud10/synopsis/"
+# path_load_toplist_5 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_stratified/04_Annotation/female/gwasresults_1.7_nstud10/synopsis/"
+# path_load_toplist_6 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_CKDgen_chrX/10_metaGWAS/03_uric_acid_allEth_sex_combined/04_Annotation/gwasresults_1.7_NStudies10/synopsis/"
 
 
 
@@ -116,18 +116,18 @@ path_load_toplist_6 = "/net/ifs1/san_projekte/projekte/genstat/02_projekte/1911_
 
 
 ##### Individual Data
-toplist_1 = read_excel(paste0(path_load_toplist_1, "step80_annotated_toplist_validated_2022-01-24_ALL_eGFR_overall_nstud10_male.xlsx"), sheet = "topliste")
-toplist_1 = as.data.frame(toplist_1)
-toplist_2 = read_excel(paste0(path_load_toplist_2, "step80_annotated_toplist_validated_2022-01-24_ALL_eGFR_overall_nstud10_female.xlsx"), sheet = "topliste")
-toplist_2 = as.data.frame(toplist_2)
-toplist_3 = read_excel(paste0(path_load_toplist_3, "step80_annotated_toplist_validated_2022-04-26_ALL_eGFR_overall_nstud10_V2.xlsx"), sheet = "topliste")
-toplist_3 = as.data.frame(toplist_3)
-toplist_4 = read_excel(paste0(path_load_toplist_4, "step80_annotated_toplist_validated_2022-01-24_ALL_uric_acid_overall_nstud10_male.xlsx"), sheet = "topliste")
-toplist_4 = as.data.frame(toplist_4)
-toplist_5 = read_excel(paste0(path_load_toplist_5, "step80_annotated_toplist_validated_2022-01-24_ALL_uric_acid_overall_nstud10_female.xlsx"), sheet = "topliste")
-toplist_5 = as.data.frame(toplist_5)
-toplist_6 = read_excel(paste0(path_load_toplist_6, "step80_annotated_toplist_validated_2021-06-29_ALL_uric_acid_overall.xlsx"), sheet = "topliste")
-toplist_6 = as.data.frame(toplist_6)
+# toplist_1 = read_excel(paste0(path_load_toplist_1, "step80_annotated_toplist_validated_2022-01-24_ALL_eGFR_overall_nstud10_male.xlsx"), sheet = "topliste")
+# toplist_1 = as.data.frame(toplist_1)
+# toplist_2 = read_excel(paste0(path_load_toplist_2, "step80_annotated_toplist_validated_2022-01-24_ALL_eGFR_overall_nstud10_female.xlsx"), sheet = "topliste")
+# toplist_2 = as.data.frame(toplist_2)
+# toplist_3 = read_excel(paste0(path_load_toplist_3, "step80_annotated_toplist_validated_2022-04-26_ALL_eGFR_overall_nstud10_V2.xlsx"), sheet = "topliste")
+# toplist_3 = as.data.frame(toplist_3)
+# toplist_4 = read_excel(paste0(path_load_toplist_4, "step80_annotated_toplist_validated_2022-01-24_ALL_uric_acid_overall_nstud10_male.xlsx"), sheet = "topliste")
+# toplist_4 = as.data.frame(toplist_4)
+# toplist_5 = read_excel(paste0(path_load_toplist_5, "step80_annotated_toplist_validated_2022-01-24_ALL_uric_acid_overall_nstud10_female.xlsx"), sheet = "topliste")
+# toplist_5 = as.data.frame(toplist_5)
+# toplist_6 = read_excel(paste0(path_load_toplist_6, "step80_annotated_toplist_validated_2021-06-29_ALL_uric_acid_overall.xlsx"), sheet = "topliste")
+# toplist_6 = as.data.frame(toplist_6)
 
 # cojo = read_excel(paste0(path_load_loci, "Von_Wuttke_to_Lokus_220530.xlsx"), sheet = "Independent_SNPs")
 # cojo = as.data.frame(cojo)
@@ -328,7 +328,7 @@ data_2_lifted = data
 data_4_lifted = data
 data_5_lifted = data
 coloc         = list()
-for (i in 1 : 14) { # nrow(data_1_lifted) == nrow(data_2_lifted) == nrow(data_4_lifted) == nrow(data_5_lifted)
+for (i in 1 : 15) { # nrow(data_1_lifted) == nrow(data_2_lifted) == nrow(data_4_lifted) == nrow(data_5_lifted)
   
   ### Create Locus-Wise Lists as Input for Colocalisation Analyses
   
@@ -572,7 +572,7 @@ for (i in 1 : 14) { # nrow(data_1_lifted) == nrow(data_2_lifted) == nrow(data_4_
   #rm(coloc_ij)
   coloc[[i]] = coloc_ij
 }
-for (i in 15 : 20) { # nrow(data_1_lifted) == nrow(data_2_lifted) == nrow(data_4_lifted) == nrow(data_5_lifted)
+for (i in 16 : 22) { # nrow(data_1_lifted) == nrow(data_2_lifted) == nrow(data_4_lifted) == nrow(data_5_lifted)
   
   ### Create Locus-Wise Lists as Input for Colocalisation Analyses
   
@@ -859,8 +859,8 @@ names(res_summary) = c("nsnps",
                        "PP.H3.abf",
                        "PP.H4.abf")
 res_summary        = data.frame(locus = paste0("Region ", data$region),
-                                trait1 = c(rep("eGFR (MALE)", 14), rep("UA (MALE)", 6)),
-                                trait2 = c(rep("eGFR (FEMALE)", 14), rep("UA (FEMALE)", 6)),
+                                trait1 = c(rep("eGFR (MALE)", 15), rep("UA (MALE)", 7)),
+                                trait2 = c(rep("eGFR (FEMALE)", 15), rep("UA (FEMALE)", 7)),
                                 res_summary)
 
 # for (i in 1 : nrow(res_h3_h4)) {
