@@ -46,6 +46,7 @@ data/*
 helperScripts/*
 results/*
 temp/*
+scripts/*.Rout
 scripts/*.out
 scripts/*.html
 
