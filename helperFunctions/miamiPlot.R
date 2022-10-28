@@ -4,7 +4,8 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
                                hline1=NULL,hline2=NULL,sugline1=NULL,sugline2=NULL, highlight=F, 
                                returnObject = F,suppress19_21label =F, diffsize = FALSE , num_breaks_y=5, 
                                mypointsize=1,plotGenes=T,
-                               showcolors =F, out_name,overall_max = 25, overall_min = -25) {
+                               showcolors =F, out_name,overall_max = 25, overall_min = -25,
+                    useBasePosition=F) {
   
   # debug
   # x=plotData
@@ -25,11 +26,10 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   # returnObject = T
   # overall_max = 40
   # overall_min = -40
-  
   # suppress19_21label =F
   # showcolors =F
   # mypointsize=1
-  
+
   if(suppress19_21label ==T) {x_labels = c(1:18, 20, 22:23)} else {x_labels= c(1:13, 15, 17, 19, 21, 23)}
   
   #load needed package
@@ -64,12 +64,15 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   # set ymin to 0 if not provided
   if(is.null(ymin)) ymin = 0
   
-  #calculate x coordinates for plot
-  #maxBP <- sapply(c(1:22),function(chr) max(x$BP[x$CHR==chr]))
-  #myX <- (x$BP/maxBP[x$CHR]) + x$CHR - 0.5
-  myX<-seq(from=1,to=length(myY),by=1)
+  # calculate x coordinates for plot
+  if(useBasePosition==T){
+    myX = x$BP
+  }else{
+    myX<-seq(from=1,to=length(myY),by=1)
+  }
   
-  #choose color labels for chromosomes
+  
+  # choose color labels for chromosomes
   if(showcolors ==F) {
     myEven<-(x$CHR %% 2) == 0
     myColor<-vector(mode="character",length=dim(x)[1])
@@ -81,18 +84,34 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   # mylabel um spaeter noch die SNP - positionen rueckschlussfolgern zu koennen
   myLabel = x$SNP
   myFlag = x$flag
+  myPhenotype = x$phenotype
   
   #build plot object for ggplot
   if(plotGenes==T){
     myGene = x$candidateGene
-    myPD<-data.table(myX,myY,myColor, myLabel,myFlag,myGene)
+    myNovelty = x$Novelty
+    mySexIA = x$SexInteraction
+    myPD<-data.table(myX,myY,myColor, myLabel,myFlag,myPhenotype,myGene,myNovelty,mySexIA)
   }else{
-    myPD<-data.table(myX,myY,myColor, myLabel,myFlag)
+    myPD<-data.table(myX,myY,myColor, myLabel,myFlag,myPhenotype)
   }
   
   myPD[myFlag=="bottom",myY:= myY*(-1)]
   
-  if (highlight==T) {myPD[myY>hline1 | myY<hline2,myColor:=3]}
+  if (highlight==T) {
+    # I want colors per setting?
+    # eGFR females - all - males: 
+    myPD[,myPhenotype := gsub(".*_","",myPhenotype)]
+    
+    myPD[myY>hline1 & myPhenotype=="FEMALE" ,myColor:=3]
+    myPD[myY>hline1 & myPhenotype=="ALL" ,myColor:=4]
+    myPD[myY>hline1 & myPhenotype=="MALE" ,myColor:=5]
+    
+    myPD[myY<hline2 & myPhenotype=="FEMALE" ,myColor:="#D1E5F0"]
+    myPD[myY<hline2 & myPhenotype=="ALL" ,myColor:=6]
+    myPD[myY<hline2 & myPhenotype=="MALE" ,myColor:=7]
+    
+  }
   
   #recalculate position and values of x axis ticks and labels
   xAL<-unique(x$CHR)
@@ -111,7 +130,7 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   
   myPD$pointsize = mypointsize
   if(diffsize == T & is.null(hline1)==F  & is.null(hline2)==F){ myPD[myY>hline1 | myY<hline2,pointsize:=2]}
-  myPD$pointsize = factor(  myPD$pointsize)
+  myPD$pointsize = factor(myPD$pointsize)
   
   # filter data to limit y-axis
   message("Filter data to limit y-axis")
@@ -144,12 +163,28 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   message("Start plot ...")
   myPlot <- ggplot() 
   # data=myPD, aes(x=myX, y=myY, colour=myColor, label = myLabel)
-  myPlot <- myPlot + geom_point(data=myPD, aes(x=myX, y=myY, colour=myColor, label = myLabel, size = pointsize)) + scale_size_discrete(range=c(1,2.5)) + guides(size="none")
-  if(is.null(highlight) & showcolors!= F) {myPlot <- myPlot + scale_colour_manual(values= rep(rev(brewer.pal(5, "Dark2")), 23))}else { myPlot <- myPlot + scale_colour_manual(values=c("black","darkgrey","red")) }
-  myPlot <- myPlot + coord_cartesian(xlim=c(0,length(myX)+1),ylim=c(ymin-1,ymax+1))
+  myPlot <- myPlot + 
+    geom_point(data=myPD, aes(x=myX, y=myY, colour=myColor, label = myLabel, size = pointsize)) + 
+    scale_size_discrete(range=c(1,2.5)) + 
+    guides(size="none")
+  if(is.null(highlight) & showcolors!= F) {
+    myPlot <- myPlot + scale_colour_manual(values= rep(rev(brewer.pal(5, "Dark2")), 23))
+  }else { 
+    myPlot <- myPlot + scale_colour_manual(values=c("#000000","#FDDBC7","#EF8A62","#B2182B","#67A9CF","#2166AC"),
+                                           labels=c("non sig.","eGFR FEMALES","eGFR ALL","eGFR MALES","UA ALL","UA MALES"))
+  }
+  if(useBasePosition == T){
+    myPlot <- myPlot + coord_cartesian(xlim=c(min(myX)-1,max(myX)+1),ylim=c(ymin-1,ymax+1), expand = FALSE)
+  }else{
+    myPlot <- myPlot + coord_cartesian(xlim=c(0,length(myX)+1),ylim=c(ymin-1,ymax+1))
+  }
+  
   myPlot <- myPlot + scale_x_continuous(name=xlabel,labels=xAL, breaks=xAP)
   myPlot <- myPlot + scale_y_continuous(name=ylabel,breaks=pretty_breaks(n=num_breaks_y)) 
-  myPlot <- myPlot + ggtitle(title,subtitle = mySubtitle) + guides(color="none")
+  myPlot <- myPlot + ggtitle(title,subtitle = mySubtitle)
+  myPlot <- myPlot + labs(color = "Legend")
+  myPlot <- myPlot + theme(legend.position = c(0.8, 0.9)) 
+  # myPlot <- myPlot + guides(color="none")
   myPlot <- myPlot + theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
   myPlot <- myPlot + theme(axis.text.y = element_text(colour="black",size = 12),axis.line.y = element_line(colour="black"))
   myPlot <- myPlot + theme(panel.background = element_blank())
@@ -171,18 +206,18 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   
   # add genenames 
   myPlot2 <-myPlot + 
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3),
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-10,ymax+1)) + 
-    # geom_label_repel(data = subset(myPD, myFlag=="top" & myY<7.3),
-    #                  aes(x=myX, y=myY, label = myGene),color = "#666666",
-    #                  ylim = c(8,20)) + 
-    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3),
+                     ylim = c(ymax-5,ymax+5)) + 
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F),
+                     aes(x=myX, y=myY, label = myGene),color = "#666666",
+                     ylim = c(ymax-15,ymax-10)) +
+    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==T),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymin-1,ymin+5)) #+ 
-    # geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY>-7.3),
-    #                  aes(x=myX, y=myY, label = myGene),color = "#666666",
-    #                  ylim = c(-20,-8)) 
+                     ylim = c(ymin-5,ymin+5)) + 
+    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==F),
+                     aes(x=myX, y=myY, label = myGene),color = "#666666",
+                     ylim = c(ymin+10,ymin+5))
   
   
   myPlot2
