@@ -50,11 +50,9 @@ You will need to customize a source file, indicating
 
 ## To discuss: Main/Sub Figures:
 
-1) Main Figure 1: Miami Plot (UA vs eGFR, mark fem-/mal-spec) min(p_fem, p_mal, p_all), known/novel in italic
-      * color 1: new gene & new locus
-      * color 2: new gene & known locus
-      * color 3: known gene & known locus
-      * italic, bold, normal for sex-specifity
+1) **DONE** Main Figure 1: Miami Plot (eGFR vs UA):
+      * color coding: reddish eGFR, bluish UA, lighter females, darker males
+      * novelty coding: candidate gene in black novel, candidate gene in grey kown
 2) Main Figure 2: RA region 7 (all, male, female as panel)
 3) Supplemental Figures:
       * RA Plots (male, female, all, all regions?)
