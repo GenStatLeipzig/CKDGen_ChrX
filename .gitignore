@@ -19,6 +19,7 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -49,5 +50,6 @@ temp/*
 scripts/*.Rout
 scripts/*.out
 scripts/*.html
-
-
+figures/*.pdf
+figures/*.tiff
+figures/*.html
