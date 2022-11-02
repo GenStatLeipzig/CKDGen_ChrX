@@ -33,9 +33,9 @@ You will need to customize a source file, indicating
 4) Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available)
 5) GCTA - cojo:
     * **DONE**: create input UKBB (in helperscripts)
-    * **DONE** select
-    * cond
-    * LD via PLINK2 between independent SNPs per locus
+    * **DONE**: select
+    * **DONE**: cond
+    * **DONE**: LD via PLINK2 between independent SNPs per locus
 6) Credible Set Analyses
 7) Coloc with eQTLs
     * all 22 unconditioned loci of script 01
