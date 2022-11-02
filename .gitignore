@@ -51,5 +51,6 @@ scripts/*.Rout
 scripts/*.out
 scripts/*.html
 figures/*.pdf
+figures/*.tif
 figures/*.tiff
 figures/*.html
