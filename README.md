@@ -30,7 +30,7 @@ You will need to customize a source file, indicating
 1) **DONE**: Locus definition 
 2) Interaction analysis 
 3) Coloc between males and females --> unconditioned 
-4) Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available) --> using the 22 top SNPs
+4) **DONE**: Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available) --> using the 22 top SNPs
 5) **DONE**: GCTA - cojo:
     * **DONE**: create input UKBB (in helperscripts)
     * **DONE**: select
@@ -43,7 +43,7 @@ You will need to customize a source file, indicating
 8) Overlapping eGFR and UA loci
     * LD via PLINK2
     * Coloc --> unconditioned; check locus definition --> we only want a pairwise comparision
-9) **DONE**: Replication in HUNT of top loci
+9) **DONE**: Replication in HUNT of top loci --> **Supplemental Figure**
 10) GCTA - heritability (reusing input of 5a)
 11) Lookup of candidate SNPs of other publications
 12) MR-Mega - check filter!!
@@ -56,7 +56,7 @@ You will need to customize a source file, indicating
 2) Main Figure 2: RA region 7 (all, male, female as panel)
 3) Supplemental Figures:
       * RA Plots (male, female, all, all regions?)
-      * beta-beta HUNT compare?
+      * **DONE** beta-beta HUNT
       * beta-beta male-female IA?
       * Cred Set size vs CADD variants as in publication Wuttke et al (2019) Fig 4? Cred Set size vs PP per SNP, mark the missense mutations --> maybe main figure?
       * Forest Plots? (MR-Mega color by ethnic origin)
