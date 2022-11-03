@@ -4,7 +4,7 @@ Analyses of X-chromosomal SNPs and kidney traits
 
 **Contributor: Markus Scholz, Katrin Horn, Andreas Kühnapfel and Janne Pott**
 
-**Last Updated: 24/10/2022**
+**Last Updated: 03/11/2022**
 
 Supporting code for the following paper:
 
@@ -30,8 +30,8 @@ You will need to customize a source file, indicating
 1) **DONE**: Locus definition 
 2) Interaction analysis 
 3) Coloc between males and females --> unconditioned 
-4) Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available)
-5) GCTA - cojo:
+4) Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available) --> using the 22 top SNPs
+5) **DONE**: GCTA - cojo:
     * **DONE**: create input UKBB (in helperscripts)
     * **DONE**: select
     * **DONE**: cond
@@ -43,7 +43,7 @@ You will need to customize a source file, indicating
 8) Overlapping eGFR and UA loci
     * LD via PLINK2
     * Coloc --> unconditioned; check locus definition --> we only want a pairwise comparision
-9) Replication in HUNT of top loci
+9) **DONE**: Replication in HUNT of top loci
 10) GCTA - heritability (reusing input of 5a)
 11) Lookup of candidate SNPs of other publications
 12) MR-Mega - check filter!!
@@ -70,11 +70,11 @@ You will need to customize a source file, indicating
 2) Main Table 2: eGFR vs UA per overlapping regions (results/combination of scripts 08) & add region start/stop
 3) Main Table 3: Candidate Genes and their function (manual search for interesting genes)
 4) Supplemental Tables:
-      * Desctiption of Studies
+      * Description of Studies
       * Genotyping & Imputation of Studies
       * Study Sample Sizes & SNP Numbers per phenotype
       * Lambda of GWAMA
-      * Cred Set Annotation for eGFR & UA in settings with genome-wide sig hits (--> 5 traits)
+      * Cred Set Annotation for eGFR & UA in settings with genome-wide sig hits (--> 5 traits --> A - E)
       * Interaction + Coloc for male-female comparison (check effective N)
       * Coloc eQTLs
       * Replication HUNT
