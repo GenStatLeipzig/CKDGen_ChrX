@@ -1,8 +1,8 @@
 #' ---
-#' title: "Sex Interaction: eGFR"
-#' subtitle: "CKDGen Chromosome X"
-#' author: "Andreas Kühnapfel"
-#' date: "Last compiled on `r format(Sys.time(), "%d %B %Y")`"
+#' title: "Sex Interaction"
+#' subtitle: "CKDGen - Chr X"
+#' author: "Andreas, Janne Pott"
+#' date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
 #' output:
 #'   html_document:
 #'     toc: true
@@ -21,7 +21,7 @@
 rm(list = setdiff(ls(), "allinfo"))
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_forostar.R")
 
 setwd(projectpath_main)
 
@@ -49,8 +49,13 @@ meta_uric_acid_male   = fread("../data/CKDGen_ChrX_sumStat_UA_MALE.gz")
 meta_uric_acid_female = fread("../data/CKDGen_ChrX_sumStat_UA_FEMALE.gz")
 meta_uric_acid_all    = fread("../data/CKDGen_ChrX_sumStat_UA_ALL.gz")
 
-
-
+locus = locus[,c(1,5,8)]
+dummy = data.table(region = 7,
+                   rsID = "rs149995096:100479327:C:T",
+                   position = 100479327)
+locus = rbind(locus,dummy)
+setorder(locus,region,position)
+locus
 
 
 ##### Analysis
