@@ -50,10 +50,10 @@ done = foreach(l = c(1:nrow(toDo))) %do% {
 
 #' # Run COJO Conditional ####
 #' ***
-gctaCall.1 = paste0(path_gcta," --bfile ../results/05_a_ukb20272_imp_chrX_v3_s486631 --chr 23 --maf 0.02 --cojo-file ../temp/05_b_Cojo_select_input/CojoInput_eGFR_all_Region_9.ma --cojo-cond ../temp/05_c_Cojo_cond_input/CojoCond_eGFR_all_Region_9_rs181497961.snplist --out ../temp/05_c_Cojo_cond_results/CojoCond_eGFR_all_Region9_rs111410539")
+gctaCall.1 = paste0(path_gcta," --bfile ../results/05_a_ukb20272_imp_chrX_v3_s486631 --chr 23 --maf 0.02 --cojo-file ../temp/05_b_Cojo_select_input/CojoInput_eGFR_all_Region_9.ma --cojo-cond ../temp/05_c_Cojo_cond_input/CojoCond_eGFR_all_Region_9_rs181497961.snplist --out ../temp/05_c_Cojo_cond_results/CojoCond_eGFR_all_Region_9_rs111410539")
 system(gctaCall.1)
 
-gctaCall.2 = paste0(path_gcta," --bfile ../results/05_a_ukb20272_imp_chrX_v3_s486631 --chr 23 --maf 0.02 --cojo-file ../temp/05_b_Cojo_select_input/CojoInput_eGFR_all_Region_9.ma --cojo-cond ../temp/05_c_Cojo_cond_input/CojoCond_eGFR_all_Region_9_rs111410539.snplist --out ../temp/05_c_Cojo_cond_results/CojoCond_eGFR_all_Region9_rs181497961")
+gctaCall.2 = paste0(path_gcta," --bfile ../results/05_a_ukb20272_imp_chrX_v3_s486631 --chr 23 --maf 0.02 --cojo-file ../temp/05_b_Cojo_select_input/CojoInput_eGFR_all_Region_9.ma --cojo-cond ../temp/05_c_Cojo_cond_input/CojoCond_eGFR_all_Region_9_rs111410539.snplist --out ../temp/05_c_Cojo_cond_results/CojoCond_eGFR_all_Region_9_rs181497961")
 system(gctaCall.2)
 
 gctaCall.3 = paste0(path_gcta," --bfile ../results/05_a_ukb20272_imp_chrX_v3_s486631 --chr 23 --maf 0.02 --cojo-file ../temp/05_b_Cojo_select_input/CojoInput_UA_all_Region_21.ma --cojo-cond ../temp/05_c_Cojo_cond_input/CojoCond_UA_all_Region_21_X_133799101_AGT_A.snplist --out ../temp/05_c_Cojo_cond_results/CojoCond_UA_all_Region_21_rs7056552")
