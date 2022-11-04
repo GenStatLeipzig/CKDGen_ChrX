@@ -40,6 +40,7 @@ vignettes/*.pdf
 .Renviron
 
 # other stuff
+README_intern.md
 SourceFile_aman.R
 SourceFile_forostar.R
 SourceFile_local.R
