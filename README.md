@@ -28,8 +28,8 @@ You will need to customize a source file, indicating
 # Included (tbc)
 
 1) **DONE**: Locus definition with 22 top hits 
-2) Interaction analysis 
-3) Coloc between males and females --> unconditioned 
+2) **DONE**: Interaction analysis 
+3) **DONE**: Coloc between males and females --> unconditioned 
 4) **DONE**: Comparison of eGFR / UA hits with CKD / BUN (all phenotype in data available) --> using the 22 top SNPs
 5) **DONE**: GCTA - cojo:
     * **DONE**: create input UKBB (in helperscripts)
@@ -37,12 +37,12 @@ You will need to customize a source file, indicating
     * **DONE**: cond
     * **DONE**: LD via PLINK2 between independent SNPs per locus
 6) **DONE**: Credible Set Analyses
-7) Coloc with eQTLs
-    * all 22 unconditioned loci of script 01
-    * perform  extra check for the XXX loci with independent signals using their conditioned statistics
-8) Overlapping eGFR and UA loci
+7) **DONE**: Coloc with eQTLs
+    * **DONE**: all 22 unconditioned loci of script 01
+    * **DONE**: perform  extra check for the 3 loci with independent signals using their conditioned statistics
+8) **DONE**: Overlapping eGFR and UA loci
     * **DONE**: LD via PLINK2
-    * Coloc --> unconditioned; check locus definition --> we only want a pairwise comparision
+    * **DONE**: Coloc --> unconditioned; check locus definition --> we only want a pairwise comparision
 9) **DONE**: Replication in HUNT of top loci --> **Supplemental Figure**
 10) GCTA - heritability (reusing input of 5a)
 11) Lookup of candidate SNPs of other publications
