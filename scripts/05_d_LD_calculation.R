@@ -57,7 +57,7 @@ result = foreach(t = toDo) %do% {
     mySNP1 = dat[pos1, SNP]
     mySNP2 = dat[pos2, SNP]
     
-    outFile = paste0("../temp/LD_calculation/5_d_", gsub(":", "_", mySNP1), "_", gsub(":", "_", mySNP2))
+    outFile = paste0("../temp/LD_calculation/05_d_", gsub(":", "_", mySNP1), "_", gsub(":", "_", mySNP2))
     plinkCall = paste0(path_plink2, " --bfile ", data.UKBB, " --ld ", mySNP1, " ", mySNP2, " --out ", outFile)
     system(plinkCall)
     
@@ -76,7 +76,7 @@ result
 
 #' # Save results 
 # ***
-write.table(result, file = "../results/5_d_results_LD_calculation.txt", col.names = T, row.names = F, quote = F)
+write.table(result, file = "../results/05_d_results_LD_calculation.txt", col.names = T, row.names = F, quote = F)
 
 #' # Session Info ####
 #' ***
