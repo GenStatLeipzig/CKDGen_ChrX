@@ -21,7 +21,7 @@
 rm(list = setdiff(ls(), "allinfo"))
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(projectpath_main)
 
@@ -49,10 +49,13 @@ meta_uric_acid_male   = fread("../data/CKDGen_ChrX_sumStat_UA_MALE.gz")
 meta_uric_acid_female = fread("../data/CKDGen_ChrX_sumStat_UA_FEMALE.gz")
 meta_uric_acid_all    = fread("../data/CKDGen_ChrX_sumStat_UA_ALL.gz")
 
-locus = locus[,c(1,5,8)]
+locus = locus[,c(1,5,6,8)]
+
 dummy = data.table(region = 7,
                    rsID = "rs149995096:100479327:C:T",
+                   phenotype = "eGFR_FEMALE",
                    position = 100479327)
+
 locus = rbind(locus,dummy)
 setorder(locus,region,position)
 locus
@@ -105,19 +108,20 @@ df = data.frame(union_unique,
                 ifelse((s == 1), "eGFR", "Uric Acid"),
                 meta_male_union$beta,
                 meta_male_union$SE,
+                meta_male_union$P,
                 meta_female_union$beta,
                 meta_female_union$SE,
+                meta_female_union$P,
                 stringsAsFactors = FALSE)
 
+df$mean_diff = rep(NA, nrow(df))
+df$se_diff = rep(NA, nrow(df))
 df$p_diff = rep(NA, nrow(df))
 
-names(df) = c("SNP",
-              "Trait",
-              "Male Beta",
-              "Male SE",
-              "Female Beta",
-              "Female SE",
-              "p_diff")
+names(df) = c("SNP","Trait",
+              "Male_Beta", "Male_SE", "Male_P",
+              "Female_Beta", "Female_SE", "Female_P",
+              "mean_diff","se_diff","p_diff")
 
 union_r        = c(meta_male$rsID, meta_female$rsID)
 union_unique_r = unique(union_r)
@@ -127,10 +131,15 @@ r              = cor(meta_male$beta[match(union_unique_r, meta_male$rsID)],
                      method = "spearman")
 for (i in 1 : nrow(df)) {
 
-  z_i = (df$"Male Beta"[i] - df$"Female Beta"[i]) / sqrt(df$"Male SE"[i]^2 + df$"Female SE"[i]^2 - 2 * r * df$"Male SE"[i] * df$"Female SE"[i])
+  z_i = (df$"Male_Beta"[i] - df$"Female_Beta"[i]) / sqrt(df$"Male_SE"[i]^2 + df$"Female_SE"[i]^2 - 2 * r * df$"Male_SE"[i] * df$"Female_SE"[i])
   p_i = 2 * pnorm(abs(z_i), lower.tail = FALSE)
+  diff_i = (df$"Male_Beta"[i] - df$"Female_Beta"[i])
+  diff_se_i = sqrt(df$"Male_SE"[i]^2 + df$"Female_SE"[i]^2 - 2 * r * df$"Male_SE"[i] * df$"Female_SE"[i])
   
+  df$mean_diff[i] = diff_i
+  df$se_diff[i] = diff_se_i
   df$p_diff[i] = p_i
+  
 }
 
 # Match Top-SNPs
@@ -149,13 +158,13 @@ png(filename = paste0("../results/02_sex_ia_beta_plot_", ifelse((s == 1), "egfr"
     width = 2000,
     res = 300)
 
-bp = ggplot(data = df, aes(x = df$"Male Beta", y = df$"Female Beta")) +
+bp = ggplot(data = df, aes(x = df$"Male_Beta", y = df$"Female_Beta")) +
        lims(x = c(ifelse((s == 1), -0.035, -0.05), ifelse((s == 1), 0.005, 0.05)), y = c(ifelse((s == 1), -0.035, -0.05), ifelse((s == 1), 0.005, 0.05))) +
        geom_hline(yintercept = 0, col = "grey") +
        geom_vline(xintercept = 0, col = "grey") +
        geom_point(size = 2, colour = col, alpha = 0.25) +
-       geom_errorbar(aes(ymin = (df$"Female Beta" - 1.96 * df$"Female SE"), ymax = (df$"Female Beta" + 1.96 * df$"Female SE")), colour = col, alpha = 0.25) +
-       geom_errorbarh(aes(xmin = (df$"Male Beta" - 1.96 * df$"Male SE"), xmax = (df$"Male Beta" + 1.96 * df$"Male SE")), colour = col, alpha = 0.25) +
+       geom_errorbar(aes(ymin = (df$"Female_Beta" - 1.96 * df$"Female_SE"), ymax = (df$"Female_Beta" + 1.96 * df$"Female_SE")), colour = col, alpha = 0.25) +
+       geom_errorbarh(aes(xmin = (df$"Male_Beta" - 1.96 * df$"Male_SE"), xmax = (df$"Male_Beta" + 1.96 * df$"Male_SE")), colour = col, alpha = 0.25) +
        #geom_label_repel(aes(label = df$SNP)) +
        labs(title = ifelse((s == 1), "eGFR", "Uric Acid"), x = "Effect Size Male", y = "Effect Size Female") +
        #scale_color_manual(breaks = c("FDR <= 5%", "FDR > 5%"), values = c("red", "black")) +
@@ -177,8 +186,64 @@ write.table(df,
 }
 
 
+#' # Supplemental Figure: Beta-Beta Plot ####
+#' ***
+sexIA_eGFR = fread("../results/02_sex_ia_egfr.txt")
+sexIA_UA = fread("../results/02_sex_ia_uric_acid.txt")
+filt = grepl("UA",locus$phenotype)
+table(filt)
+
+sexIA = rbind(sexIA_eGFR[!filt,],sexIA_UA[filt,])
+setDT(sexIA)
+sexIA[,fdr_diff := p.adjust(p_diff, method = "fdr")]
+
+myPlotData<-data.table(rs_id=sexIA$SNP,
+                       trait=sexIA$Trait,
+                       beta_male = sexIA$Male_Beta,
+                       beta_female = sexIA$Female_Beta,
+                       se_male = sexIA$Male_SE,
+                       se_female = sexIA$Female_SE,
+                       meandiff = sexIA$mean_diff,
+                       meandiff_p = sexIA$p_diff,
+                       meandiff_p_FDR = sexIA$fdr_diff)
+myPlotData[meandiff_p>=0.05,sig:="no"]
+myPlotData[meandiff_p<0.05,sig:="yes"]
+myPlotData[meandiff_p_FDR<0.05,sig:="yes (FDR 5%)"]
+myPlotData[,gene2:=""]
+myPlotData[meandiff_p_FDR<0.05,gene2:=gsub(":.*","",rs_id)]
+myPlotData[,gene3:=""]
+myPlotData[meandiff_p<0.05,gene3:=gsub(":.*","",rs_id)]
 
 
+
+myPlot1 = ggplot(myPlotData, aes(x=beta_male, y=beta_female,color=sig)) + 
+  facet_wrap(~trait, scales = "free") +
+  geom_abline(intercept = 0, slope = 1, color="grey", linetype="dashed", size=1.25)+
+  geom_hline(yintercept = 0, color="grey", linetype="dashed", size=1.15)+
+  geom_vline(xintercept = 0, color="grey", linetype="dashed", size=1.15)+
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = beta_female- 1.96*se_female, ymax = beta_female+ 1.96*se_female)) +
+  geom_errorbarh(aes(xmin = beta_male- 1.96*se_male, xmax = beta_male + 1.96*se_male)) +
+  theme_bw(base_size = 10)+
+  scale_colour_manual(values=c("#000000","#B2182B","#2166AC"),
+                      labels=c("no","yes","yes (FDR 5%)"))+
+  theme(plot.title = element_text(hjust = 0, size=22,face="bold"),
+        axis.title.x = element_text(size=12,face="bold"),
+        axis.title.y = element_text(size=12,face="bold"),
+        axis.text = element_text(size=12,face="bold"),
+        strip.text = element_text(size = 20))+
+  labs(x="Effect Size Male", 
+       y = "Effect Size Female",
+       color = "SNPs with \nsex interaction")+
+  geom_label_repel(data = subset(myPlotData, sig!="no"),
+                   aes(x=beta_male, y=beta_female, label = gene3))+
+  guides(label="none",color="none")
+myPlot1
+
+tiff(filename = "../figures/SupplementalFigure_BetaBeta_sexIA.tiff", 
+     width = 1744, height = 960, res=125, compression = 'lzw')
+myPlot1
+dev.off()
 
 #' # Session Info ####
 #' ***
