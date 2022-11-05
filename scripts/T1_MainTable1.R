@@ -34,7 +34,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(paste0(projectpath,"scripts/"))
 
@@ -164,7 +164,7 @@ tab1[,NR_indepSignals := indep[matched,N]]
 tab1[,dumID := NULL]
 
 coloc_sexIA = rbind(coloc_sexIA[1:7,],coloc_sexIA[7:22,])
-tab1[,coloc_sexIA:="inclonclusive"]
+tab1[,coloc_sexIA:="inconclusive"]
 filt = coloc_sexIA$PP.H4.abf>0.75
 tab1[filt,coloc_sexIA:="both sexes - shared"]
 filt = coloc_sexIA$PP.H3.abf>0.75
