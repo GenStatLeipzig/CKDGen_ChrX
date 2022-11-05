@@ -45,12 +45,12 @@ If you want to reproduce our results, you will need to customize a source file, 
     * LD estimation: LD between eGFR and UA index SNPs using *PLINK2*
     * Co-localization analyses of eGFR and UA:  test of the associations of eGFR and UA for shared causal signal 
 9) **Replication analysis**: replicate findings of eGFR in *HUNT* study (one-sided)
-10) **X-chromosomal heritability**: *GCTA* - restricted maximum likelihood (REML) analyses
+10) X-chromosomal heritability: *GCTA* - restricted maximum likelihood (REML) analyses
     * Reference data set: *UKBB* (genotyped SNPs)
     * REML: estimation of heritability for eGFR and UA
     * REML bivariate: estimation of genetic correlation between eGFR and UA 
 11) **Lookup of reported variants**: replicate findings of *Graham et al*, *Kanai et al* and *Sakaue et al* (successful if nominal significance and concordant effect is observed) 
-12) **Trans-ethnic meta-regression analysis**: accounting for mixed ethnicities by using MR-Mega
+12) Trans-ethnic meta-regression analysis: accounting for mixed ethnicities by using MR-Mega
 
 # Statistical Analyses not included 
 
@@ -69,18 +69,18 @@ If you want to reproduce our results, you will need to customize a source file, 
 1) **Miami Plot** (eGFR vs UA):
     * color coding: blue, males; red, females
     * novelty coding: candidate gene in black novel, candidate gene in grey kown
-2) **Heatmap of p-values of index SNPs** 
+2) Heatmap of p-values of index SNPs
     * 9 Phenotypes: eGFR, CKD, BUN in ALL, MALE, FEMALE
     * 16 SNPs: index SNP per locus + female-specific index SNP of region 7
-3) **Regional Association Plot of region 7**:
+3) Regional Association Plot of region 7:
     * panel with all, male, female
-4) **Credible Set Size vs. Posterior Probability** (planned, maybe supplement)
+4) Credible Set Size vs. Posterior Probability (maybe supplement)
 
 ## Supplemental Figures
 
 1) RA-Plots of all regions
-2) Beta-Beta-Plot of sex interaction analysis (--> see script 02)
-3) Beta-Beta-Plot of HUNT replication (--> see script 09)
+2) **Beta-Beta-Plot** of sex interaction analysis (--> see script 02)
+3) **Beta-Beta-Plot** of HUNT replication (--> see script 09)
 4) Forest Plots (--> see script 12)
 5) Co-localization Plots of eQTL results (--> see script 08) 
 
@@ -88,9 +88,9 @@ If you want to reproduce our results, you will need to customize a source file, 
 
 ## Main Tables
 
-1) **Genome-wide significant regions with their respective index SNPs of eGFR and UA** (--> see script T1 for scaffold of table, some information is added later during literature review and writing process) 
-2) **Overlapping regions of eGFR and UA** (--> see script T2 and 08)
-3) **Candidate genes and their function** (manual web search for interesting genes)
+1) **Genome-wide significant regions with their respective index SNPs of eGFR and UA** (--> see script T1 for scaffold of table, some information will be added later during literature review and writing process) 
+2) **Overlapping regions of eGFR and UA** (--> see script T2)
+3) Candidate genes and their function (manual web search for interesting genes)
 
 ## Supplemental Tables
 
@@ -98,12 +98,12 @@ If you want to reproduce our results, you will need to customize a source file, 
 
 1) Description of Studies (as received from participating studies)
 2) Genotyping & Imputation of Studies (as received from participating studies)
-3) Sample Sizes & SNP Numbers, and inflation factor $\lambda$ per phenotype
-4) Comparisons between the sexes (interaction and co-localization --> see script 02 and 03)
-5) Cross-phenotype comparision (--> see script 04)
-6) Genome-wide significant & independent hit per region (--> see script 05)
-7) Annotation of credible sets (a-e for eGFR and UA in their respective settings)
-9) Co-localization with eQTLs (--> see script 07)
-10) Replication in *HUNT* (--> see script 09)
-11) Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results (--> see script 11)
-12) Summary of MR-Mega results (--> see scripts 12)
+3) **Sample Sizes & SNP Numbers, and inflation factor $\lambda$ per phenotype**
+4) **Comparisons between the sexes (interaction and co-localization --> see script 02 and 03)**
+5) **Cross-phenotype comparision (--> see script 04)**
+6) **Genome-wide significant & independent hit per region (--> see script 05)**
+7) **Annotation of credible sets** (maybe seperate in a-e for eGFR and UA in their respective settings)
+8) **Co-localization with eQTLs** (--> see script 07, only unconditioned so far)
+9) **Replication in *HUNT* (--> see script 09)**
+10) **Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results** (--> see script 11)
+11) Summary of MR-Mega results (--> see scripts 12)

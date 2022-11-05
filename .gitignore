@@ -55,3 +55,5 @@ figures/*.pdf
 figures/*.tif
 figures/*.tiff
 figures/*.html
+tables/*_check.xlsx
+
