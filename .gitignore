@@ -51,8 +51,5 @@ temp/*
 scripts/*.Rout
 scripts/*.out
 scripts/*.html
-figures/*.pdf
-figures/*.tif
-figures/*.html
 tables/*_check.xlsx
-
+tables/*.RData
