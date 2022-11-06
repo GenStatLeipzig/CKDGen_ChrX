@@ -53,3 +53,4 @@ scripts/*.out
 scripts/*.html
 tables/*_check.xlsx
 tables/*.RData
+scripts/_files4RegionAssocPlots/*
