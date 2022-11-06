@@ -129,14 +129,13 @@ myPlot0
 
 #' ## Beta-Beta Plot ####
 c_CKDGen = qnorm(0.975,lower.tail = T)
-c_HUNT = qnorm(0.975 - 0.0125,lower.tail = T)
+c_HUNT = qnorm(0.95,lower.tail = T)
 
 myPlot1 = ggplot(plotData, aes(x=beta_CKDGen, y=beta_HUNT,color=replicated)) + 
   geom_abline(intercept = 0, slope = 1, color="grey", linetype="dashed", size=1.25)+
   geom_hline(yintercept = 0, color="grey", linetype="dashed", size=1.15)+
   geom_vline(xintercept = 0, color="grey", linetype="dashed", size=1.15)+
   geom_point(size = 3) +
-  geom_errorbar(aes(ymin = beta_HUNT-c_HUNT*SE_HUNT, ymax = beta_HUNT+c_HUNT*SE_HUNT)) +
   geom_errorbarh(aes(xmin = beta_CKDGen-c_CKDGen*SE_CKDGen, xmax = beta_CKDGen + c_CKDGen*SE_CKDGen)) +
   theme_bw(base_size = 10)+
   theme(plot.title = element_text(hjust = 0, size=22,face="bold"),
@@ -147,15 +146,20 @@ myPlot1 = ggplot(plotData, aes(x=beta_CKDGen, y=beta_HUNT,color=replicated)) +
        y = "Effect on eGFR ALL in HUNT",
        color = "Successful \nreplication")
 
-myPlot1
+myPlot2 = myPlot1 + 
+  geom_errorbar(data = subset(plotData, beta_CKDGen>0),
+                aes(ymin = beta_HUNT-c_HUNT*SE_HUNT, ymax = beta_HUNT)) +
+  geom_errorbar(data = subset(plotData, beta_CKDGen<0),
+                aes(ymin = beta_HUNT, ymax = beta_HUNT+c_HUNT*SE_HUNT))
+myPlot2
 
 #' # Save results ####
 #' ***
 #' ## Save plot ####
 
-tiff(filename = "../figures/SupplementalFigure_BetaBeta_ReplicationHunt.tif", 
-     width = 1200, height = 900, res=125, compression = 'lzw')
-myPlot1
+tiff(filename = "../figures/SupplementalFigure_BetaBeta_ReplicationHunt.tiff", 
+     width = 1800, height = 1350, res=250, compression = 'lzw')
+myPlot2
 dev.off()
 
 #' ## Save data ####
@@ -168,6 +172,8 @@ data_Merge[, CIlower_CKDGen := round(beta_CKDGen-c_CKDGen*SE_CKDGen, digits = 6)
 data_Merge[, CIupper_CKDGen := round(beta_CKDGen+c_CKDGen*SE_CKDGen, digits = 6)]
 data_Merge[, CIlower_HUNT := round(beta_HUNT-c_HUNT*SE_HUNT, digits = 6)]
 data_Merge[, CIupper_HUNT := round(beta_HUNT+c_HUNT*SE_HUNT, digits = 6)]
+data_Merge[beta_CKDGen>0,CIupper_HUNT:=Inf]
+data_Merge[beta_CKDGen<0,CIlower_HUNT:=-Inf]
 
 result = copy(data_Merge)
 myNames = names(result)[c(1:5,22,13,12,7:9,11,23,24,19,14:16,21,25,26)]
@@ -183,12 +189,12 @@ data.description = data.table(column = names(result),
                                               "position according to hg19",
                                               "effect allele, also known as coding allele",
                                               "TRUE/FALSE vector indicating successful replication in HUNT",
-                                              "number of studies included in CKDGen Meta analysis",
-                                              "number of samples included in CKDGen Meta analysis",
-                                              "effect allele frequency in CKDGen Meta analysis",
-                                              "beta estimate in CKDGen Meta analysis",
-                                              "standard error in CKDGen Meta analysis",
-                                              "-log10 transformed p-value in CKDGen Meta analysis",
+                                              "number of studies included in CKDGen Meta analysis for eGFR",
+                                              "number of samples included in CKDGen Meta analysis for eGFR",
+                                              "effect allele frequency in CKDGen Meta analysis for eGFR",
+                                              "beta estimate in CKDGen Meta analysis for eGFR",
+                                              "standard error in CKDGen Meta analysis for eGFR",
+                                              "-log10 transformed p-value in CKDGen Meta analysis for eGFR",
                                               "lower bound of the 95% confidence interval in CKDGen Meta analysis",
                                               "upper bound of the 95% confidence interval in CKDGen Meta analysis",
                                               "number of samples included in HUNT study",
@@ -196,8 +202,8 @@ data.description = data.table(column = names(result),
                                               "beta estimate in HUNT study",
                                               "standard error in HUNT study",
                                               "-log10 transformed one-sided p-value in HUNT study",
-                                              "lower bound of the 97.5% confidence interval in HUNT study",
-                                              "upper bound of the 97.5% confidence interval in HUNT study"))
+                                              "lower bound of the one-sided 95% confidence interval in HUNT study",
+                                              "upper bound of the one-sided 95% confidence interval in HUNT study"))
 
 WriteXLS(x = c("result","data.description"), 
          ExcelFileName = "../results/09_replication_HUNT.xlsx",
@@ -205,6 +211,7 @@ WriteXLS(x = c("result","data.description"),
          AutoFilter=T, 
          BoldHeaderRow=T)
 save(data_Merge, file = "../results/09_replication_HUNT.RData")
+save(result,data.description, file = "../results/09_replication_HUNT_summary.RData")
 
 #' # Session Info ####
 #' ***
