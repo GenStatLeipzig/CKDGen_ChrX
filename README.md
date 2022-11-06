@@ -72,7 +72,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 2) Heatmap of p-values of index SNPs
     * 9 Phenotypes: eGFR, CKD, BUN in ALL, MALE, FEMALE
     * 16 SNPs: index SNP per locus + female-specific index SNP of region 7
-3) Regional Association Plot of region 7:
+3) **Regional Association Plot of region 7**:
     * panel with all, male, female
 4) **Credible Set Size vs. Posterior Probability** (maybe supplement)
 
