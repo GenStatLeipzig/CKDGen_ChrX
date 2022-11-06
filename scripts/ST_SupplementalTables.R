@@ -32,7 +32,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_forostar.R")
 
 #' # Get content table (tab0) ####
 #' ***
@@ -155,6 +155,17 @@ setnames(tab3,"n_studies_unfiltered","n_studies")
 setnames(tab3,"n_samples_unfiltered","n_samples")
 tab3
 
+tab3_annot = data.table(column = names(tab3),
+                         description = c("Analyzed phenotype and setting",
+                                         "Maximal number of participating studies",
+                                         "Maximal number of individuals",
+                                         "Number of SNPs before any QC was applied (number of SNPs analyzed in raw meta-analysis)",
+                                         "Inflation factor lambda before any QC was applied",
+                                         "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)",
+                                         "Inflation factor lambda after QC"))
+
+
+
 #' # Get Sup Tab 4 ####
 #' ***
 #' Comparisons between the sexes (interaction and co-localization --> see script 02 and 03)
@@ -193,12 +204,75 @@ tab4[PP.H2.abf>0.75,sexIA_coloc:="female driven"]
 tab4[PP.H1.abf>0.75,sexIA_coloc:="male driven"]
 tab4
 
+tab4_annot = data.table(column = names(tab4),
+                        description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                                        "Genomic cytoband of index SNP",
+                                        "SNP with lowest p-value in this region",
+                                        "Best phenotype and setting",
+                                        "Beta estimate in males (using respective best phenotypes)",
+                                        "Standard error in males (using respective best phenotypes)",
+                                        "P-value in males (using respective best phenotypes)",
+                                        "Beta estimate in females (using respective best phenotypes)",
+                                        "Standard error in females (using respective best phenotypes)",
+                                        "P-value in females (using respective best phenotypes)",
+                                        "Difference of effect estimates (males - females)",
+                                        "Standard error of difference (correcting for beta correlation using Sprearmans rho (eGFR: 0.1604, UA: 0.1285))",
+                                        "P-value of difference",
+                                        "FDR corrected p-value of difference",
+                                        "TRUE/FALSE flag indicating significant sex-interaction after FDR correction",
+                                        "Number of SNPs included in co-localization analysis per loci",
+                                        "Posterior probability for hypothesis 0: neither trait associated",
+                                        "Posterior probability for hypothesis 1: only trait 1 associated (males)",
+                                        "Posterior probability for hypothesis 2: only trait 2 associated (females)",
+                                        "Posterior probability for hypothesis 3: both trait associated, but different signals",
+                                        "Posterior probability for hypothesis 4: both trait associated, shared signal",
+                                        "Summary of co-localization result, using 0.75 as threshold"))
+
+
 #' # Get Sup Tab 5 ####
 #' ***
 #' Cross-phenotype comparision (--> see script 04)
 load("../results/04_lookup_TopHits_matchingSettings.RData")
 tab5 = ShorterTable
-tab5
+
+names(tab5)[1:4] = names(tab4)[1:4]
+tab5_annot = data.table(column = names(tab5),
+                        description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                                        "Genomic cytoband of index SNP",
+                                        "SNP with lowest p-value in this region",
+                                        "Best phenotype and setting",
+                                        "Sample size in eGFR (using respective best setting)",
+                                        "Effect allele frequency in eGFR (using respective best setting)",
+                                        "Beta estimate in eGFR (using respective best setting)",
+                                        "Standard error in eGFR (using respective best setting)",
+                                        "P-value in eGFR (using respective best setting)",
+                                        "Sample size in BUN (using respective best setting)",
+                                        "Effect allele frequency in BUN (using respective best setting)",
+                                        "Beta estimate in BUN (using respective best setting)",
+                                        "Standard error in BUN (using respective best setting)",
+                                        "P-value in BUN (using respective best setting)",
+                                        "One-sided p-value in BUN (using respective best setting)",
+                                        "TRUE/FALSE flag indicating significant nominal association in BUN with discordant effect direction compared to eGFR (using respective best setting)",
+                                        "Sample size in CKD (using respective best setting)",
+                                        "Effect allele frequency in CKD (using respective best setting)",
+                                        "Beta estimate in CKD (using respective best setting)",
+                                        "Standard error in CKD (using respective best setting)",
+                                        "P-value in CKD (using respective best setting)",
+                                        "One-sided p-value in CKD (using respective best setting)",
+                                        "TRUE/FALSE flag indicating significant nominal association in CKD with discordant effect direction compared to eGFR (using respective best setting)",
+                                        "Sample size in UA (using respective best setting)",
+                                        "Effect allele frequency in UA (using respective best setting)",
+                                        "Beta estimate in UA (using respective best setting)",
+                                        "Standard error in UA (using respective best setting)",
+                                        "P-value in UA (using respective best setting)",
+                                        "Sample size in BUN (using respective best setting)",
+                                        "Effect allele frequency in Gout (using respective best setting)",
+                                        "Beta estimate in Gout (using respective best setting)",
+                                        "Standard error in Gout (using respective best setting)",
+                                        "P-value in Gout (using respective best setting)",
+                                        "One-sided p-value in Gout (using respective best setting)",
+                                        "TRUE/FALSE flag indicating significant nominal association in Gout compared to UA (using respective best setting)"))
+
 
 #' # Get Sup Tab 6 ####
 #' ***
@@ -209,12 +283,13 @@ tab6[,phenotype := gsub("_all","_ALL",phenotype)]
 tab6[,phenotype := gsub("_male","_MALE",phenotype)]
 tab6[,phenotype := gsub("_female","_FEMALE",phenotype)]
 
-myNames = names(tab6)[c(1:3,18,5:17)]
+myNames = names(tab6)[c(2:3,18,5,1,6:17)]
 colsOut<-setdiff(colnames(tab6),myNames)
 tab6[,get("colsOut"):=NULL]
 setcolorder(tab6,myNames)
-names(tab6) = c("phenotype","region","size.region","rsID","SNPID_UKBB","position","effect_allele","eaf","beta","SE","pvalue","estimated_Ne",
-               "eaf_UKBB","beta_joint","SE_joint","pvalue_joint","LD_r")
+names(tab6) = c("region","size.region","rsID","SNPID_UKBB","phenotype","position","effect_allele",
+                "eaf","beta","SE","pvalue","estimated_Ne",
+                "eaf_UKBB","beta_joint","SE_joint","pvalue_joint","LD_r")
 filt = tab6$LD_r ==0
 ld = tab6$LD_r[!filt]
 x=grep("F",filt)
@@ -223,6 +298,27 @@ tab6[x,LD_r2:=ld]
 tab6[x2,LD_r2:=ld]
 tab6[,LD_r:=NULL]
 tab6
+
+tab6_annot = data.table(column = names(tab6),
+                        description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                                        "Range of tested region (not necessary centered around the index SNP)",
+                                        "Independent SNP",
+                                        "SNP ID as in UKBB data (reference data in GCTA COJO analysis)",
+                                        "Analyzed phenotype and setting",
+                                        "Base position of independent SNP",
+                                        "Effect allele in CKDGen",
+                                        "Effect allele frequency in CKDGen",
+                                        "Beta estimate in CKDGen",
+                                        "Standard error in CKDGen",
+                                        "P-value in CKDGen",
+                                        "Estimated effective sample size",
+                                        "Effect allele frequency in UKBB",
+                                        "Beta estimate in joint analysis",
+                                        "Standard error in joint analysis",
+                                        "P-value in joint analysis",
+                                        "LD r^2 between the two independent signals (according to UKBB)"))
+
+
 
 #' # Get Sup Tabs 7 ####
 #' ***
@@ -236,7 +332,7 @@ ToDoList3 = data.table(pheno = c("eGFR_ALL","eGFR_FEMALE","eGFR_MALE","UA_ALL","
                                  ("../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V4/synopsis/topliste_tabdelim/topliste_2022-07-22_credSets_male.txt")))
 
 tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
-  #i=1
+  #i=3
   myRow = ToDoList3[i,]
   
   tab = fread(myRow$files)
@@ -255,11 +351,64 @@ tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
   setcolorder(tab,myNames)
   names(tab) = myNames2
   tab[,phenotype := myRow$pheno]
+  if(myRow$pheno == "eGFR_MALE"){
+    tab[cyto == "Xq22.1" & CredSet == "Region1", CredSet := "Region7"]
+  }
+  if(myRow$pheno == "UA_ALL"){
+    tab[CredSet == "Region21_SNP1", CredSet := "Region21_rs202138804"]
+    tab[CredSet == "Region21_SNP2", CredSet := "Region21_rs7056552"]
+    tab[CredSet == "Region22_SNP1", CredSet := "Region21_rs111884516"]
+    tab[CredSet == "Region22_SNP2", CredSet := "Region21_rs4328011"]
+  }
   tab
 }
 tab7 = rbindlist(tab7)
 table(tab7$phenotype)
 tab7
+tab7 = tab7[,c(41,1:40)]
+
+tab7_annot = data.table(column = names(tab7),
+                        description = c("Analyzed phenotype and setting",
+                                        "SNP ID of the marker.  Mostly from dbSNP, sometimes constructed like chr1:42147691:D (chromosome, position, alleletype)",
+                                        "ID of the credible set",
+                                        "Posterior Probability of the SNP depending of the given phenotype",
+                                        "Cummulative sum of Probabilities per credible set",
+                                        "Cytoband with 850 resolution",
+                                        "Position of SNP in basepairs on the chromosome (hg19)",
+                                        "SNP that tags the marker in column snp",
+                                        "LD r-square value between SNP and tagSNP",
+                                        "TRUE/FALSE flag indicating marker in SNP is tagger",
+                                        "Allele for which effect sizes were calculated",
+                                        "Other allele",
+                                        "Effect allele frquency",
+                                        "Beta estimate",
+                                        "Standard error",
+                                        "-log10 transformed p-value",
+                                        "Heterogenetity I-squared",
+                                        "HGNC (Ensembl) symbols of the nearest genes as specified in the settings with information on distance to the marker in SNP including functional relevance if within or within the flanking 5 kb of a gene",
+                                        "Functional relevance of the gene and its validation level  for proximate genes(Ensembl)",
+                                        "HGNC (Ensembl) full name of nearest gene that actually has got a full name",
+                                        "Eigen is a spectral approach to the functional annotation of genetic variants in coding and noncoding regions. Eigen makes use of a variety of functional annotations in both coding and noncoding regions (such as made available by the ENCODE and Roadmap Epigenomics projects), and combines them into one single measure of functional importance. Eigen is an unsupervised approach, and, unlike most existing methods, is not based on any labelled training data. Eigen produces estimates of predictive accuracy for each functional annotation score, and subsequently uses these estimates of accuracy to derive the aggregate functional score for variants of interest as a weighted linear combination of individual annotations. We show that the resulting meta-score has good discriminatory ability using disease associated and putatively benign variants from published studies (for both Mendelian and complex diseases). The Eigen score is particularly useful in prioritizing likely causal variants in a region of interest when it is combined with population-level genetic data in the framework of a hierarchical model. Furthermore, an important advantage of the Eigen score is that it can be easily adapted to a specific tissue or cell type. More information about the Eigen score can be found in the accompanying manuscript: A spectral approach integrating functional genomic annotations for coding and noncoding variants (Iuliana Ionita-Laza, Kenneth McCallum, Bin Xu, Joseph Buxbaum). and possible confounding factors; therefore, Eigen is a more robust approach at this point.",
+                                        "Eigen-PC performs well across many scenarios, although, as we discuss in the Supplementary Note, it is more sensitive than Eigen to component annotations and possible confounding factors; therefore, Eigen is a more robust approach at this point.",
+                                        "PHRED-like (-10*log10(rank/total)) scaled C-score ranking a variant relative to all possible substitutions of the human genome (8.6x10^9). For details see tab 'deleteriousness'.  Like explained above, a scaled C-score of greater or# equal 10 indicates that these are predicted to be the 10% most deleterious substitutions that you can do to the human genome, a score of greater or equal 20 indicates the 1% most deleterious and so on. If you would like to apply a cutoff on deleteriousness, eg to identify potentially pathogenic variants, we would suggest to put a cutoff somewhere between 10 and 20. Maybe at 15, as this also happens to be the median value for all possible canonical splice site changes and non-synonymous variants. However, there is not a natural choice here -- it is always arbitrary. We therefore recommend integrating C-scores with other evidence and to rank your candidates for follow up rather than hard filtering.",
+                                        "DANN score, similar to CADD, but prediction made using a non-linear kernel function instead of a linear.",
+                                        "Deleteriousness / functional variant relevance score",
+                                        "Deleteriousness / functional variant relevance score",
+                                        "Deleteriousness / functional variant relevance score",
+                                        "Deleteriousness / functional variant relevance score",
+                                        "Deleteriousness / functional variant relevance score",
+                                        "Deleteriousness / functional variant relevance score",
+                                        "r-square value between marker in SNP and a hit from GWAS catalog for named phenotype",
+                                        "cis-eQTL genes for which reported eQTL-SNP has specified min R2 with marker in SNP",
+                                        "trans-eQTL genes for which reported eQTL-SNP has specified min R2 with marker in SNP",
+                                        "List of all genes reported for marker in SNP in nearest genes, cis-eQTL genes and trans-eQTL genes",
+                                        "corresponding HGNC names for pathway genes used",
+                                        "Genes used for pathway enrichment actually used",
+                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in KEGG pathways",
+                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in reactome pathways",
+                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in disease ontology pathways",
+                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in GO categories pathways",
+                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes in high expressed genes of several tissues according to pathway enrichment specific settings"))
 
 #' # Get Sup Tabs 8 ####
 #' ***
@@ -290,13 +439,26 @@ tab8_a = tab8_a[dumID %in% goodDumIDs,]
 setorder(tab8_a,region,GWAMA_phenotype,gene)
 tab8_a[,dumID:=NULL]
 
+tab8_annot = data.table(column = names(tab8_a),
+                        description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                                        "Analyzed phenotype and setting",
+                                        "Analyzed gene expression of GTEx of NEPTUNE",
+                                        "Analyzed tissue for gene expression",
+                                        "Number of SNPs included in co-localization analysis per region",
+                                        "Posterior probability for hypothesis 0: neither trait associated",
+                                        "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
+                                        "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
+                                        "Posterior probability for hypothesis 3: both trait associated, but different signals",
+                                        "Posterior probability for hypothesis 4: both trait associated, shared signal"))
+
 #' # Get Sup Tabs 9 ###
 #' ***
 #' Replication in *HUNT* 
 #' 
-load("../results/09_replication_HUNT.RData")
-tab9 = copy(data_Merge)
-tab9
+load("../results/09_replication_HUNT_summary.RData")
+tab9 = copy(result)
+tab9_annot = data.description
+
 
 #' # Get Sup Tabs 10 ###
 #' ***
@@ -324,6 +486,38 @@ tab10[!is.na(UA.P),table(UA.P<0.05)]
 tab10[!is.na(UA.P),table(UA.P<0.05,eGFR.P<0.05)]
 tab10
 
+tab10_annot = data.table(column = names(tab10),
+                        description = c("First Author et al. of looked-up study",
+                                        "Digital Object Identifier of looked-up study",
+                                        "Analyzed phenotype in looked-up study",
+                                        "Sample Size of looked-up study",
+                                        "Base position in looked-up study",
+                                        "SNP ID and effect allele in looked-up study",
+                                        "SNP ID used for matching",
+                                        "Effect allele frequency in looked-up study",
+                                        "P-value in looked-up study",
+                                        "Sample size in eGFR ALL",
+                                        "Effect allele in eGFR ALL",
+                                        "Effect allele frquency in eGFR ALL",
+                                        "Weighted imputation info score in eGFR ALL",
+                                        "Heterogeneity I^2 in eGFR ALL",
+                                        "Beta estimate in eGFR ALL",
+                                        "Standard error in eGFR ALL",
+                                        "P-value in eGFR ALL",
+                                        "-log10 transformed p-value in eGFR",
+                                        "TRUE/FALSE flag indicating validity of SNP for eGFR ALL (F=valid)",
+                                        "Reason to exclude SNP for eGFR ALL",
+                                        "Sample size in UA ALL",
+                                        "Effect allele in UA ALL",
+                                        "Effect allele frquency in UA ALL",
+                                        "Weighted imputation info score in UA ALL",
+                                        "Heterogeneity I^2 in UA ALL",
+                                        "Beta estimate in UA ALL",
+                                        "Standard error in UA ALL",
+                                        "P-value in UA ALL",
+                                        "-log10 transformed p-value in UA",
+                                        "TRUE/FALSE flag indicating validity of SNP for UA ALL (F=valid)",
+                                        "Reason to exclude SNP for UA ALL"))
 
 #' # Get Sup Tabs 11 ###
 #' ***
@@ -347,6 +541,22 @@ WriteXLS(tosave4$data,
          AutoFilter=T, 
          BoldHeaderRow=T,
          FreezeRow=1)
+
+tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_annot","tab6_annot",
+                              "tab7_annot","tab8_annot","tab9_annot","tab10_annot"), 
+                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_annot", "TableS6_annot",
+                                    "TableS7_annot","TableS8_annot","TableS9_annot","TableS10_annot"))
+excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
+WriteXLS(tosave4$data, 
+         ExcelFileName=excel_fn, 
+         SheetNames=tosave4$SheetNames, 
+         AutoFilter=T, 
+         BoldHeaderRow=T,
+         FreezeRow=1)
+
+save(tab0,tab3,tab4,tab5,tab6,tab7,tab8_a,tab9,tab10,file = "../tables/SupplementalTables.RData")
+save(tab3_annot,tab4_annot,tab5_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,
+     file = "../tables/SupplementalTables_annot.RData")
 
 #' # Sessioninfo ####
 #' ***
