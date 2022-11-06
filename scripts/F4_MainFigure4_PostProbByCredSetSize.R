@@ -135,6 +135,27 @@ tiff(filename = "../figures/MainFigure4_PostProbByCredSetSize.tiff",
 myPlot3
 dev.off()
 
+myPlot4 = ggplot(plotData[CADD_scaled>=10 & N<400,], aes(x=N, y=PostProb,color=CADD_type)) + 
+  # facet_wrap(~phenotype, scales = "free") +
+  geom_point(data=plotData[CADD_scaled<10 & N<400,], aes(x=N, y=PostProb),col="black",size=2.5,alpha=0.5,shape = 16)+
+  geom_point(size=3,alpha=0.75) + 
+  theme_bw(base_size = 10)+
+  scale_colour_manual(values=c("#000000","#B2182B","#2166AC"),
+                      labels=c("CAD<=10","CAD in (10,20]","CAD>20"))+
+  theme(plot.title = element_text(hjust = 0, size=22,face="bold"),
+        axis.title.x = element_text(size=12,face="bold"),
+        axis.title.y = element_text(size=12,face="bold"),
+        axis.text = element_text(size=12,face="bold"),
+        strip.text = element_text(size = 20))+
+  labs(x="Credible Set Size", 
+       y = "Posterior Probability",
+       color = "CADD Score")
+myPlot4
+
+tiff(filename = "../figures/MainFigure4_PostProbByCredSetSize_N400.tiff", 
+     width = 2500 , height = 2000, res=300, compression = 'lzw')
+myPlot4
+dev.off()
 
 #' # Session Info ####
 #' ***
