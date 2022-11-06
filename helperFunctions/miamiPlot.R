@@ -100,17 +100,13 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   
   if (highlight==T) {
     # I want colors per setting?
-    # eGFR females - all - males: 
+    # males - blue, females - red, all - black
     myPD[,myPhenotype := gsub(".*_","",myPhenotype)]
     
-    myPD[myY>hline1 & myPhenotype=="FEMALE" ,myColor:=3]
-    myPD[myY>hline1 & myPhenotype=="ALL" ,myColor:=4]
-    myPD[myY>hline1 & myPhenotype=="MALE" ,myColor:=5]
-    
-    myPD[myY<hline2 & myPhenotype=="FEMALE" ,myColor:="#D1E5F0"]
-    myPD[myY<hline2 & myPhenotype=="ALL" ,myColor:=6]
-    myPD[myY<hline2 & myPhenotype=="MALE" ,myColor:=7]
-    
+    myPD[abs(myY)>7.3 & myPhenotype=="ALL" ,myColor:=2]
+    myPD[abs(myY)>7.3 & myPhenotype=="MALE" ,myColor:=3]
+    myPD[abs(myY)>7.3 & myPhenotype=="FEMALE" ,myColor:=4]
+
   }
   
   #recalculate position and values of x axis ticks and labels
@@ -160,6 +156,8 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   if(is.null(sub1) & is.null(sub2)) mySubtitle<-""
   
   #print the manhattan plot 
+  setorder(myPD,myColor,myX)
+  
   message("Start plot ...")
   myPlot <- ggplot() 
   # data=myPD, aes(x=myX, y=myY, colour=myColor, label = myLabel)
@@ -170,8 +168,8 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   if(is.null(highlight) & showcolors!= F) {
     myPlot <- myPlot + scale_colour_manual(values= rep(rev(brewer.pal(5, "Dark2")), 23))
   }else { 
-    myPlot <- myPlot + scale_colour_manual(values=c("#000000","#FDDBC7","#EF8A62","#B2182B","#67A9CF","#2166AC"),
-                                           labels=c("non sig.","eGFR FEMALES","eGFR ALL","eGFR MALES","UA ALL","UA MALES"))
+    myPlot <- myPlot + scale_colour_manual(values=c("#000000", "#666666","#4575B4","#D73027"),
+                                           labels=c("non sig.","ALL",     "MALES", "FEMALES"))
   }
   if(useBasePosition == T){
     myPlot <- myPlot + coord_cartesian(xlim=c(min(myX)-1,max(myX)+1),ylim=c(ymin-1,ymax+1), expand = FALSE)
@@ -183,8 +181,8 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   myPlot <- myPlot + scale_y_continuous(name=ylabel,breaks=pretty_breaks(n=num_breaks_y)) 
   myPlot <- myPlot + ggtitle(title,subtitle = mySubtitle)
   myPlot <- myPlot + labs(color = "Legend")
-  myPlot <- myPlot + theme(legend.position = c(0.8, 0.9)) 
-  # myPlot <- myPlot + guides(color="none")
+  # myPlot <- myPlot + theme(legend.position = c(0.8, 0.9)) 
+  myPlot <- myPlot + guides(color="none")
   myPlot <- myPlot + theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
   myPlot <- myPlot + theme(axis.text.y = element_text(colour="black",size = 12),axis.line.y = element_line(colour="black"))
   myPlot <- myPlot + theme(panel.background = element_blank())
@@ -206,18 +204,43 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   
   # add genenames 
   myPlot2 <-myPlot + 
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T),
+    # top: novel & sex-unspecific hits
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T & is.na(mySexIA)),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-5,ymax+5)) + 
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F),
-                     aes(x=myX, y=myY, label = myGene),color = "#666666",
+                     ylim = c(ymax-5,ymax+5),fontface = 'bold') + 
+    # top: novel & male-specific hits
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T & mySexIA == "male-specific"),
+                     aes(x=myX, y=myY, label = myGene),
+                     ylim = c(ymax-10,ymax),fontface = 'bold.italic',color = "#4575B4" ) + 
+    # top: novel & female-specific hits
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T & mySexIA == "female-specific"),
+                     aes(x=myX, y=myY, label = myGene),
+                     ylim = c(ymax-10,ymax),fontface = 'bold.italic',color = "#D73027") + 
+    # top: known & male-specific hit
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F & mySexIA == "male-specific"),
+                     aes(x=myX, y=myY, label = myGene),
+                     ylim = c(ymax-15,ymax-10),fontface = 'italic',color = "#4575B4") +
+    # top: known & sex-unspecific hit part 1
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F & is.na(mySexIA) & !grepl("BEX",myGene)),
+                     aes(x=myX, y=myY, label = myGene),
                      ylim = c(ymax-15,ymax-10)) +
+    # top: known & sex-unspecific hit part 2
+    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F & is.na(mySexIA) & grepl("BEX",myGene)),
+                     aes(x=myX, y=myY, label = myGene),
+                     ylim = c(ymax-15,ymax-10),xlim = c(79925246,98890204)) +
+    # bottom: novel & sex-unspecific hits
     geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==T),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymin-5,ymin+5)) + 
-    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==F),
-                     aes(x=myX, y=myY, label = myGene),color = "#666666",
-                     ylim = c(ymin+10,ymin+5))
+                     ylim = c(ymin-5,ymin+5),fontface = 'bold') + 
+    # bottom: known & sex-unspecific hits part 1
+    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==F & !grepl("BEX",myGene) & !grepl("ARM",myGene) & !grepl("DCAF",myGene)),
+                     aes(x=myX, y=myY, label = myGene),
+                     ylim = c(ymin,ymin+10)) +
+    # bottom: known & sex-unspecific hits part 2
+    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==F & 
+                                     (grepl("BEX",myGene) | grepl("ARM",myGene) | grepl("DCAF",myGene))),
+                     aes(x=myX, y=myY, label = myGene),
+                     ylim = c(ymin,ymin+10),xlim = c(106168067,118082383)) 
   
   
   myPlot2

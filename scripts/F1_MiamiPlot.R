@@ -21,7 +21,7 @@ time0 = Sys.time()
 source("../SourceFile_forostar.R")
 source("../helperFunctions/miamiPlot.R")
 
-setwd(paste0(projectpath,"figures/"))
+setwd(paste0(projectpath,"scripts/"))
 
 #' # Load data ####
 #' ***
@@ -186,7 +186,7 @@ head(plotData)
 #' * Novelty: taken from excel sheet table1_2022-10-15.xlsx (stored locally - not pretty!)
 #' * IA 
 myTab = fread("../results/01_Locus_Definitions.txt")
-myTab[,CandidateGenes := c("FAM9B","CDKL5","CDK16","EDA2R, AR","BRWD3","TSPAN6","ARMCX4, \nBEX4",
+myTab[,CandidateGenes := c("FAM9B","CDKL5","CDK16","EDA2R, \nAR","BRWD3","TSPAN6","ARMCX4, \nBEX4",
                            "BEX, \nTCEAL","CLDN2","ACSL4","SLC25A43","DCAF12L1","MST4","HPRT1",
                            "DUSP9","EDA2R, \nAR","CITED1, \nPIN4","ARMCX, \nADH4","BEX, \nTCEAL","DCAF12L1","HPRT1","DUSP9")]
 myTab[,Novelty := c(F,F,F,T,T,T,F,F,T,T,F,F,F,F,F,T,F,F,F,F,F,F)]
@@ -213,6 +213,8 @@ plotData[SNP == "rs149995096:100479327:C:T",candidateGene := "DRP2"]
 plotData[SNP == "rs149995096:100479327:C:T",Novelty := T]
 plotData[SNP == "rs149995096:100479327:C:T",SexInteraction := "female-specific"]
 
+save(plotData,file = "../results/F1_MiamiPlot_PlotData.RData")
+
 #' # Plot ####
 #' ***
 mytitle = paste0("Miami Plot; top: eGFR, buttom: UA") 
@@ -230,27 +232,18 @@ plot1 = miamiPlot(x=plotData,
                  sugline1=-log10(1e-6),sugline2=log10(1e-6),
                  highlight=T, diffsize = T,num_breaks_y=10,
                  plotGenes=T,
-                 out_name="Fig1_MiamiPlot_BasePosition.pdf",
+                 out_name="../figures/MainFigure1_MiamiPlot.pdf",
                  returnObject = T,
                  overall_max = 40, overall_min = -40,useBasePosition = T)
 
 plot1
 
-plot2 = miamiPlot(x=plotData,
-                  ymax = ymaxpar1,
-                  ymin = -ymaxpar2,
-                  title = mytitle,
-                  xlabel = "",
-                  ylabel=expression(paste("UA: ",log[10](p),"; eGFR: ",-log[10](p))),
-                  hline1=-log10(5e-8),hline2=log10(5e-8),
-                  sugline1=-log10(1e-6),sugline2=log10(1e-6),
-                  highlight=T, diffsize = T,num_breaks_y=10,
-                  plotGenes=T,
-                  out_name="Fig1_MiamiPlot_IndexPosition.pdf",
-                  returnObject = T,
-                  overall_max = 40, overall_min = -40,useBasePosition = F)
 
-plot2
+tiff(filename = "../figures/MainFigure1_MiamiPlot.tiff", 
+     width = 4750, height = 3000, res=300, compression = 'lzw')
+plot1
+dev.off()
+
 
 #' # Session Info ####
 #' ***
