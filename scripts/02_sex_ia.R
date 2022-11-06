@@ -21,7 +21,7 @@
 rm(list = setdiff(ls(), "allinfo"))
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_forostar.R")
 
 setwd(projectpath_main)
 
@@ -235,13 +235,17 @@ myPlot1 = ggplot(myPlotData, aes(x=beta_male, y=beta_female,color=sig)) +
   labs(x="Effect Size Male", 
        y = "Effect Size Female",
        color = "SNPs with \nsex interaction")+
-  geom_label_repel(data = subset(myPlotData, sig!="no"),
-                   aes(x=beta_male, y=beta_female, label = gene3))+
+  geom_label_repel(data = subset(myPlotData, sig!="no" & beta_male>-0.02),
+                   aes(x=beta_male, y=beta_female, label = gene3),
+                   xlim = c(-0.02,-0.005),nudge_y = 0.001)+
+  geom_label_repel(data = subset(myPlotData, sig!="no" & beta_male< -0.02),
+                   aes(x=beta_male, y=beta_female, label = gene3),
+                   ylim = c(0,0.02),nudge_x = 0.01)+
   guides(label="none",color="none")
 myPlot1
 
 tiff(filename = "../figures/SupplementalFigure_BetaBeta_sexIA.tiff", 
-     width = 1744, height = 960, res=125, compression = 'lzw')
+     width = 3000, height = 1800, res=300, compression = 'lzw')
 myPlot1
 dev.off()
 
