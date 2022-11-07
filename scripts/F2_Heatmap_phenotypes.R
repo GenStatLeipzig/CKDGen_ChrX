@@ -56,7 +56,7 @@ toPlot2 = melt(toPlot, id.vars = 1)
 
 #change scale (four different levels of significance)
 toPlot2[, significance := "none"]
-toPlot2[-log10(value) >= -log10(0.01), significance := "nominal"]
+toPlot2[-log10(value) >= -log10(0.05), significance := "nominal"]
 toPlot2[-log10(value) >= -log10(1*10^-6), significance := "suggestive"]
 toPlot2[-log10(value) >= -log10(5*10^-8), significance := "genome-wide"]
 
@@ -72,8 +72,8 @@ toPlot2$nr.SNP[toPlot2$SNP=="rs72616719"] = 14
 toPlot2$nr.SNP[toPlot2$SNP=="rs189618857"] = 13
 toPlot2$nr.SNP[toPlot2$SNP=="rs2063579"] = 12
 toPlot2$nr.SNP[toPlot2$SNP=="rs1802288"] = 11
-toPlot2$nr.SNP[toPlot2$SNP=="rs3850318"] = 10
-toPlot2$nr.SNP[toPlot2$SNP=="rs149995096"] = 9
+toPlot2$nr.SNP[toPlot2$SNP=="rs149995096"] = 10
+toPlot2$nr.SNP[toPlot2$SNP=="rs3850318"] = 9
 toPlot2$nr.SNP[toPlot2$SNP=="rs11092455"] = 8
 toPlot2$nr.SNP[toPlot2$SNP=="rs181497961"] = 7
 toPlot2$nr.SNP[toPlot2$SNP=="rs5942852"] = 6
