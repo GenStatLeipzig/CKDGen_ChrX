@@ -1,5 +1,5 @@
 #' ---
-#' title: "Plot Pvalues of top hits in all phenotypes"
+#' title: "Plot Pvalues of top hits in phenotypes eGFR, BUN and CKD"
 #' subtitle: "A Heatmap Plot"
 #' author: "Katrin Horn"
 #' date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
@@ -13,7 +13,9 @@
 #'
 #' # Introduction ####
 #' ***
-#' 
+#' This is a script to visualise the connection between the phenotypes eGFR, BUN and CKD. This is done with a heatmap plot of 
+#' p values for the 13 eGFR top SNPs of the aforementioned phenotypes. The p values for eGFR are two-sided from the Meta-GWAS results. 
+#' For BUN and CKD one-sided p values are used.
 #' 
 #' # Initialize ####
 #' ***
