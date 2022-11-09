@@ -51,6 +51,8 @@ If you want to reproduce our results, you will need to customize a source file, 
     * REML bivariate: estimation of genetic correlation between eGFR and UA 
 11) **Lookup of reported variants**: replicate findings of *Graham et al*, *Kanai et al* and *Sakaue et al* (successful if nominal significance and concordant effect is observed) 
 12) Trans-ethnic meta-regression analysis: accounting for mixed ethnicities by using MR-Mega
+    * Get an overview of MR-Mega results and check results for MetaGWAS loci
+    * Generate Forest plots for MR-Mega hits   
 
 # Statistical Analyses not included 
 
@@ -69,7 +71,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 1) **Miami Plot** (eGFR vs UA):
     * color coding: blue, males; red, females
     * novelty coding: candidate gene in black novel, candidate gene in grey kown
-2) Heatmap of p-values of index SNPs
+2) **Heatmap** of p-values of index SNPs
     * 9 Phenotypes: eGFR, CKD, BUN in ALL, MALE, FEMALE
     * 16 SNPs: index SNP per locus + female-specific index SNP of region 7
 3) **Regional Association Plot of region 7**:
@@ -81,7 +83,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 1) RA-Plots of all regions
 2) **Beta-Beta-Plot** of sex interaction analysis (--> see script 02)
 3) **Beta-Beta-Plot** of HUNT replication (--> see script 09)
-4) Forest Plots (--> see script 12)
+4) Forest Plots (--> see script 12 b)
 5) Co-localization Plots of eQTL results (--> see script 07) 
 
 # Tables (not yet completed)
@@ -106,4 +108,4 @@ If you want to reproduce our results, you will need to customize a source file, 
 8) **Co-localization with eQTLs** (--> see script 07, only unconditioned so far)
 9) **Replication in *HUNT* (--> see script 09)**
 10) **Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results** (--> see script 11)
-11) Summary of MR-Mega results (--> see scripts 12)
+11) Summary of MR-Mega results (--> see scripts 12 a)
