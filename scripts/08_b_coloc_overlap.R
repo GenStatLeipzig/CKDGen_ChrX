@@ -278,33 +278,8 @@ res_summary        = data.frame(region1 = paste0("Region ", data_1$region),
 #   }
 # }
 
-# png(paste0(path_save_coloc, "_corrplot_20220906.png"),
-#     width = 3000,
-#     height = 3000,
-#     res = 300)
-# 
-# res_matrix             = as.matrix(res_h3_h4[, -1])
-# res_matrix_t           = t(res_matrix)
-# rownames(res_matrix_t) = "eGFR (ALL) vs Uric Acid (ALL)"
-# colnames(res_matrix_t) = paste0("Region ", data_1_lifted$region, " (", data_1_lifted$snp, ")", "\nvs\n", "Region ", data_2_lifted$region, " (", data_2_lifted$snp, ")")
-# ggcp = ggcorrplot(res_matrix_t, title = "", lab = TRUE) +
-#   scale_fill_gradient2(low = "red", mid = "white", high = "blue", na.value = "grey", limits = c(-1, 1), name = "PP", breaks = seq(-1, 1, by = 0.25)) +
-#   #scale_color_discrete() +
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-# #res_melted = melt(res_h3_h4, id.vars = names(res_h3_h4)[1], measure.vars = names(res_h3_h4)[-1])
-# # ggcp = ggplot(res_melted, aes(x = variable, y = gene, fill = value)) +
-# #   geom_tile() +
-# #   scale_colour_discrete() +
-# #   theme(axis.title.x = element_blank(),
-# #         axis.title.y = element_blank()) +
-# #   ggtitle("")
-# 
-# print(ggcp)
-# 
-# dev.off()
-
 write.table(res_summary,
-            file = "../results/08_coloc_overlap.txt",
+            file = "../results/08_b_coloc_overlap.txt",
             sep = "\t",
             row.names = FALSE)
 

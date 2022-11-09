@@ -121,8 +121,10 @@ sub_names  = c("eGFR (MALE)",
                "Uric Acid (MALE)",
                "Uric Acid (FEMALE)",
                "Uric Acid (ALL)")
-width_sub  = c(9000, 6000, 15000, 6000, 6000, 9000)
-height_sub = c(6000, 4000, 10000, 4000, 4000, 6000)
+width_sub  = c(12000, 12000, 12000, 12000, 12000, 12000)
+height_sub = c(8000, 8000, 8000, 8000, 8000, 8000)
+# width_sub  = c(6000, 6000, 6000, 6000, 6000, 6000)
+# height_sub = c(4000, 4000, 4000, 4000, 4000, 4000)
 
 for (sub in 1 : 6) {
 
@@ -758,12 +760,31 @@ png(paste0("../results/07_coloc_heatmap_", sub_names[sub], ".png"),
     width = width_sub[sub],
     height = height_sub[sub],
     res = 300)
+# png(paste0("../results/07_coloc_heatmap_reduced_", sub_names[sub], ".png"),
+#     width = width_sub[sub],
+#     height = height_sub[sub],
+#     res = 300)
 
 res_matrix             = as.matrix(res_h3_h4[, -c(1, 2)])
+# res_matrix             = as.matrix(res_h3_h4[, c(32, 51, 36)])
 res_matrix_t           = t(res_matrix)
 rownames(res_matrix_t) = c(gsub(pattern = "_", replacement = " ", eqtl_names), neptune_names)
+# rownames(res_matrix_t) = gsub(pattern = "_", replacement = " ", eqtl_names[c(30, 49, 34)])
 colnames(res_matrix_t) = paste0("Region ", region_names, " (", snp_names, " | ", gene_names, ")")
-ggcp = ggcorrplot(res_matrix_t[, region_names_ordering], title = sub_names[sub]) +
+res_matrix_t           = res_matrix_t[, region_names_ordering]
+# dum_pp_ok              = rep(FALSE, ncol(res_matrix_t))
+# for (j in 1 : ncol(res_matrix_t)) {
+#   
+#   if (sum(!is.na(res_matrix_t[, j])) > 0) {
+#     
+#     if (sum((abs(res_matrix_t[, j]) >= 0.75), na.rm = TRUE) > 0) { # At least for one tissue a posterior probability greater than or equal to 75% (H3 or H4)
+#       
+#       dum_pp_ok[j] = TRUE
+#     }
+#   }
+# }
+# res_matrix_t           = res_matrix_t[, dum_pp_ok]
+ggcp = ggcorrplot(res_matrix_t, title = sub_names[sub]) +
   scale_fill_gradient2(low = "red", mid = "white", high = "blue", na.value = "grey", limits = c(-1, 1), name = "PP", breaks = seq(-1, 1, by = 0.25)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
@@ -772,10 +793,10 @@ print(ggcp)
 dev.off()
 
 res_summary = rbind(res_summary_eqtl, res_summary_neptune)
-write.table(res_summary,
-            file = paste0("../results/07_coloc_summary_", sub_names[sub], ".txt"),
-            sep = "\t",
-            row.names = FALSE)
+# write.table(res_summary,
+#             file = paste0("../results/07_coloc_summary_", sub_names[sub], ".txt"),
+#             sep = "\t",
+#             row.names = FALSE)
 }
 
 

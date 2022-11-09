@@ -121,8 +121,8 @@ sub_names  = c("eGFR (MALE)",
                "Uric Acid (MALE)",
                "Uric Acid (FEMALE)",
                "Uric Acid (ALL)")
-width_sub  = c(9000, 6000, 15000, 6000, 6000, 9000)
-height_sub = c(6000, 4000, 10000, 4000, 4000, 6000)
+width_sub  = c(6000, 6000, 6000, 6000, 6000, 6000)
+height_sub = c(4000, 4000, 4000, 4000, 4000, 4000)
 
 for (sub in c(3, 6)) { # Conditional Statistics only for eGFR (ALL) and Uric Acid (ALL)
 
@@ -305,9 +305,9 @@ eqtl_j = eqtl_files_i_chrX
 rm(eqtl_files_i_chrX)
 
 for (i in c(9, 21, 22)) { # Conditional Statistics only for Region 9, Region 21 and Region 22
-  
+
   for (ii in 1 : 2) {
-  
+
   ### Create Locus-Wise Lists as Input for Colocalisation Analyses
 
   ### Step/Option 1: Use step10 Data ->
@@ -483,9 +483,9 @@ names(neptune_j) = c("chr",
                      "pvalues")
 
 for (i in c(9, 21, 22)) { # Conditional Statistics only for Region 9, Region 21 and Region 22
-  
+
   for (ii in 1 : 2) {
-  
+
   ### Create Locus-Wise Lists as Input for Colocalisation Analyses
 
   ### Step/Option 1: Use step10 Data ->
@@ -516,13 +516,13 @@ for (i in c(9, 21, 22)) { # Conditional Statistics only for Region 9, Region 21 
   grep_ii = grep(pattern = ".cma.cojo",
                  grep_i,
                  value = TRUE)
-  
+
   if (length(grep_ii) > 0) {
-    
+
     cojo_cond_ii = read.table(paste0("../temp/05_c_Cojo_cond_results/", grep_ii[ii]),
                               header = TRUE,
                               sep = "\t")
-    
+
     matched                       = match(step10_filt_locus_i$ID_UKBB, cojo_cond_ii$SNP)
     step10_filt_locus_i$beta_cond = cojo_cond_ii$bC[matched]
     step10_filt_locus_i$se_cond   = cojo_cond_ii$bC_se[matched]
@@ -656,6 +656,7 @@ res_h3_h4 = data.frame(gene = gene_names,
 res_files        = dir(paste0("../temp/07_coloc_results/"))
 res_summary_eqtl = data.frame()
 locus_eqtl       = c()
+snp_eqtl         = c()
 gene_eqtl        = c()
 trait2_eqtl      = c()
 for (j in 1 : length(eqtl_files)) {
@@ -678,7 +679,16 @@ for (j in 1 : length(eqtl_files)) {
       rm(coloc_ij)
 
       if (length(res_ij) > 0) {
-
+        
+        grep_i         = grep(pattern = paste0("Region_", i),
+                              dir("../temp/05_c_Cojo_cond_results/"),
+                              value = TRUE)
+        grep_ii        = grep(pattern = ".cma.cojo",
+                              grep_i,
+                              value = TRUE)
+        strsplit_end   = unlist(strsplit(grep_ii[ii], split = ".cma.cojo"))
+        strsplit_start = unlist(strsplit(strsplit_end, split = "_Region_[0-9]_|_Region_[0-9][0-9]_"))[2]
+        
         for (k in 1 : length(res_ij)) {
 
           dum_k = (gene_names == names(res_ij)[k]) & (snp_names == data_lifted$snp[i])
@@ -688,6 +698,7 @@ for (j in 1 : length(eqtl_files)) {
 
           res_summary_eqtl = rbind(res_summary_eqtl, res_ij[[k]][["summary"]])
           locus_eqtl       = c(locus_eqtl, paste0("Region ", data_lifted$region[i]))
+          snp_eqtl         = c(snp_eqtl, strsplit_start[length(strsplit_start)])
           gene_eqtl        = c(gene_eqtl, names(res_ij)[k])
           trait2_eqtl      = c(trait2_eqtl, paste0("GTEx", " (", gsub(pattern = "_", replacement = " ", eqtl_names[j]), ")"))
         }
@@ -703,12 +714,14 @@ names(res_summary_eqtl) = c("nsnps",
                             "PP.H3.abf",
                             "PP.H4.abf")
 res_summary_eqtl        = data.frame(locus = locus_eqtl,
+                                     snp = snp_eqtl,
                                      gene = gene_eqtl,
                                      trait1 = sub_names[sub],
                                      trait2 = trait2_eqtl,
                                      res_summary_eqtl)
 res_summary_neptune     = data.frame()
 locus_neptune           = c()
+snp_neptune             = c()
 gene_neptune            = c()
 trait2_neptune          = c()
 for (j in 1 : length(neptune_files)) {
@@ -731,7 +744,16 @@ for (j in 1 : length(neptune_files)) {
       rm(coloc_ij)
 
       if (length(res_ij) > 0) {
-
+        
+        grep_i         = grep(pattern = paste0("Region_", i),
+                              dir("../temp/05_c_Cojo_cond_results/"),
+                              value = TRUE)
+        grep_ii        = grep(pattern = ".cma.cojo",
+                              grep_i,
+                              value = TRUE)
+        strsplit_end   = unlist(strsplit(grep_ii[ii], split = ".cma.cojo"))
+        strsplit_start = unlist(strsplit(strsplit_end, split = "_Region_[0-9]_|_Region_[0-9][0-9]_"))[2]
+        
         for (k in 1 : length(res_ij)) {
 
           dum_k = (gene_names == names(res_ij)[k]) & (snp_names == data$snp[i])
@@ -741,6 +763,7 @@ for (j in 1 : length(neptune_files)) {
 
           res_summary_neptune = rbind(res_summary_neptune, res_ij[[k]][["summary"]])
           locus_neptune       = c(locus_neptune, paste0("Region ", data$region[i]))
+          snp_neptune         = c(snp_neptune, strsplit_start[length(strsplit_start)])
           gene_neptune        = c(gene_neptune, names(res_ij)[k])
           trait2_neptune      = c(trait2_neptune, paste0("NEPTUNE", " (", gsub(pattern = "_", replacement = " ", neptune_names[j]), ")"))
         }
@@ -756,6 +779,7 @@ names(res_summary_neptune) = c("nsnps",
                                "PP.H3.abf",
                                "PP.H4.abf")
 res_summary_neptune        = data.frame(locus = locus_neptune,
+                                        snp = snp_neptune,
                                         gene = gene_neptune,
                                         trait1 = sub_names[sub],
                                         trait2 = trait2_neptune,
@@ -790,10 +814,10 @@ print(ggcp)
 dev.off()
 
 res_summary = rbind(res_summary_eqtl, res_summary_neptune)
-write.table(res_summary,
-            file = paste0("../results/07_coloc_cond_summary_", sub_names[sub], ".txt"),
-            sep = "\t",
-            row.names = FALSE)
+# write.table(res_summary,
+#             file = paste0("../results/07_coloc_cond_summary_", sub_names[sub], ".txt"),
+#             sep = "\t",
+#             row.names = FALSE)
 }
 
 
