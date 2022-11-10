@@ -54,6 +54,7 @@ myForestPlot = function(snp, studydata) {
   posBeta = colnames(studydata)[which(substring(colnames(studydata),1,5) == "beta.")]
   posSE = colnames(studydata)[which(substring(colnames(studydata),1,3) == "se.")]
   posN = colnames(studydata)[which(substring(colnames(studydata),1,2) == "n.")]
+  posEAF = colnames(studydata)[which(substring(colnames(studydata),1,4) == "eaf.")]
   
   #get beta, SE values for single studies
   fp.mean = as.numeric(studydata[rowNR , get("posBeta"), with = F])
@@ -65,6 +66,9 @@ myForestPlot = function(snp, studydata) {
   fp.upper = fp.mean + fp.se
   fp.N = as.numeric(studydata[rowNR , get("posN"), with = F])
   fp.N = fp.N[!is.na(fp.N)]
+  fp.EAF = as.numeric(studydata[rowNR , get("posEAF"), with = F])
+  fp.EAF = fp.EAF[!is.na(fp.EAF)]
+  fp.EAF = round(fp.EAF, digits = 2)
   
   #extract study names
   studyname = posBeta[myFilt]
@@ -73,7 +77,7 @@ myForestPlot = function(snp, studydata) {
   dummy = strsplit(studyname, split = "_")
   studyname = sapply(dummy, function(x) return(paste0(x[[1]], "_", x[[2]])))
   fp.labeltext = as.matrix(data.frame(study = studyname))
-  fp.labeltext = paste0(fp.labeltext, " (", fp.N, ")")
+  fp.labeltext = paste0(fp.labeltext, " (N=", fp.N, ", EAF=", fp.EAF, ")")
   
   #extract ethnicity
   dummy = strsplit(studyname, split = "_")
@@ -84,7 +88,7 @@ myForestPlot = function(snp, studydata) {
   fp.lower = c(fp.lower, studydata[rowNR, betaFEM] - studydata[rowNR, seFEM])
   fp.upper = c(fp.upper, studydata[rowNR, betaFEM] + studydata[rowNR, seFEM])
   fp.N = c(fp.N, studydata[rowNR, totalN])
-  fp.labeltext = c(fp.labeltext, paste0("MetaGWAS", " (", studydata[rowNR, totalN], ")"))
+  fp.labeltext = c(fp.labeltext, paste0("MetaGWAS", " (N=", studydata[rowNR, totalN], ", I2=", round(studydata[rowNR, I2], digits = 2), ")"))
   fp.eth = c(fp.eth, "Mixed")
   
   #build object for plotting
