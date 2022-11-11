@@ -192,7 +192,7 @@ for (i in 1 : nrow(data)) {
   dum_ij = c()
   for (j in 1 : length(dum_i)) {
     
-    dum_j = matching$ensembl_gene_id[matching$external_gene_name == dum_i[j]]
+    dum_j = as.character(matching$ensembl_gene_id[matching$external_gene_name == dum_i[j]])
     if (length(dum_j) > 0) {
       
       dum_ij = c(dum_ij, dum_j)
@@ -766,19 +766,19 @@ png(paste0("../results/07_coloc_heatmap_", sub_names[sub], ".png"),
 #     res = 300)
 
 res_matrix             = as.matrix(res_h3_h4[, -c(1, 2)])
-# res_matrix             = as.matrix(res_h3_h4[, c(32, 51, 36)])
+# res_matrix             = as.matrix(res_h3_h4[, c(5, 32, 51, 36)])
 res_matrix_t           = t(res_matrix)
 rownames(res_matrix_t) = c(gsub(pattern = "_", replacement = " ", eqtl_names), neptune_names)
-# rownames(res_matrix_t) = gsub(pattern = "_", replacement = " ", eqtl_names[c(30, 49, 34)])
+# rownames(res_matrix_t) = gsub(pattern = "_", replacement = " ", eqtl_names[c(3, 30, 49, 34)])
 colnames(res_matrix_t) = paste0("Region ", region_names, " (", snp_names, " | ", gene_names, ")")
 res_matrix_t           = res_matrix_t[, region_names_ordering]
 # dum_pp_ok              = rep(FALSE, ncol(res_matrix_t))
 # for (j in 1 : ncol(res_matrix_t)) {
-#   
+# 
 #   if (sum(!is.na(res_matrix_t[, j])) > 0) {
-#     
+# 
 #     if (sum((abs(res_matrix_t[, j]) >= 0.75), na.rm = TRUE) > 0) { # At least for one tissue a posterior probability greater than or equal to 75% (H3 or H4)
-#       
+# 
 #       dum_pp_ok[j] = TRUE
 #     }
 #   }
@@ -793,10 +793,10 @@ print(ggcp)
 dev.off()
 
 res_summary = rbind(res_summary_eqtl, res_summary_neptune)
-# write.table(res_summary,
-#             file = paste0("../results/07_coloc_summary_", sub_names[sub], ".txt"),
-#             sep = "\t",
-#             row.names = FALSE)
+write.table(res_summary,
+            file = paste0("../results/07_coloc_summary_", sub_names[sub], ".txt"),
+            sep = "\t",
+            row.names = FALSE)
 }
 
 
