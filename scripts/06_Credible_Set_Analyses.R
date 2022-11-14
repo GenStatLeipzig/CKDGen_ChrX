@@ -75,15 +75,15 @@ CredibleSetFunction = function(data,filenm) {
   #' ### Calculate Bayes factors ####
   #' Bayes factors, sum of Bayes factors and posterior probability (PP)
   dat[,abf.Wakefield:=gtx::abf.Wakefield(beta = beta, se = beta_se, priorsd = prior)]
-  #summary(dat[,abf.Wakefield])
-  #boxplot(dat[,abf.Wakefield])
+  
   sum.abf.r1 = sum(dat[,abf.Wakefield], na.rm=T)
   sum.abf.r1
-  dat[,PostProb:=abf.Wakefield/sum.abf.r1]
+  dat[, PostProb:=abf.Wakefield/sum.abf.r1]
   summary(dat[,PostProb])
   ordering = order(dat[,PostProb], decreasing = TRUE)
   dat = dat[ordering,]
-  dat[,SumProb:=cumsum(PostProb)]
+  dat[, SumProb:=cumsum(PostProb)]
+  dat[, prior := prior]
   dat
   
   #' ### Summary ####
@@ -114,7 +114,7 @@ uncond = foreach(s = toDo[useCondStats == FALSE, setting]) %do% {
   snp = toDo[line, rsID]
   result = CredibleSetFunction(locusData, paste0(s, "_", gsub(":", "_", snp)))
   
-  report = list(phenotype = pheno, region = myRegion, SNP = snp, CredSet.95 = nrow(result[SumProb <= 0.95, ])+1, CredSet.99 = nrow(result[SumProb <= 0.99, ])+1)
+  report = list(phenotype = pheno, region = myRegion, SNP = snp, CredSet.95 = nrow(result[SumProb <= 0.95, ])+1, CredSet.99 = nrow(result[SumProb <= 0.99, ])+1, prior = unique(result[, prior]))
   report
 }
 uncond = rbindlist(uncond)
@@ -151,7 +151,7 @@ cond = foreach(s = toDo[useCondStats == TRUE, SNP]) %do% {
   snp = toDo[line, rsID]
   result = CredibleSetFunction(locusData, paste0(setting, "_", gsub(":", "_", snp)))
   
-  report = list(phenotype = pheno, region = myRegion, SNP = snp, CredSet.95 = nrow(result[SumProb <= 0.95, ])+1, CredSet.99 = nrow(result[SumProb <= 0.99, ])+1)
+  report = list(phenotype = pheno, region = myRegion, SNP = snp, CredSet.95 = nrow(result[SumProb <= 0.95, ])+1, CredSet.99 = nrow(result[SumProb <= 0.99, ])+1, prior = unique(result[, prior]))
   report
 }
 cond = rbindlist(cond)
@@ -162,9 +162,12 @@ overview = rbindlist(list(uncond, cond))
 myOrder = order(overview[, phenotype], overview[, region])
 overview = overview[myOrder, ]
 
+#get summary of prior used
+summary(overview[, prior])
+
 write.table(overview, file = "../results/06_SNP_numbers_Credible_Sets.txt", col.names = T, row.names = F)
 
-#' # Generate riles for annotation with GWAS Pipeline ####
+#' # Generate files for annotation with GWAS Pipeline ####
 #' ***
 colsNeeded = c("SNP", "CredSet", "PostProb", "SumProb")
 phenotypes = unique(overview[, phenotype])
