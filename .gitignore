@@ -55,3 +55,4 @@ tables/*_check.xlsx
 tables/*.RData
 scripts/_files4RegionAssocPlots/*
 figures/_archive/*
+tables/_archive/*
