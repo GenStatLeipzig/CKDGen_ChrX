@@ -50,7 +50,7 @@ If you want to reproduce our results, you will need to customize a source file, 
     * REML: estimation of heritability for eGFR and UA
     * REML bivariate: estimation of genetic correlation between eGFR and UA 
 11) **Lookup of reported variants**: replicate findings of *Graham et al*, *Kanai et al* and *Sakaue et al* (successful if nominal significance and concordant effect is observed) 
-12) Trans-ethnic meta-regression analysis: accounting for mixed ethnicities by using MR-Mega
+12) **Trans-ethnic meta-regression analysis**: accounting for mixed ethnicities by using MR-Mega
     * Get an overview of MR-Mega results and check results for MetaGWAS loci
     * Generate Forest plots for MR-Mega hits   
 
@@ -83,7 +83,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 1) **RA-Plots** of all regions
 2) **Beta-Beta-Plot** of sex interaction analysis (--> see script 02)
 3) **Beta-Beta-Plot** of HUNT replication (--> see script 09)
-4) Forest Plots (--> see script 12 b)
+4) **Forest Plots** of MR-MEGA results (--> see script 12 b)
 5) Co-localization Plots of eQTL results (--> see script 07) 
 6) **Beta-Beta-Plot** of index SNPs comparing trans-ethnic metaGWAS and Europeans only metaGWAS
 7) **Box-Plot** showing chromosome X coding variants
@@ -105,7 +105,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 3) **Sample Sizes & SNP Numbers, and inflation factor $\lambda$ per phenotype**
 4) **Comparisons between the sexes (interaction and co-localization --> see script 02 and 03)**
 5) **Cross-phenotype comparision (--> see script 04)**
-6) **Genome-wide significant & independent hit per region (--> see script 05)**
+6) **Genome-wide significant & independent hits per region (--> see script 05)**
 7) **Annotation of credible sets** (maybe seperate in a-e for eGFR and UA in their respective settings)
 8) **Co-localization with eQTLs** (--> see script 07, only unconditioned so far)
 9) **Replication in *HUNT* (--> see script 09)**
