@@ -34,7 +34,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_forostar.R")
 
 setwd(paste0(projectpath,"scripts/"))
 
@@ -148,6 +148,26 @@ tab1[is.na(CKD_assoc) & region<16,CKD_assoc:=F]
 tab1[,CKD_pval:=NULL]
 tab1[,CKD_beta:=NULL]
 
+stopifnot(tab1$indexSNP == WideTable$rsID)
+tab1[,BUN_pval := WideTable[,P_oneSided_BUN_ALL]]
+tab1[,BUN_beta := WideTable[,beta_BUN_ALL]]
+tab1[filt,BUN_pval := NA]
+tab1[filt,BUN_beta := NA]
+filt1 = grepl("_MALE",tab1$bestSetting)
+filt2 = grepl("_FEMALE",tab1$bestSetting)
+tab1[filt1,BUN_pval := WideTable[filt1,P_oneSided_BUN_MALE]]
+tab1[filt1,BUN_beta := WideTable[filt1,beta_BUN_MALE]]
+tab1[filt2,BUN_pval := WideTable[filt2,P_oneSided_BUN_FEMALE]]
+tab1[filt2,BUN_beta := WideTable[filt2,beta_BUN_FEMALE]]
+tab1[BUN_pval<0.05 & sign(beta)!=sign(BUN_beta) & region<16,BUN_assoc := "likely"]
+tab1[BUN_pval<0.05 & sign(beta)==sign(BUN_beta) & region<16,BUN_assoc := "unlikely"]
+tab1[is.na(BUN_assoc) & region<16,BUN_assoc:="inconclusive"]
+
+tab1[,BUN_pval:=NULL]
+tab1[,BUN_beta:=NULL]
+setnames(tab1,"BUN_assoc","kidneyFunction")
+tab1[,table(kidneyFunction,CKD_assoc)]
+
 #' # Get sexIA and gw by setting ####
 #' ***
 #' * number of independent variants
@@ -198,6 +218,7 @@ description = data.table(column = names(tab1),
                                          "TRUE/FALSE flag indicating genome-wide significance in setting MALE for given phenotype",
                                          "TRUE/FALSE flag indicating genome-wide significance in setting FEMALE for given phenotype",
                                          "TRUE/FALSE flag indicating nominal (one-sided) association with CKD in our data with discordant effect direction (only for eGFR)",
+                                         "Kidney function defined by BUN comparisin (likely: significantly associated with BUN and discordant effect direction; unlikely: significantly associated with BUN and concordant effect direction; inconclusive: not significantly associated with BUN",
                                          "Number independent signals at this loci in best setting",
                                          "Co-localization result for each loci (PP4>0.75, both sexes-shared; PP3>0.75, both sexes-independent; PP2>0.75, female-driven; PP1>0.75, male-driven; no PP>0.75, inconclusive"))
 
