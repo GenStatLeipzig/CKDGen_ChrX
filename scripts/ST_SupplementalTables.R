@@ -25,7 +25,7 @@
 #' 8) Co-localization with eQTLs (--> see script 07)
 #' 9) Replication in *HUNT* (--> see script 09)
 #' 10) Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results (--> see script 11)
-#' 11) Summary of MR-Mega results (--> see scripts 12)**--> not yet included**
+#' 11) Summary of MR-Mega results (--> see scripts 12)**
 #' 
 #' # Initialize ####
 #' ***
@@ -55,10 +55,10 @@ tab0 = data.table(Table = paste0("S",c(1:11)),
                              "../results/04_lookup_TopHits_matchingSettings.RData",
                              "../results/05_b_Cojo_Select_Results.txt",
                              "../../../10_metaGWAS/PHENOTYPE/08_credSets/gwasresults_V5/synopsis/topliste_tabdelim/topliste_2022-11-04_credSets.txt",
-                             "../results/07_",
+                             "not yet finished",
                              "../results/09_replication_HUNT.RData",
                              "../results/11_Look_Up_GWAS_hits_eGFR_UA_only.txt",
-                             "not yet finished"))
+                             "../results/12_SNPs_table1_in_MR_MEGA.txt"))
 
 tab0
 
@@ -142,8 +142,7 @@ tab3 = foreach(i=1:dim(ToDoList)[1])%do%{
                    lambda_unfiltered = round(lambda_unfiltered,3),
                    n_studies_filtered = n_studies_filtered,
                    n_samples_filtered = trunc(n_samples_filtered),
-                   n_SNPs_filtered = n_SNPs_filtered,
-                   lambda_filtered = round(lambda_filtered,3))
+                   n_SNPs_filtered = n_SNPs_filtered)
   res
 }
 tab3 = rbindlist(tab3)
@@ -161,8 +160,7 @@ tab3_annot = data.table(column = names(tab3),
                                          "Maximal number of individuals",
                                          "Number of SNPs before any QC was applied (number of SNPs analyzed in raw meta-analysis)",
                                          "Inflation factor lambda before any QC was applied",
-                                         "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)",
-                                         "Inflation factor lambda after QC"))
+                                         "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)"))
 
 
 
@@ -322,7 +320,14 @@ tab6_annot = data.table(column = names(tab6),
 
 #' # Get Sup Tabs 7 ####
 #' ***
-#'  Annotation of credible sets (a-e for eGFR and UA in their respective settings)
+#'  Annotation of credible sets (a-e for eGFR and UA in their respective settings):
+#' 
+#' Ensembl
+#' CADD score
+#' Regulome score
+#' GWAS catalog
+#' GTEx v8 eQTLs (cis)
+#' Pathways (KEGG, GO, DOSE and Reactome)
 #' 
 ToDoList3 = data.table(pheno = c("eGFR_ALL","eGFR_FEMALE","eGFR_MALE","UA_ALL","UA_MALE"),
                        files = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V5/synopsis/topliste_tabdelim/topliste_2022-11-04_credSets.txt",
@@ -340,12 +345,13 @@ tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
   stopifnot(tab$litsnp == tab$provided_name)
   
   myNames2 =  c("snp","CredSet","PostProb","SumProb","cyto","pos","tagger","r2_tagger","tagsnp","effect_allele","other_allele","eaf",
-                "beta","SE","logP", "I2","nearestgenes","gene_biotype","nearestgene","Eigen","EigenPC","CADD_scaled","DANN",
-                "GWAVA_Region","GWAVA_TSS","GWAVA_Unmatched","regulome_score","regulome_score_numeric","regulome_details",
-                "corinfo_gwas2","cisgene","transgene","coremine_genes","hgnc4pathway","entrez4pathway","KEGG","reactome","DOSE",
-                "GO","tissues")
-  myNames = names(tab)[c(1:4,13,15:18,61,62,64,70:72,74,19:42)]
-  stopifnot(sum(myNames == myNames2)==34)
+                "beta","SE","logP", "I2",
+                "nearestgenes","gene_biotype","nearestgene",
+                "CADD_scaled","regulome_score","regulome_score_numeric","regulome_details",
+                "corinfo_gwas2","cisgene","coremine_genes",
+                "KEGG","reactome","DOSE","GO")
+  myNames = names(tab)[c(1:4,13,15:18,61,62,64,70:72,74,19:21,24,29:33,35,38:41)]
+  stopifnot(sum(myNames == myNames2)==24)
   colsOut<-setdiff(colnames(tab),myNames)
   tab[,get("colsOut"):=NULL]
   setcolorder(tab,myNames)
@@ -357,15 +363,15 @@ tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
   if(myRow$pheno == "UA_ALL"){
     tab[CredSet == "Region21_SNP1", CredSet := "Region21_rs202138804"]
     tab[CredSet == "Region21_SNP2", CredSet := "Region21_rs7056552"]
-    tab[CredSet == "Region22_SNP1", CredSet := "Region21_rs111884516"]
-    tab[CredSet == "Region22_SNP2", CredSet := "Region21_rs4328011"]
+    tab[CredSet == "Region22_SNP1", CredSet := "Region22_rs111884516"]
+    tab[CredSet == "Region22_SNP2", CredSet := "Region22_rs4328011"]
   }
   tab
 }
 tab7 = rbindlist(tab7)
 table(tab7$phenotype)
 tab7
-tab7 = tab7[,c(41,1:40)]
+tab7 = tab7[,c(31,1:30)]
 
 tab7_annot = data.table(column = names(tab7),
                         description = c("Analyzed phenotype and setting",
@@ -388,27 +394,17 @@ tab7_annot = data.table(column = names(tab7),
                                         "HGNC (Ensembl) symbols of the nearest genes as specified in the settings with information on distance to the marker in SNP including functional relevance if within or within the flanking 5 kb of a gene",
                                         "Functional relevance of the gene and its validation level  for proximate genes(Ensembl)",
                                         "HGNC (Ensembl) full name of nearest gene that actually has got a full name",
-                                        "Eigen is a spectral approach to the functional annotation of genetic variants in coding and noncoding regions. Eigen makes use of a variety of functional annotations in both coding and noncoding regions (such as made available by the ENCODE and Roadmap Epigenomics projects), and combines them into one single measure of functional importance. Eigen is an unsupervised approach, and, unlike most existing methods, is not based on any labelled training data. Eigen produces estimates of predictive accuracy for each functional annotation score, and subsequently uses these estimates of accuracy to derive the aggregate functional score for variants of interest as a weighted linear combination of individual annotations. We show that the resulting meta-score has good discriminatory ability using disease associated and putatively benign variants from published studies (for both Mendelian and complex diseases). The Eigen score is particularly useful in prioritizing likely causal variants in a region of interest when it is combined with population-level genetic data in the framework of a hierarchical model. Furthermore, an important advantage of the Eigen score is that it can be easily adapted to a specific tissue or cell type. More information about the Eigen score can be found in the accompanying manuscript: A spectral approach integrating functional genomic annotations for coding and noncoding variants (Iuliana Ionita-Laza, Kenneth McCallum, Bin Xu, Joseph Buxbaum). and possible confounding factors; therefore, Eigen is a more robust approach at this point.",
-                                        "Eigen-PC performs well across many scenarios, although, as we discuss in the Supplementary Note, it is more sensitive than Eigen to component annotations and possible confounding factors; therefore, Eigen is a more robust approach at this point.",
                                         "PHRED-like (-10*log10(rank/total)) scaled C-score ranking a variant relative to all possible substitutions of the human genome (8.6x10^9). For details see tab 'deleteriousness'.  Like explained above, a scaled C-score of greater or# equal 10 indicates that these are predicted to be the 10% most deleterious substitutions that you can do to the human genome, a score of greater or equal 20 indicates the 1% most deleterious and so on. If you would like to apply a cutoff on deleteriousness, eg to identify potentially pathogenic variants, we would suggest to put a cutoff somewhere between 10 and 20. Maybe at 15, as this also happens to be the median value for all possible canonical splice site changes and non-synonymous variants. However, there is not a natural choice here -- it is always arbitrary. We therefore recommend integrating C-scores with other evidence and to rank your candidates for follow up rather than hard filtering.",
-                                        "DANN score, similar to CADD, but prediction made using a non-linear kernel function instead of a linear.",
-                                        "Deleteriousness / functional variant relevance score",
-                                        "Deleteriousness / functional variant relevance score",
-                                        "Deleteriousness / functional variant relevance score",
                                         "Deleteriousness / functional variant relevance score",
                                         "Deleteriousness / functional variant relevance score",
                                         "Deleteriousness / functional variant relevance score",
                                         "r-square value between marker in SNP and a hit from GWAS catalog for named phenotype",
                                         "cis-eQTL genes for which reported eQTL-SNP has specified min R2 with marker in SNP",
-                                        "trans-eQTL genes for which reported eQTL-SNP has specified min R2 with marker in SNP",
-                                        "List of all genes reported for marker in SNP in nearest genes, cis-eQTL genes and trans-eQTL genes",
-                                        "corresponding HGNC names for pathway genes used",
-                                        "Genes used for pathway enrichment actually used",
+                                        "List of all genes reported for marker in SNP in nearest genes, and cis-eQTL genes",
                                         "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in KEGG pathways",
                                         "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in reactome pathways",
                                         "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in disease ontology pathways",
-                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in GO categories pathways",
-                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes in high expressed genes of several tissues according to pathway enrichment specific settings"))
+                                        "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in GO categories pathways"))
 
 #' # Get Sup Tabs 8 ####
 #' ***
@@ -419,37 +415,36 @@ tab7_annot = data.table(column = names(tab7),
 #' --> fix this later!!
 #' 
 #' 
-tab8_cond = data.table(read_excel("../results/07_coloc_cond_summary.xlsx"))
-tab8_uncond = data.table(read_excel("../results/07_coloc_summary.xlsx"))
-
-tab8_a = copy(tab8_uncond)
-setnames(tab8_a,"locus","region")
-setnames(tab8_a,"trait1","GWAMA_phenotype")
-setnames(tab8_a,"trait2","tissue")
-tab8_a = tab8_a[,c(1,3,2,4:10)]
-tab8_a[,GWAMA_phenotype:=gsub(" [(]","_",GWAMA_phenotype)]
-tab8_a[,GWAMA_phenotype:=gsub("[)]","",GWAMA_phenotype)]
-tab8_a[,GWAMA_phenotype:=gsub("Uric Acid","UA",GWAMA_phenotype)]
-tab8_a[,region :=gsub("Region ","",region )]
-
-tab8_a[,dumID := paste(region,GWAMA_phenotype,sep="__")]
-goodDumIDs = tab6[,paste(region,phenotype,sep="__")]
-table(is.element(tab8_a$dumID,goodDumIDs))
-tab8_a = tab8_a[dumID %in% goodDumIDs,]
-setorder(tab8_a,region,GWAMA_phenotype,gene)
-tab8_a[,dumID:=NULL]
-
-tab8_annot = data.table(column = names(tab8_a),
-                        description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
-                                        "Analyzed phenotype and setting",
-                                        "Analyzed gene expression of GTEx of NEPTUNE",
-                                        "Analyzed tissue for gene expression",
-                                        "Number of SNPs included in co-localization analysis per region",
-                                        "Posterior probability for hypothesis 0: neither trait associated",
-                                        "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
-                                        "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
-                                        "Posterior probability for hypothesis 3: both trait associated, but different signals",
-                                        "Posterior probability for hypothesis 4: both trait associated, shared signal"))
+# tab8 = data.table(read_excel("../results/07_coloc_summary.xlsx"))
+# 
+# tab8 = copy(tab8)
+# setnames(tab8,"locus","region")
+# setnames(tab8,"trait1","GWAMA_phenotype")
+# setnames(tab8,"trait2","tissue")
+# tab8 = tab8[,c(1,3,2,4:10)]
+# tab8[,GWAMA_phenotype:=gsub(" [(]","_",GWAMA_phenotype)]
+# tab8[,GWAMA_phenotype:=gsub("[)]","",GWAMA_phenotype)]
+# tab8[,GWAMA_phenotype:=gsub("Uric Acid","UA",GWAMA_phenotype)]
+# tab8[,region :=gsub("Region ","",region )]
+# 
+# tab8[,dumID := paste(region,GWAMA_phenotype,sep="__")]
+# goodDumIDs = tab6[,paste(region,phenotype,sep="__")]
+# table(is.element(tab8$dumID,goodDumIDs))
+# tab8 = tab8[dumID %in% goodDumIDs,]
+# setorder(tab8,region,GWAMA_phenotype,gene)
+# tab8[,dumID:=NULL]
+# 
+# tab8_annot = data.table(column = names(tab8),
+#                         description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+#                                         "Analyzed phenotype and setting",
+#                                         "Analyzed gene expression of GTEx of NEPTUNE",
+#                                         "Analyzed tissue for gene expression",
+#                                         "Number of SNPs included in co-localization analysis per region",
+#                                         "Posterior probability for hypothesis 0: neither trait associated",
+#                                         "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
+#                                         "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
+#                                         "Posterior probability for hypothesis 3: both trait associated, but different signals",
+#                                         "Posterior probability for hypothesis 4: both trait associated, shared signal"))
 
 #' # Get Sup Tabs 9 ###
 #' ***
@@ -465,7 +460,7 @@ tab9_annot = data.description
 #' Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results
 #' 
 
-tab10 = fread("../results/11_Look_Up_GWAS_hits_eGFR_UA_only.txt")
+tab10 = fread("../results/11_Look_Up_GWAS_hits_eGFR_BUN_UA_only.txt")
 tab10[grepl("A cross-population atlas of genetic associations for 220",STUDY),Authors := "Sakaue et al. (2021)"]
 tab10[grepl("A cross-population atlas of genetic associations for 220",STUDY),DOI := "10.1038/s41588-021-00931-x"]
 tab10[grepl("Genetic analysis of quantitative traits in the Japanese",STUDY),Authors := "Kanai et al. (2018)"]
@@ -479,12 +474,52 @@ tab10[,`INITIAL SAMPLE SIZE` := gsub("European ancestry","EUR",`INITIAL SAMPLE S
 tab10[,`INITIAL SAMPLE SIZE` := gsub("East Asian ancestry","EA",`INITIAL SAMPLE SIZE`)]
 tab10[,`INITIAL SAMPLE SIZE` := gsub("Japanese ancestry individuals","JAP",`INITIAL SAMPLE SIZE`)]
 
+table(tab10$`DISEASE/TRAIT`)
 names(tab10)
-tab10 = tab10[,c(32,33,2,3,5:31)]
-tab10[!is.na(eGFR.P),table(eGFR.P<0.05)]
-tab10[!is.na(UA.P),table(UA.P<0.05)]
-tab10[!is.na(UA.P),table(UA.P<0.05,eGFR.P<0.05)]
-tab10
+
+tab10[,phenotype := "eGFR"]
+tab10[`DISEASE/TRAIT` == "Blood urea nitrogen levels",phenotype := "BUN"]
+tab10[`DISEASE/TRAIT` == "Serum uric acid levels",phenotype := "UA"]
+
+tab10[,CKDGen_N := eGFR.N]
+tab10[,CKDGen_EA := eGFR.effect_allele]
+tab10[,CKDGen_EAF := eGFR.EAF]
+tab10[,CKDGen_infoScore := eGFR.infoScore]
+tab10[,CKDGen_I2 := eGFR.I2]
+tab10[,CKDGen_beta := eGFR.beta]
+tab10[,CKDGen_SE := eGFR.SE]
+tab10[,CKDGen_P := eGFR.P]
+tab10[,CKDGen_logP := eGFR.logP]
+tab10[,CKDGen_invalid := eGFR.invalid_assoc]
+tab10[,CKDGen_reason := eGFR.reason_for_exclusion]
+
+tab10[phenotype == "UA",CKDGen_N := UA.N]
+tab10[phenotype == "UA",CKDGen_EA := UA.effect_allele]
+tab10[phenotype == "UA",CKDGen_EAF := UA.EAF]
+tab10[phenotype == "UA",CKDGen_infoScore := UA.infoScore]
+tab10[phenotype == "UA",CKDGen_I2 := UA.I2]
+tab10[phenotype == "UA",CKDGen_beta := UA.beta]
+tab10[phenotype == "UA",CKDGen_SE := UA.SE]
+tab10[phenotype == "UA",CKDGen_P := UA.P]
+tab10[phenotype == "UA",CKDGen_logP := UA.logP]
+tab10[phenotype == "UA",CKDGen_invalid := UA.invalid_assoc]
+tab10[phenotype == "UA",CKDGen_reason := UA.reason_for_exclusion]
+
+tab10[phenotype == "BUN",CKDGen_N := BUN.N]
+tab10[phenotype == "BUN",CKDGen_EA := BUN.effect_allele]
+tab10[phenotype == "BUN",CKDGen_EAF := BUN.EAF]
+tab10[phenotype == "BUN",CKDGen_infoScore := BUN.infoScore]
+tab10[phenotype == "BUN",CKDGen_I2 := BUN.I2]
+tab10[phenotype == "BUN",CKDGen_beta := BUN.beta]
+tab10[phenotype == "BUN",CKDGen_SE := BUN.SE]
+tab10[phenotype == "BUN",CKDGen_P := BUN.P]
+tab10[phenotype == "BUN",CKDGen_logP := BUN.logP]
+tab10[phenotype == "BUN",CKDGen_invalid := BUN.invalid_assoc]
+tab10[phenotype == "BUN",CKDGen_reason := BUN.reason_for_exclusion]
+
+names(tab10)[c(45,46,2,3,5:10,44,47:58)]
+tab10 = tab10[,c(45,46,2,3,5:10,44,47:58)]
+tab10 = tab10[!is.na(CKDGen_invalid),]
 
 tab10_annot = data.table(column = names(tab10),
                         description = c("First Author et al. of looked-up study",
@@ -496,44 +531,68 @@ tab10_annot = data.table(column = names(tab10),
                                         "SNP ID used for matching",
                                         "Effect allele frequency in looked-up study",
                                         "P-value in looked-up study",
-                                        "Sample size in eGFR ALL",
-                                        "Effect allele in eGFR ALL",
-                                        "Effect allele frquency in eGFR ALL",
-                                        "Weighted imputation info score in eGFR ALL",
-                                        "Heterogeneity I^2 in eGFR ALL",
-                                        "Beta estimate in eGFR ALL",
-                                        "Standard error in eGFR ALL",
-                                        "P-value in eGFR ALL",
-                                        "-log10 transformed p-value in eGFR",
-                                        "TRUE/FALSE flag indicating validity of SNP for eGFR ALL (F=valid)",
-                                        "Reason to exclude SNP for eGFR ALL",
-                                        "Sample size in UA ALL",
-                                        "Effect allele in UA ALL",
-                                        "Effect allele frquency in UA ALL",
-                                        "Weighted imputation info score in UA ALL",
-                                        "Heterogeneity I^2 in UA ALL",
-                                        "Beta estimate in UA ALL",
-                                        "Standard error in UA ALL",
-                                        "P-value in UA ALL",
-                                        "-log10 transformed p-value in UA",
-                                        "TRUE/FALSE flag indicating validity of SNP for UA ALL (F=valid)",
-                                        "Reason to exclude SNP for UA ALL"))
+                                        "Odds ratio, Z-score or beta estimate in looked-up study",
+                                        "TRUE/FALSE flag indicating successful replication in CKDGen",
+                                        "CKDGen phenotype used for replication",
+                                        "Sample size in CKDGen",
+                                        "Effect allele in CKDGen",
+                                        "Effect allele frquency in CKDGen",
+                                        "Weighted imputation info score in CKDGen",
+                                        "Heterogeneity I^2 in CKDGen",
+                                        "Beta estimate in CKDGen",
+                                        "Standard error in CKDGen",
+                                        "P-value in CKDGen",
+                                        "-log10 transformed p-value in CKDGen",
+                                        "TRUE/FALSE flag indicating validity of SNP for CKDGen (F=valid)",
+                                        "Reason to exclude SNP for CKDGen"))
 
 #' # Get Sup Tabs 11 ###
 #' ***
 #' MR-Mega
 #' 
-#' Not yet available
-#' 
+tab11 = fread("../results/12_SNPs_table1_in_MR_MEGA.txt")
+
+tab11_annot = data.table(column = names(tab11),
+                         description = c("SNP ID in CKDGen",
+                                         "SNP ID used for matching",
+                                         "Chromosome",
+                                         "Base position (hg19)",
+                                         "Effect allele",
+                                         "Non-effect allele",
+                                         "Effect allele frequency",
+                                         "Sample size in CKDGen",
+                                         "Number of studies in CKDGen",
+                                         "Effect direction across cohorts (+ if the effect allele effect was positive, - if negative, 0 if the effect was zero, ? if marker was not available in cohort)",
+                                         "Effect of first PC of meta-regression",
+                                         "Standard error of the effect of first PC of meta-regression",
+                                         "Effect of second PC of meta-regression",
+                                         "Standard error of the effect of second PC of meta-regression",
+                                         "Effect of third PC of meta-regression",
+                                         "Standard error of the effect of third PC of meta-regression",
+                                         "Effect of fourth PC of meta-regression",
+                                         "Standard error of the effect of fourth PC of meta-regression",
+                                         "Chisq value of the association",
+                                         "Number of degrees of freedom of the association",
+                                         "P-value of the association",
+                                         "Chisq value of the heterogeneity due to different ancestry",
+                                         "Number of degrees of freedom of the heterogeneity due to different ancestry",
+                                         "P-value of the heterogeneity due to different ancestry",
+                                         "Chisq value of the residual heterogeneity",
+                                         "Number of degrees of freedom  of the residual heterogeneity",
+                                         "Pvalue of the residual heterogeneity",
+                                         "Log of Bayes factor",
+                                         "Reason why marker was not analysed in MR-MEGA",
+                                         "TRUE/FALSE flag indicating validity of SNP for CKDGen (F=valid)",
+                                         "Phenotype used in CKDGen"))
 
 #' # Save tables ###
 #' ***
 tosave4 = data.table(data = c("tab0",#"tab1","tab2", 
-                              "tab3", "tab4","tab5","tab6",
-                              "tab7","tab8_a","tab9","tab10"), 
+                              "tab3", "tab4","tab5","tab6","tab7",#"tab8_a",
+                              "tab9","tab10","tab11"), 
                      SheetNames = c("Content",#"TableS1","TableS2", 
-                                    "TableS3", "TableS4","TableS5", "TableS6",
-                                    "TableS7","TableS8a","TableS9","TableS10"))
+                                    "TableS3", "TableS4","TableS5", "TableS6","TableS7",#"TableS8a",
+                                    "TableS9","TableS10","TableS11"))
 excel_fn = "../tables/SupplementalTables.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
@@ -542,10 +601,11 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_annot","tab6_annot",
-                              "tab7_annot","tab8_annot","tab9_annot","tab10_annot"), 
-                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_annot", "TableS6_annot",
-                                    "TableS7_annot","TableS8_annot","TableS9_annot","TableS10_annot"))
+tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_annot","tab6_annot","tab7_annot",#"tab8_annot",
+                              "tab9_annot","tab10_annot","tab11_annot"), 
+                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_annot", "TableS6_annot","TableS7_annot",
+                                    #"TableS8_annot",
+                                    "TableS9_annot","TableS10_annot","TableS11_annot"))
 excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
@@ -554,8 +614,8 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-save(tab0,tab3,tab4,tab5,tab6,tab7,tab8_a,tab9,tab10,file = "../tables/SupplementalTables.RData")
-save(tab3_annot,tab4_annot,tab5_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,
+save(tab0,tab3,tab4,tab5,tab6,tab7,tab9,tab10,tab11,file = "../tables/SupplementalTables.RData")
+save(tab3_annot,tab4_annot,tab5_annot,tab6_annot,tab7_annot,tab9_annot,tab10_annot,tab11_annot,
      file = "../tables/SupplementalTables_annot.RData")
 
 #' # Sessioninfo ####
