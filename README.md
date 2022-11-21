@@ -59,7 +59,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 1) **Study quality control and harmonization**: pipeline from GenStatLeipzig, not yet available on github
 2) **Meta-analyses**: pipeline from GenStatLeipzig, not yet available on github
 3) **Bioinformatic annotation**: pipeline from GenStatLeipzig, not yet available on github 
-4) **Lookup of reported variants**: pipeline from GenStatLeipzig, not yet available on github 
+4) **Lookup of reported variants**: manual evaluation of GWAS catalog data of recent publications from *Graham et al*, *Kanai et al* and *Sakaue et al*
 5) **Trans-ethnic meta-regression analysis**: done by Alexander Teumers lab (Greifswald, Germany), not yet shared
 6) **Assignment of candidate genes**: manual evaluation of all previous applied methods, no code available
 
@@ -80,7 +80,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 
 ## Supplemental Figures
 
-1) **RA-Plots** of all regions
+1) **RA-Plots** of all loci for all, male, female 
 2) **Beta-Beta-Plot** of sex interaction analysis (--> see script 02)
 3) **Beta-Beta-Plot** of HUNT replication (--> see script 09)
 4) **Forest Plots** of MR-MEGA results (--> see script 12 b)
