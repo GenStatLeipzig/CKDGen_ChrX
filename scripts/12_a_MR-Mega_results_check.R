@@ -152,78 +152,32 @@ topHitsInMrMega[, region := NULL]
 topHitsInMrMega
 write.table(topHitsInMrMega, file ="../results/12_SNPs_table1_in_MR_MEGA.txt", col.names = T, row.names = F, quote = F)
 
-#' ## Check SNPs regarding heterogeneity due to different ancestry 
-topHitsInMrMega[`P-value_ancestry_het` < 5*10^-8, ]
-plotSNP = topHitsInMrMega[`P-value_ancestry_het` < 5*10^-8, MarkerName]
 
-#' ## Generate Forest Plot of chr23:152898261:A:G
-metaDetails = fread("../temp/12_MR_Mega/meta_results/GWASMA_uric_acid_overall_2021-06-23_11-41-05.gz")
-matched = match(plotSNP, metaDetails[, markerID])
-metaDetails = metaDetails[matched, ]
-
-#get column positions of importanct columns
-posBeta = colnames(metaDetails)[which(substring(colnames(metaDetails),1,5) == "beta.")]
-posSE = colnames(metaDetails)[which(substring(colnames(metaDetails),1,3) == "se.")]
-
-#calculate mean and SE of all studies
-fp.mean = as.numeric(metaDetails[1, get("posBeta"), with = F])
-myFilt = !is.na(fp.mean)
-fp.mean = fp.mean[!is.na(fp.mean)]
-fp.se = as.numeric(metaDetails[1, get("posSE"), with = F])
-fp.se = fp.se[!is.na(fp.se)]
-fp.lower = fp.mean - fp.se
-fp.upper = fp.mean + fp.se
-
-#extract study names
-studyname = posBeta[myFilt]
-studyname = substring(studyname, 6, nchar(studyname))
-dummy = strsplit(studyname, split = "_")
-studyname = sapply(dummy, function(x) return(paste0(x[[1]], "_", x[[2]])))
-fp.labeltext = as.matrix(data.frame(study = studyname))
-
-#add result from MetaGWAS
-fp.mean = c(fp.mean, metaDetails[1, betaFEM])
-fp.lower = c(fp.lower, metaDetails[1, betaFEM] - metaDetails[1, seFEM])
-fp.upper = c(fp.upper, metaDetails[1, betaFEM] + metaDetails[1, seFEM])
-fp.labeltext = rbind(fp.labeltext, "MetaGWAS") 
-
-#forest plot
-fp.summary = c(rep(FALSE, length(fp.mean)-1), TRUE)
-
-marker = metaDetails[1, markerID]
-marker = gsub(":", "_", marker)
-
-forestplot(labeltext = fp.labeltext, mean = fp.mean, lower = fp.lower, upper = fp.upper, align = "r", is.summary = fp.summary, 
-           xlab = metaDetails[1, markerID])
-
-fn = paste0("../temp/12_MR_Mega/12_MR_MEGA_", marker, ".tiff")  
-tiff(filename = fn, width = 800, height = 1200, res = 300, compression = 'lzw')
-par(mar=c(0,0,0,0), cex.lab = 2)
-forestplot(labeltext = fp.labeltext, mean = fp.mean, lower = fp.lower, upper = fp.upper, align = "r", is.summary = fp.summary, 
-           xlab = metaDetails[1, markerID])
-dev.off()
-
-
-#' # Check for genome wide significant results of heterogeneity due to different ancestry (P-value_ancestry_het)
-MR2 = MrMegaResults[`P-value_ancestry_het` < 5*10^-8, ]
+#' # Check for genome wide significant results which are not in our trans-ethnic MetaGWAS
+MR2 = MrMegaResults[`P-value_association` < 5*10^-8, ]
 table(MR2[, setting])
 
-#annotate this SNPs with our loci and shrink to best SNP per region
+#annotate this SNPs with our loci
 loci = fread("../results/01_Locus_Definitions.txt")
-foreach(l = c(1:nrow(MR2))) %do% {
+done = foreach(l = c(1:nrow(MR2))) %do% {
   myPos = MR2[l, Position]
   mySet = MR2[l, setting]
   mySet = unlist(strsplit(mySet, "_"))[1]
   myRegion = loci[region_start < myPos & region_end > myPos & grepl(mySet, phenotype) , region]
-  if (identical(integer(0), myRegion)) { myRegion = 0}
-  MR2[l, region := myRegion]
+  if (identical(integer(0), myRegion)) { myRegion = 0.0}
+  MR2[l, region := as.numeric(myRegion)]
 }
+done = rbindlist(done)
 table(MR2[, setting], MR2[, region], dnn = c("Setting", "Region"))
-#one SNP for eGFR_MALE needs to be treated separatly
-MR2[MarkerName == "chr23:146968633:A:C", region := -1]
 
-#find SNP with lowest p value per setting and region
-MR3 = MR2 %>% group_by(setting, region) %>% tally()
+#take a look at SNPs not in our loci
+MR2[region == 0.0, ]
+
+#this SNPs needs its own locus, big distance to other SNPs of UA_ALL and without locus number of metaGWAS
+MR2[setting == "UA_ALL" & MarkerName == "chr23:99890204:T:C" , region := 0.1]
+
+#find SNP with lowest p value per setting and only in region 0 (not overlapping our loci)
+MR3 = MR2 %>% filter(region < 1) %>% group_by(setting, region) %>% tally()
 MR3 = as.data.table(MR3)
 SNPsToPlot = foreach(l = c(1:nrow(MR3))) %do% {
   mySetting = MR3[l, setting]
@@ -236,6 +190,10 @@ SNPsToPlot = foreach(l = c(1:nrow(MR3))) %do% {
 SNPsToPlot = rbindlist(SNPsToPlot)
 SNPsToPlot
 
+#add SNP from table 1 with low p-value anc_het
+SNPsToPlot = rbindlist(list(list(setting = "UA_ALL", region = "22", ID_Meta = "chr23:152898261:A:G"), SNPsToPlot))
+SNPsToPlot
+
 #' # Look at SNPsToPlot in MR-MEGA results
 done = foreach(l = c(1:nrow(SNPsToPlot))) %do% {
   x = MrMegaResults[MarkerName == SNPsToPlot[l, ID_Meta],]
@@ -243,7 +201,7 @@ done = foreach(l = c(1:nrow(SNPsToPlot))) %do% {
 }
 done = rbindlist(done)
 done
-write.table(done, file = "../results/12_MR_Mega_Hits.txt", col.names = T, row.names = F, quote = F)
+write.table(done, file = "../results/12_MR_Mega_Hits_including_SNP_from_table1.txt", col.names = T, row.names = F, quote = F)
 
 
 #' # Session Info ####
