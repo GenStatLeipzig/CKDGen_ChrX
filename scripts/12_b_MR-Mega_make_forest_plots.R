@@ -29,15 +29,13 @@ setwd(projectpath_main)
 #' ***
 #' ##  ####
 #' ## Load data object with MR-Mega hits
-SNPsToPlot = fread("../results/12_MR_Mega_Hits.txt")
+SNPsToPlot = fread("../results/12_MR_Mega_Hits_including_SNP_from_table1.txt")
 unique(SNPsToPlot[, setting])
 
 #' ## Load data of Meta-GWAS with study specific values
-eGFR_ALL = fread("../temp/12_MR_Mega/meta_results/GWASMA_eGFR_overall_2021-06-09_09-40-38.gz")
 eGFR_MALE = fread("../temp/12_MR_Mega/meta_results/GWASMA_eGFR_overall_ChrX_M_2021-12-16_12-10-52.gz")
 UA_ALL = fread("../temp/12_MR_Mega/meta_results/GWASMA_uric_acid_overall_2021-06-23_11-41-05.gz")
 UA_FEMALE = fread("../temp/12_MR_Mega/meta_results/GWASMA_uric_acid_overall_ChrX_F_2022-01-11_15-59-15.gz")
-UA_MALE = fread("../temp/12_MR_Mega/meta_results/GWASMA_uric_acid_overall_ChrX_M_2022-01-11_15-59-15.gz")
 BUN_MALE = fread("../temp/12_MR_Mega/meta_results/GWASMA_BUN_ChrX_M_2022-01-27_14-46-00.gz")
 
 #' ## Define function for Forest plots
@@ -149,10 +147,20 @@ myForestPlot = function(snp, studydata) {
 }
 
 
-#' # Generate Forest Plots
-pdf(file = "../figures/SupplementalFigure_MR_MEGA_Forest_plots.pdf", width = 8, height = 12)
+#' # Generate Forest Plot of table 1 index SNP with low pvalue anc_het
+pdf(file = "../figures/SupplementalFigure_Forest_plot_table1_indexSNP.pdf", width = 8, height = 12)
 
-foreach(r = c(1:nrow(SNPsToPlot))) %do% {
+foreach(r = 1) %do% {
+  mySNP = SNPsToPlot[r, MarkerName]
+  myData = SNPsToPlot[r, setting]
+  
+  myForestPlot(snp = mySNP, studydata = myData)
+}
+
+#' # Generate Forest Plots of MR-MEGA hits
+pdf(file = "../figures/SupplementalFigure_Forest_plots_MR_MEGA_results.pdf", width = 8, height = 12)
+
+foreach(r = c(2:nrow(SNPsToPlot))) %do% {
   mySNP = SNPsToPlot[r, MarkerName]
   myData = SNPsToPlot[r, setting]
   
