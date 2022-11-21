@@ -2,7 +2,7 @@
 
 Analyses of X-chromosomal SNPs and kidney traits
 
-**Last Updated: 07/11/2022**
+**Last Updated: 21/11/2022**
 
 Supporting code for the following draft:
 
@@ -80,11 +80,13 @@ If you want to reproduce our results, you will need to customize a source file, 
 
 ## Supplemental Figures
 
-1) RA-Plots of all regions
+1) **RA-Plots** of all regions
 2) **Beta-Beta-Plot** of sex interaction analysis (--> see script 02)
 3) **Beta-Beta-Plot** of HUNT replication (--> see script 09)
 4) Forest Plots (--> see script 12 b)
 5) Co-localization Plots of eQTL results (--> see script 07) 
+6) **Beta-Beta-Plot** of index SNPs comparing trans-ethnic metaGWAS and Europeans only metaGWAS
+7) **Box-Plot** showing chromosome X coding variants
 
 # Tables (not yet completed)
 
