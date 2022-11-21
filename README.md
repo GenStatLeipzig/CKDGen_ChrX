@@ -108,6 +108,6 @@ If you want to reproduce our results, you will need to customize a source file, 
 6) **Genome-wide significant & independent hits per region** (--> see script 05)
 7) **Annotation of credible sets** (maybe seperate in a-e for eGFR and UA in their respective settings)
 8) Co-localization with eQTLs (--> see script 07)
-9) **Replication in *HUNT* **(--> see script 09)
+9) **Replication in _HUNT_**(--> see script 09)
 10) **Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results** (--> see script 11)
 11) **Summary of MR-Mega results** (--> see scripts 12 a)
