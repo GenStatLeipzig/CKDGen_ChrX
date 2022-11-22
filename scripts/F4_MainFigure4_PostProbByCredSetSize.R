@@ -192,6 +192,7 @@ myPlot4
 # myPlot4
 # dev.off()
 
+
 myPlot5 = ggplot(plotData[CADD_scaled>=10 & N<400,], aes(x=N, y=PostProb,color=CADD_type)) + 
   # facet_wrap(~phenotype, scales = "free") +
   geom_point(data=plotData[CADD_scaled<10 & N<400,], aes(x=N, y=PostProb),col="black",size=2.5,alpha=0.5,shape = 16)+
@@ -215,9 +216,58 @@ myPlot5 = ggplot(plotData[CADD_scaled>=10 & N<400,], aes(x=N, y=PostProb,color=C
 
 myPlot5
 
+plotData2 = copy(plotData)
+plotData2 = plotData2[N<400,]
+plotData2[missense==T & CADD_scaled>10,]
+plotData2[missense==T & CADD_scaled>10,rsID := paste(rsID, c("\n(SLC25A5 - Leu332Arg)","\n(SLC25A43 - Pro334Leu)","\n(TSPAN6 - Ala322Thr)"))]
+
+myPlot6 = ggplot(
+  plotData2, 
+  aes(x = N, 
+      y = PostProb,
+      color = CADD_type,
+      size = CADD_type,
+      alpha = CADD_type,
+      shape = phenotype
+  )
+) + 
+  # facet_wrap(~phenotype, scales = "free") +
+  geom_point() +
+  # scale_fill_manual() +
+  scale_shape_manual(values = c(16, 15, 17),
+                     labels = c("eGFR ALL","eGFR MALE","UA ALL")) +
+  scale_size_manual(values = c(2.5, 3, 3)) +
+  scale_alpha_manual(values = c(0.5, 0.75, 0.75)) +
+  
+  # geom_point(data=plotData[CADD_scaled<10 & N<400,], aes(x=N, y=PostProb),col="black",size=2.5,alpha=0.5,shape = 16)+
+  # geom_point(size=3,alpha=0.75) + 
+  
+  theme_bw(base_size = 10) +
+  theme(plot.title = element_text(hjust = 0, size=22,face="bold"),
+        axis.title.x = element_text(size=12,face="bold"),
+        axis.title.y = element_text(size=12,face="bold"),
+        axis.text = element_text(size=12,face="bold"),
+        strip.text = element_text(size = 20))+
+  geom_label_repel(data = subset(plotData2, missense==T & CADD_scaled> 10 & N<400),
+                   aes(x=N, y=PostProb, label = rsID),
+                   size=4, direction = 'y',
+                   xlim = c(150,Inf), ylim = c(0.5,Inf),box.padding = 0.5, max.overlaps = Inf, 
+                   show.legend = FALSE
+  )+
+  scale_colour_manual(
+    values = c("#000000","#B2182B","#2166AC"),
+    labels = c("CAD<=10","CAD in (10,20]","CAD>20"))+
+  labs(x="Credible Set Size", 
+       y = "Posterior Probability",
+       color = "CADD Score")+
+  guides(
+    label="none",size = "none", alpha = "none", fill = "none")
+
+myPlot6
+
 tiff(filename = "../figures/MainFigure4_PostProbByCredSetSize_N400_MissenseMut.tiff", 
      width = 2500 , height = 2000, res=300, compression = 'lzw')
-myPlot5
+myPlot6
 dev.off()
 
 #' # Session Info ####
