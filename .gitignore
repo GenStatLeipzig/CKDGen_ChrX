@@ -43,6 +43,7 @@ vignettes/*.pdf
 README_intern.md
 SourceFile_aman.R
 SourceFile_forostar.R
+SourceFile_angmar.R
 SourceFile_local.R
 data/*
 helperScripts/*
