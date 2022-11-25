@@ -54,8 +54,8 @@ tab0 = data.table(Table = paste0("S",c(1:11)),
                              "../results/02_ and ../results/03_",
                              "../results/04_lookup_TopHits_matchingSettings.RData",
                              "../results/05_b_Cojo_Select_Results.txt",
-                             "../../../10_metaGWAS/PHENOTYPE/08_credSets/gwasresults_V5/synopsis/topliste_tabdelim/topliste_2022-11-04_credSets.txt",
-                             "not yet finished",
+                             "../../../10_metaGWAS/PHENOTYPE/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt",
+                             "../results/07_coloc_eQTLs.RData",
                              "../results/09_replication_HUNT.RData",
                              "../results/11_Look_Up_GWAS_hits_eGFR_UA_only.txt",
                              "../results/12_SNPs_table1_in_MR_MEGA.txt"))
@@ -330,11 +330,11 @@ tab6_annot = data.table(column = names(tab6),
 #' Pathways (KEGG, GO, DOSE and Reactome)
 #' 
 ToDoList3 = data.table(pheno = c("eGFR_ALL","eGFR_FEMALE","eGFR_MALE","UA_ALL","UA_MALE"),
-                       files = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V5/synopsis/topliste_tabdelim/topliste_2022-11-04_credSets.txt",
-                                 "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V5/synopsis/topliste_tabdelim/topliste_2022-11-04_credSets_female.txt",
-                                 ("../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V4/synopsis/topliste_tabdelim/topliste_2022-07-22_credSets_male.txt"),
-                                 ("../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V4/synopsis/topliste_tabdelim/topliste_2022-07-21_credSets.txt"),
-                                 ("../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V4/synopsis/topliste_tabdelim/topliste_2022-07-22_credSets_male.txt")))
+                       files = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt",
+                                 "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets_female.txt",
+                                 ("../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets_male.txt"),
+                                 ("../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt"),
+                                 ("../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets_male.txt")))
 
 tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
   #i=3
@@ -410,41 +410,28 @@ tab7_annot = data.table(column = names(tab7),
 #' ***
 #' Co-localization with eQTLs (--> see script 07)
 #' 
-#' Problem: no indication, which signal in the cond setting is used!!
-#' 
-#' --> fix this later!!
+#' Check if conditional data should be used as well!
 #' 
 #' 
-# tab8 = data.table(read_excel("../results/07_coloc_summary.xlsx"))
-# 
-# tab8 = copy(tab8)
-# setnames(tab8,"locus","region")
-# setnames(tab8,"trait1","GWAMA_phenotype")
-# setnames(tab8,"trait2","tissue")
-# tab8 = tab8[,c(1,3,2,4:10)]
-# tab8[,GWAMA_phenotype:=gsub(" [(]","_",GWAMA_phenotype)]
-# tab8[,GWAMA_phenotype:=gsub("[)]","",GWAMA_phenotype)]
-# tab8[,GWAMA_phenotype:=gsub("Uric Acid","UA",GWAMA_phenotype)]
-# tab8[,region :=gsub("Region ","",region )]
-# 
-# tab8[,dumID := paste(region,GWAMA_phenotype,sep="__")]
-# goodDumIDs = tab6[,paste(region,phenotype,sep="__")]
-# table(is.element(tab8$dumID,goodDumIDs))
-# tab8 = tab8[dumID %in% goodDumIDs,]
-# setorder(tab8,region,GWAMA_phenotype,gene)
-# tab8[,dumID:=NULL]
-# 
-# tab8_annot = data.table(column = names(tab8),
-#                         description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
-#                                         "Analyzed phenotype and setting",
-#                                         "Analyzed gene expression of GTEx of NEPTUNE",
-#                                         "Analyzed tissue for gene expression",
-#                                         "Number of SNPs included in co-localization analysis per region",
-#                                         "Posterior probability for hypothesis 0: neither trait associated",
-#                                         "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
-#                                         "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
-#                                         "Posterior probability for hypothesis 3: both trait associated, but different signals",
-#                                         "Posterior probability for hypothesis 4: both trait associated, shared signal"))
+load("../results/07_coloc_eQTLs.RData")
+tab8 = copy(ColocTable)
+
+names(tab8)
+setnames(tab8,"trait1","GWAMA_phenotype")
+setnames(tab8,"trait2","tissue")
+
+tab8_annot = data.table(column = names(tab8),
+                        description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                                        "Genomic cytoband of gene",
+                                        "Analyzed phenotype and setting",
+                                        "Analyzed gene expression of GTEx or NEPTUNE",
+                                        "Analyzed tissue for gene expression",
+                                        "Number of SNPs included in co-localization analysis per region",
+                                        "Posterior probability for hypothesis 0: neither trait associated",
+                                        "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
+                                        "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
+                                        "Posterior probability for hypothesis 3: both trait associated, but different signals",
+                                        "Posterior probability for hypothesis 4: both trait associated, shared signal"))
 
 #' # Get Sup Tabs 9 ###
 #' ***
@@ -588,10 +575,10 @@ tab11_annot = data.table(column = names(tab11),
 #' # Save tables ###
 #' ***
 tosave4 = data.table(data = c("tab0",#"tab1","tab2", 
-                              "tab3", "tab4","tab5","tab6","tab7",#"tab8_a",
+                              "tab3", "tab4","tab5","tab6","tab7","tab8",
                               "tab9","tab10","tab11"), 
                      SheetNames = c("Content",#"TableS1","TableS2", 
-                                    "TableS3", "TableS4","TableS5", "TableS6","TableS7",#"TableS8a",
+                                    "TableS3", "TableS4","TableS5", "TableS6","TableS7","TableS8",
                                     "TableS9","TableS10","TableS11"))
 excel_fn = "../tables/SupplementalTables.xlsx"
 WriteXLS(tosave4$data, 
@@ -601,11 +588,10 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_annot","tab6_annot","tab7_annot",#"tab8_annot",
+tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_annot","tab6_annot","tab7_annot","tab8_annot",
                               "tab9_annot","tab10_annot","tab11_annot"), 
                      SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_annot", "TableS6_annot","TableS7_annot",
-                                    #"TableS8_annot",
-                                    "TableS9_annot","TableS10_annot","TableS11_annot"))
+                                    "TableS8_annot", "TableS9_annot","TableS10_annot","TableS11_annot"))
 excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
