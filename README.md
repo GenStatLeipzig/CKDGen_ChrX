@@ -2,7 +2,7 @@
 
 Analyses of X-chromosomal SNPs and kidney traits
 
-**Last Updated: 21/11/2022**
+**Last Updated: 25/11/2022**
 
 Supporting code for the following draft:
 
@@ -24,9 +24,9 @@ If you want to reproduce our results, you will need to customize a source file, 
 * path to [PLINK2](https://www.cog-genomics.org/plink/2.0/)
 * path to [GCTA](https://yanglab.westlake.edu.cn/software/gcta/#Overview)
 * path to [GTEx v8 data](https://gtexportal.org/home/protectedDataAccess)
-* path to NEPTUNE eQTL data
-* path to HUNT data
-* path to UKBB data
+* path to [NEPTUNE](https://nephqtl.org/)
+* path to [HUNT](https://www.ntnu.edu/hunt) data
+* path to [UKBB](https://www.ukbiobank.ac.uk/) data
 
 # Statistical Analyses included
 
@@ -40,7 +40,10 @@ If you want to reproduce our results, you will need to customize a source file, 
     * COJO conditional: Estimation of association statistics conditional to previously selected variants (in case of multiple independent variants at a locus) 
     * LD estimation: LD between independent variants per locus using *PLINK2*
 6) **Credible set analyses**: Calculation of Approximate Bayes Factors using (conditional) effect estimates and standard errors
-7) **Co-localization analyses with eQTLs**: test of the (conditinal) associations for shared causal signal with gene-expression of nearby genes using *GTEx v8* and *NEPTUNE* data
+7) **Co-localization analyses with eQTLs**: test of the associations for shared causal signal with gene-expression of nearby genes using *GTEx v8* and *NEPTUNE* data
+    * Extraction of eQTL data of nearby genes in 51 tissues 
+    * Colocalization analyses per phenotype, tissue and gene
+    * Checks and plots
 8) **Analysis of overlap of eGFR and UA signals**:
     * LD estimation: LD between eGFR and UA index SNPs using *PLINK2*
     * Co-localization analyses of eGFR and UA:  test of the associations of eGFR and UA for shared causal signal 
@@ -107,7 +110,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 5) **Cross-phenotype comparision** (--> see script 04)
 6) **Genome-wide significant & independent hits per region** (--> see script 05)
 7) **Annotation of credible sets** (maybe seperate in a-e for eGFR and UA in their respective settings)
-8) Co-localization with eQTLs (--> see script 07)
+8) **Co-localization with eQTLs** (--> see script 07)
 9) **Replication in _HUNT_** (--> see script 09)
 10) **Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results** (--> see script 11)
 11) **Summary of MR-Mega results** (--> see scripts 12 a)
