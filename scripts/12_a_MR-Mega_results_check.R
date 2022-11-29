@@ -154,7 +154,8 @@ write.table(topHitsInMrMega, file ="../results/12_SNPs_table1_in_MR_MEGA.txt", c
 
 
 #' # Check for genome wide significant results which are not in our trans-ethnic MetaGWAS
-MR2 = MrMegaResults[`P-value_association` < 5*10^-8, ]
+#' We decided to report only SNPs of the combined analysis (ALL). 
+MR2 = MrMegaResults[`P-value_association` < 5*10^-8 & is.element(setting, c("eGFR_ALL", "UA_ALL", "BUN_ALL", "UACR_ALL")), ]
 table(MR2[, setting])
 
 #annotate this SNPs with our loci
