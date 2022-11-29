@@ -50,7 +50,7 @@ dummy = strsplit(data_CKDGen_indep[, rsID], split = ":")
 dummy = as.data.table(dummy)
 dummy = t(dummy)
 data_CKDGen_indep[, ourSNPs := paste0("chr23:", dummy[, 2], ":", dummy[, 3], ":", dummy[, 4])]
-data_CKDGen_indep = data_CKDGen_indep[grepl("eGFR",phenotype),]
+data_CKDGen_indep = data_CKDGen_indep[grepl("eGFR_a",phenotype),]
 setorder(data_CKDGen_indep,p)
 data_CKDGen_indep = data_CKDGen_indep[!duplicated(rsID),]
 setorder(data_CKDGen_indep,region)
@@ -168,7 +168,7 @@ data_Merge3[,table(pval_HUNT<0.05,pval_HUNT_oneSided<0.05)]
 data_Merge3[pval_HUNT_oneSided<0.05,]
 data_Merge3[pval_HUNT_oneSided<0.05 & sign(beta_HUNT)==sign(beta_CKDGen),]
 
-#' Using the one-sided p-value, we can replicate 15 of 22 SNPs in HUNT. All SNPs have the same effect direction in CKDGen and HUNT. 
+#' Using the one-sided p-value, we can replicate 11 of 15 SNPs in HUNT. All SNPs have the same effect direction in CKDGen and HUNT. 
 #' 
 data_Merge3[pval_HUNT_oneSided<0.05 & sign(beta_HUNT)==sign(beta_CKDGen),replicated := T]
 data_Merge3[pval_HUNT_oneSided>0.05 ,replicated := F]
@@ -263,10 +263,10 @@ myPlot4
 #' ***
 #' ## Save plot ####
 
-tiff(filename = "../figures/SupplementalFigure_BetaBeta_ReplicationHunt_indexSNPs_eGFR_ALL.tiff", 
-     width = 1800, height = 1350, res=250, compression = 'lzw')
-myPlot2
-dev.off()
+# tiff(filename = "../figures/SupplementalFigure_BetaBeta_ReplicationHunt_indexSNPs_eGFR_ALL.tiff", 
+#      width = 1800, height = 1350, res=250, compression = 'lzw')
+# myPlot2
+# dev.off()
 
 tiff(filename = "../figures/SupplementalFigure_BetaBeta_ReplicationHunt_indepSNPs_eGFR.tiff", 
      width = 1800, height = 1350, res=250, compression = 'lzw')
@@ -285,9 +285,12 @@ data_Merge3[, CIlower_HUNT := round(beta_HUNT-c_HUNT*SE_HUNT, digits = 6)]
 data_Merge3[, CIupper_HUNT := round(beta_HUNT+c_HUNT*SE_HUNT, digits = 6)]
 data_Merge3[beta_CKDGen>0,CIupper_HUNT:=Inf]
 data_Merge3[beta_CKDGen<0,CIlower_HUNT:=-Inf]
+data_Merge3[, ts_power := abs(beta_CKDGen/SE_CKDGen*sqrt(NSamples_HUNT/NSamples_CKDGen))]
+data_Merge3[, power := 1-pnorm(c_HUNT,mean=ts_power)]
+data_Merge3[, ts_power := NULL]
 
 result = copy(data_Merge3)
-myNames = names(result)[c(2:6,21,1,12,7:9,11,22,23,18,13:15,20,24,25)]
+myNames = names(result)[c(2:6,21,1,12,7:9,11,22,23,18,13:15,20,24,25,26)]
 colsOut<-setdiff(colnames(result),myNames)
 result[,get("colsOut"):=NULL]
 setcolorder(result,myNames)
@@ -314,7 +317,8 @@ data.description = data.table(column = names(result),
                                               "standard error in HUNT study",
                                               "-log10 transformed one-sided p-value in HUNT study",
                                               "lower bound of the one-sided 95% confidence interval in HUNT study",
-                                              "upper bound of the one-sided 95% confidence interval in HUNT study"))
+                                              "upper bound of the one-sided 95% confidence interval in HUNT study",
+                                              "power for replication, given the CKDGen statistics and the square-root of HUNT and CKDGen sample size ratio"))
 
 WriteXLS(x = c("result","data.description"), 
          ExcelFileName = "../results/09_replication_HUNT.xlsx",
