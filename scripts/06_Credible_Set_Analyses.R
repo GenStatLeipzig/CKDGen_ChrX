@@ -122,9 +122,6 @@ uncond = rbindlist(uncond)
 
 #' # Prepare input data and calculate credible set (conditional statistics) ####
 #' ***
-step25 = fread("../results/05_b_step25_Matching_Table_UKBB.txt.gz") 
-step25[, SNPinRef := pmax(SNPinRef.x, SNPinRef.y, na.rm = T)]
-
 cond = foreach(s = toDo[useCondStats == TRUE, SNP]) %do% {
   #get variables needed for data preparation
   line = which(toDo[, SNP] == s)
@@ -136,17 +133,17 @@ cond = foreach(s = toDo[useCondStats == TRUE, SNP]) %do% {
   myRegion = toDo[line, region]
   setting = toDo[line, setting]
   
-  #load data onf conditional statistics
+  #load data of conditional statistics
   inFile = paste0("../temp/05_c_Cojo_cond_results/CojoCond_",pheno, "_Region_", myRegion, "_",gsub(":", "_", s),".cma.cojo")
   locusData = fread(inFile)
   setnames(locusData, c("bC", "bC_se"), c("beta", "beta_se"))
   colsOut = setdiff(colnames(locusData), neededCol)
   locusData[, get("colsOut") := NULL]
   
-  #change SNP IDs to match out IDs
-  matched = match(locusData[, SNP], step25[, UKBB.ID])
-  locusData[, SNPinRef := step25[matched, SNPinRef]]
-  locusData[!is.na(SNPinRef), SNP := SNPinRef]
+  #change SNP ID from UKBB to match IDs of reference or pipeline objects
+  dat = get(pheno)
+  matched = match(locusData[, SNP], dat[, ID_UKBB])
+  locusData[, SNP := dat[matched, rsID]]
   
   snp = toDo[line, rsID]
   result = CredibleSetFunction(locusData, paste0(setting, "_", gsub(":", "_", snp)))
