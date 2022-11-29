@@ -49,6 +49,12 @@ phenotypes2keep = c("Creatinine levels", "Estimated glomerular filtration rate",
 knownGWAS = knownGWAS[is.element(`DISEASE/TRAIT`, phenotypes2keep), ]
 table(knownGWAS[, `DISEASE/TRAIT`])
 
+#How many entries are there?
+dim(knownGWAS)
+
+#How many unique SNPs are there?
+length(unique(knownGWAS[, SNPS]))
+
 
 #' # Load Meta-GWAS results of all phenotypes and sex combined (ALL) setting
 #adding rsID only for matching
@@ -79,6 +85,22 @@ UACR[, shortID := shortID]
 MA = fread("../data/CKDGen_ChrX_sumStat_MA_ALL.gz")
 shortID = sapply(MA[, rsID], function(x) return(unlist(strsplit(x, split = ":"))[1]))
 MA[, shortID := shortID]
+
+#calculate one-sided p-values for replication check
+eGFR[, P := pnorm(-abs(beta/SE))]
+eGFR[, logP := -log10(P)]
+CKD[, P := pnorm(-abs(beta/SE))]
+CKD[, logP := -log10(P)]
+BUN[, P := pnorm(-abs(beta/SE))]
+BUN[, logP := -log10(P)]
+UA[, P := pnorm(-abs(beta/SE))]
+UA[, logP := -log10(P)]
+Gout[, P := pnorm(-abs(beta/SE))]
+Gout[, logP := -log10(P)]
+UACR[, P := pnorm(-abs(beta/SE))]
+UACR[, logP := -log10(P)]
+MA[, P := pnorm(-abs(beta/SE))]
+MA[, logP := -log10(P)]
 
 
 #' # Look up of known GWAS hits in our results
@@ -165,7 +187,7 @@ knownGWAS[, RISK_ALLELE := sapply(dummy, function(x) return(x[[2]]))]
 knownGWAS[, same_allele_eGFR := RISK_ALLELE == eGFR.effect_allele]
 knownGWAS[, same_allele_BUN := RISK_ALLELE == BUN.effect_allele]
 knownGWAS[, same_allele_UA := RISK_ALLELE == UA.effect_allele]
-#-> no allele given where check ist false
+#-> no allele given where check is false
 
 #do check by hand
 knownGWAS[, SNP_replicated := NA]
@@ -197,8 +219,8 @@ knownGWAS[13, `OR or BETA` := "0.011 unit increase"]
 #BUN, same allele, p < 0.05, 0.013 unit increase -> same beta direction -> replicated
 knownGWAS[14, SNP_replicated := 1]
 knownGWAS[14, `OR or BETA` := "0.013 unit increase"]
-#UA, same allele, p > 0.05, 0.0184248 unit decrease -> same beta direction -> not replicated
-knownGWAS[15, SNP_replicated := 0]
+#UA, same allele, p < 0.05, 0.0184248 unit decrease -> same beta direction -> replicated
+knownGWAS[15, SNP_replicated := 1]
 knownGWAS[15, `OR or BETA` := "0.0184248 unit decrease"]
 #creatinine, same allele, p < 0.05, 0.0157643 unit decrease -> different beta direction -> replicated with eGFR
 knownGWAS[16, SNP_replicated := 1]
@@ -278,22 +300,6 @@ table(knownGWAS[, SNP_replicated], useNA = "ifany")
 knownGWAS[, c("same_allele_eGFR", "same_allele_BUN", "same_allele_UA", "RISK_ALLELE") := NULL]
 
 write.table(knownGWAS, file = "../results/11_Look_Up_GWAS_hits_eGFR_BUN_UA_only.txt", col.names = T, row.names = F, sep = "|")
-
-#input for annotation pipeline
-step25 = fread("../results/05_b_step25_Matching_Table_UKBB.txt.gz")
-
-cols2keep = c("STUDY", "DISEASE/TRAIT", "INITIAL SAMPLE SIZE", "STRONGEST SNP-RISK ALLELE", "SNPS", "CHR_ID", "CHR_POS", "RISK ALLELE FREQUENCY", "P-VALUE")
-colsOut = setdiff(colnames(knownGWAS), cols2keep)
-knownGWAS[, get("colsOut") := NULL]
-matched = match(knownGWAS[, SNPS], step25[, UKBB.ID])
-knownGWAS[, snp := step25[matched, SNPinRef.x]]
-knownGWAS[, position := CHR_POS]
-knownGWAS[, chr := 23]
-knownGWAS[, CHR_ID := NULL]
-knownGWAS[, CHR_POS := NULL]
-setcolorder(knownGWAS, c("snp", "chr", "position", "STUDY", "DISEASE/TRAIT", "INITIAL SAMPLE SIZE", "STRONGEST SNP-RISK ALLELE", "SNPS", 
-                         "RISK ALLELE FREQUENCY", "P-VALUE"))
-write.table(knownGWAS, file = "../../../10_metaGWAS/_results_combined/Lookup_GWAS_Hits/SNPs_to_annotate_v3.txt", col.names = T, row.names = F)
 
 
 #' # Session Info ####
