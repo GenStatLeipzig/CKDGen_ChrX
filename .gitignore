@@ -57,3 +57,5 @@ tables/*.RData
 scripts/_files4RegionAssocPlots/*
 figures/_archive/*
 tables/_archive/*
+tables/*_comments.xlsx
+
