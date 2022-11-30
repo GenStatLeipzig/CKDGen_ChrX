@@ -71,17 +71,16 @@ tab6[grepl("rs111410539:",rsID),leadSNP := "rs181497961:106168067:G:A"]
 #' ## Step 1.2: get annotation data ####
 #' 
 ToDoList3 = data.table(pheno = c("eGFR_ALL","eGFR_FEMALE","eGFR_MALE","UA_ALL","UA_MALE"),
-                       genelist = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_female.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_male.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_male.txt"),
-                       eQTLlist = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_female.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_male.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_male.txt"))
-
+                       genelist = c(paste0(path_CS_eGFR_ALL,"proximate_genes_2022-11-29_credSets.txt"),
+                                    paste0(path_CS_eGFR_FEMALE,"proximate_genes_2022-11-29_credSets_female.txt"),
+                                    paste0(path_CS_eGFR_MALE,"proximate_genes_2022-11-29_credSets_male.txt"),
+                                    paste0(path_CS_UA_ALL,"proximate_genes_2022-11-29_credSets.txt"),
+                                    paste0(path_CS_UA_MALE,"proximate_genes_2022-11-29_credSets_male.txt")),
+                       eQTLlist = c(paste0(path_CS_eGFR_ALL,"eqtlinfo_2022-11-29_credSets.txt"),
+                                    paste0(path_CS_eGFR_FEMALE,"eqtlinfo_2022-11-29_credSets_female.txt"),
+                                    paste0(path_CS_eGFR_MALE,"eqtlinfo_2022-11-29_credSets_male.txt"),
+                                    paste0(path_CS_UA_ALL,"eqtlinfo_2022-11-29_credSets.txt"),
+                                    paste0(path_CS_UA_MALE,"eqtlinfo_2022-11-29_credSets_male.txt")))
 
 tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
   #i=1
@@ -136,7 +135,6 @@ tab7[genes == "TMEM35", genes:="TMEM35A"]
 tab7[genes == "RGAG4", genes:="RTL5"]
 tab7[genes == "FAM122C", genes:="PABIR3"]
 tab7[genes == "BHLHB9", genes:="GPRASP3"]
-tab7[genes == "FAM122B", genes:=" PABIR2"]
 
 candidateGenes = unique(tab7$genes)
 candidateGenes = candidateGenes[candidateGenes!=""]
@@ -370,6 +368,7 @@ table(mySums == 0)
 myGenTab = myGenTab[mySums != 0,]
 
 save(myGenTab,file="../results/07_a_usedGenes.RData")
+save(tab7,file = "../temp/07_allGenes.RData")
 
 #' # Sessioninfo ####
 #' ***

@@ -55,108 +55,8 @@ wait4finishedOutfile(outfile_fn = "07_a_coloc_get_eQTL_data.R.out",
 
 #' # Prep data ####
 #' ***
-load("../results/_archive/07_usedGenes.RData")
-
-tab6 = fread("../results/05_b_Cojo_Select_Results.txt")
-tab6[,phenotype := gsub("_all","_ALL",phenotype)]
-tab6[,phenotype := gsub("_male","_MALE",phenotype)]
-tab6[,phenotype := gsub("_female","_FEMALE",phenotype)]
-
-tab6[,leadSNP := rsID]
-tab6[grepl("rs111884516:",rsID),leadSNP := "rs4328011:152898261:G:A"]
-tab6[grepl("rs7056552:",rsID),leadSNP := "rs202138804:133799101:AGT:A"]
-tab6[grepl("rs111410539:",rsID),leadSNP := "rs181497961:106168067:G:A"]
-
-ToDoList3 = data.table(pheno = c("eGFR_ALL","eGFR_FEMALE","eGFR_MALE","UA_ALL","UA_MALE"),
-                       genelist = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_female.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_male.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_male.txt"),
-                       eQTLlist = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_female.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_male.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_male.txt"))
-
-
-tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
-  #i=1
-  myRow = ToDoList3[i,]
-  
-  genes = fread(myRow$genelist)
-  eQTLs = fread(myRow$eQTLlist)
-  
-  check = copy(tab6)
-  check = check[phenotype == myRow$pheno,]
-  
-  genes = genes[markername %in% check$rsID,]
-  genes[,dumID := paste(genename,markername,sep="__")]
-  genes = genes[!duplicated(dumID),]
-  
-  eQTLs = eQTLs[snps %in% check$rsID,]
-  eQTLs = eQTLs[cistrans == "cis",]
-  eQTLs = eQTLs[!is.na(genesymbol) & genesymbol != "",]
-  eQTLs[,dumID := paste(genesymbol,snps,sep="__")]
-  eQTLs = eQTLs[!duplicated(dumID),]
-  
-  res = data.table(phenotype = myRow$pheno,
-                   markername = c(eQTLs$snps,genes$markername),
-                   genes = c(eQTLs$genesymbol,genes$genename),
-                   source = c(rep("eQTL",dim(eQTLs)[1]),rep("proxGene",dim(genes)[1])))
-  matched = match(res$markername,check$rsID)
-  res[,region:=check[matched,region]]
-  res[,leadSNP:=check[matched,leadSNP]]
-  res[,dumID := paste(genes,markername, sep="__")]
-  table(duplicated(res$dumID))
-  dups = res[duplicated(dumID),dumID]
-  res[dumID %in% dups,source := "eQTL and proxGene"]
-  res = res[!duplicated(dumID),]
-  res
-}
-tab7 = rbindlist(tab7)
-table(tab7$phenotype)
-tab7[markername!=leadSNP,table(region)]
-
-tab7[genes == "NGFRAP1", genes:="Z92846.1"]
-tab7[genes == "WBP5", genes:="TCEAL9"]
-tab7[genes == "FAM127A", genes:="TMEM35A"]
-tab7[genes == "FAM58A", genes:="CCNQ"]
-tab7[genes == "KAL1", genes:="ANOS1"]
-tab7[genes == "FAM46D", genes:="TENT5D"]
-tab7[genes == "CXorf57", genes:="RADX"]
-tab7[genes == "KCNE1L", genes:="KCNE5"]
-tab7[genes == "SEPT6", genes:="SEPTIN6"]
-tab7[genes == "TMEM35", genes:="TMEM35A"]
-tab7[genes == "RGAG4", genes:="RTL5"]
-tab7[genes == "FAM122C", genes:="PABIR3"]
-tab7[genes == "BHLHB9", genes:="GPRASP3"]
-tab7[genes == "FAM122B", genes:=" PABIR2"]
-
-candidateGenes = unique(tab7$genes)
-candidateGenes = candidateGenes[candidateGenes!=""]
-myGenTab<-data.table(genename=candidateGenes)
-
-genes38 = fread("../temp/07_HGNC_Download_221124.txt")
-table(is.element(myGenTab$genename, genes38$symbol))
-myGenTab[!is.element(genename,genes38$symbol),]
-myGenTab = myGenTab[is.element(genename,genes38$symbol),]
-m1 <- match(myGenTab$gene, genes38$symbol)
-genes38 = genes38[m1,]
-
-myGenTab[, `:=`(
-  ensg = genes38[, ensembl_gene_id],
-  entrez = genes38[, entrez_id],
-  hgnc = genes38[, hgnc_id],
-  description = genes38[, name],
-  type = genes38[,locus_group],
-  cytoband = genes38[,location_sortable ]
-)]
-myGenTab
-
-table(is.na(myGenTab$ensg))
-table(is.na(myGenTab$entrez))
-setorder(myGenTab,cytoband)
+load("../results/07_a_usedGenes.RData")
+load("../temp/07_allGenes.RData")
 
 #' # Run Coloc ####
 #' ***
@@ -177,8 +77,7 @@ ToDoList[,UA :=F]
 ToDoList[filt2,UA :=T]
 table(ToDoList$UA,ToDoList$eGFR)
 
-myPhenos = unique(tab6$phenotype)
-myPhenos = c(myPhenos,"UA_FEMALE")
+myPhenos = c("eGFR_ALL","eGFR_MALE","eGFR_FEMALE","UA_ALL","UA_MALE","UA_FEMALE")
 
 registerDoMC(cores=20)
 
@@ -326,7 +225,7 @@ description = data.table(column = names(ColocTable),
 
 
 
-save(ColocTable, description,file="../results/07_coloc_eQTLs.RData")
+save(ColocTable, description,file="../results/07_b_coloc_eQTLs.RData")
 tosave4 = data.table(data = c("ColocTable", "description"), 
                      SheetNames = c("ColocTable", "Description"))
 excel_fn = "../results/07_b_coloc_eQTLs.xlsx"
