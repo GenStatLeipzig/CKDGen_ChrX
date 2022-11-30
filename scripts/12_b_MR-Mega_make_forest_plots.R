@@ -32,8 +32,12 @@ setwd(projectpath_main)
 SNPsToPlot = fread("../results/12_MR_Mega_Hits_including_SNP_from_table1.txt")
 unique(SNPsToPlot[, setting])
 
+#add rsID for SNPs
+UA = fread("../data/CKDGen_ChrX_sumStat_UA_ALL.gz")
+matched = match(SNPsToPlot[, MarkerName], UA[, ID_Meta])
+SNPsToPlot[, rsID := UA[matched, rsID]]
+
 #' ## Load data of Meta-GWAS with study specific values
-eGFR_MALE = fread("../temp/12_MR_Mega/meta_results/GWASMA_eGFR_overall_ChrX_M_2021-12-16_12-10-52.gz")
 UA_ALL = fread("../temp/12_MR_Mega/meta_results/GWASMA_uric_acid_overall_2021-06-23_11-41-05.gz")
 
 #' ## Define function for Forest plots
@@ -45,6 +49,7 @@ myForestPlot = function(snp, studydata) {
   
   #find row of SNP
   rowNR = which(studydata[, markerID] == snp)
+  snp_rsID = SNPsToPlot[MarkerName == snp, rsID]
   
   #find columns with beta, SE or samplesize values
   posBeta = colnames(studydata)[which(substring(colnames(studydata),1,5) == "beta.")]
@@ -88,7 +93,7 @@ myForestPlot = function(snp, studydata) {
   fp.eth = c(fp.eth, "Mixed")
   
   #build object for plotting
-  plotData = data.frame(DV = paste0(setting, " - ", snp), study = fp.labeltext, beta = fp.mean, lower = fp.lower, upper = fp.upper, 
+  plotData = data.frame(DV = paste0(snp_rsID, " - Uric acid (ALL)"), study = fp.labeltext, beta = fp.mean, lower = fp.lower, upper = fp.upper, 
                         N = fp.N, ethnicity = fp.eth)
   
   #set order of rows in plot data object
@@ -123,7 +128,7 @@ myForestPlot = function(snp, studydata) {
     facet_wrap(~DV) + # Makes DV header (Can handle multiple DVs)
     coord_flip() + # flip coordinates (puts labels on y axis)
     geom_point(shape = myShape, size = mySize, colour = myCol) + # specifies the size and shape of the geompoint
-    ggtitle("") + # Blank Title for the Graph
+    ggtitle("Forest plot") + # Blank Title for the Graph
     xlab("") + # Label on the Y axis (flipped specification do to coord_flip)
     ylab("Beta") + # Label on the X axis (flipped specification do to coord_flip)
     scale_y_continuous(limits = c(myMin, myMax))  + # limits and tic marks on X axis (flipped specification do to coord_flip)
@@ -146,7 +151,7 @@ myForestPlot = function(snp, studydata) {
 
 
 #' # Generate Forest Plot of table 1 index SNP with low pvalue anc_het
-pdf(file = "../figures/SupplementalFigure_Forest_plot_locus22_indexSNP.pdf", width = 8, height = 12)
+pdf(file = "../figures/SupplementalFigure_Forest_plot_locus22_indexSNP.pdf", width = 10, height = 12)
 
 foreach(r = 1) %do% {
   mySNP = SNPsToPlot[r, MarkerName]
@@ -156,7 +161,7 @@ foreach(r = 1) %do% {
 }
 
 #' # Generate Forest Plots of MR-MEGA hits
-pdf(file = "../figures/SupplementalFigure_Forest_plots_MR_MEGA_results.pdf", width = 8, height = 12)
+pdf(file = "../figures/SupplementalFigure_Forest_plots_MR_MEGA_results.pdf", width = 10, height = 12)
 
 foreach(r = c(2:nrow(SNPsToPlot))) %do% {
   mySNP = SNPsToPlot[r, MarkerName]
