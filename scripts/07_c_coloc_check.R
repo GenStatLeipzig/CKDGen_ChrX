@@ -44,10 +44,12 @@ time0 = Sys.time()
 source("../SourceFile_forostar.R")
 
 setwd(paste0(projectpath,"scripts/"))
+source("../helperFunctions/colocPlot.R")
 
 #' # Load data ####
 #' ***
-load("../results/07_coloc_eQTLs.RData")
+load("../temp/07_allGenes.RData")
+load("../results/07_b_coloc_eQTLs.RData")
 coloc = copy(ColocTable)
 
 tab6 = fread("../results/05_b_Cojo_Select_Results.txt")
@@ -59,97 +61,6 @@ tab6[,leadSNP := rsID]
 tab6[grepl("rs111884516:",rsID),leadSNP := "rs4328011:152898261:G:A"]
 tab6[grepl("rs7056552:",rsID),leadSNP := "rs202138804:133799101:AGT:A"]
 tab6[grepl("rs111410539:",rsID),leadSNP := "rs181497961:106168067:G:A"]
-
-ToDoList3 = data.table(pheno = c("eGFR_ALL","eGFR_FEMALE","eGFR_MALE","UA_ALL","UA_MALE"),
-                       genelist = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_female.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_male.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/proximate_genes_2022-11-24_credSets_male.txt"),
-                       eQTLlist = c("../../../10_metaGWAS/01_eGFR_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_female_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_female.txt",
-                                    "../../../10_metaGWAS/01_eGFR_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_male.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_combined/08_credSets/gwasresults_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets.txt",
-                                    "../../../10_metaGWAS/03_uric_acid_allEth_sex_stratified/08_credSets/gwasresults_male_V6/synopsis/topliste_tabdelim/eqtlinfo_2022-11-24_credSets_male.txt"))
-
-
-tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
-  #i=1
-  myRow = ToDoList3[i,]
-  
-  genes = fread(myRow$genelist)
-  eQTLs = fread(myRow$eQTLlist)
-  
-  check = copy(tab6)
-  check = check[phenotype == myRow$pheno,]
-  
-  genes = genes[markername %in% check$rsID,]
-  genes[,dumID := paste(genename,markername,sep="__")]
-  genes = genes[!duplicated(dumID),]
-  
-  eQTLs = eQTLs[snps %in% check$rsID,]
-  eQTLs = eQTLs[cistrans == "cis",]
-  eQTLs = eQTLs[!is.na(genesymbol) & genesymbol != "",]
-  eQTLs[,dumID := paste(genesymbol,snps,sep="__")]
-  eQTLs = eQTLs[!duplicated(dumID),]
-  
-  res = data.table(phenotype = myRow$pheno,
-                   markername = c(eQTLs$snps,genes$markername),
-                   genes = c(eQTLs$genesymbol,genes$genename),
-                   source = c(rep("eQTL",dim(eQTLs)[1]),rep("proxGene",dim(genes)[1])))
-  matched = match(res$markername,check$rsID)
-  res[,region:=check[matched,region]]
-  res[,leadSNP:=check[matched,leadSNP]]
-  res[,dumID := paste(genes,markername, sep="__")]
-  table(duplicated(res$dumID))
-  dups = res[duplicated(dumID),dumID]
-  res[dumID %in% dups,source := "eQTL and proxGene"]
-  res = res[!duplicated(dumID),]
-  res
-}
-tab7 = rbindlist(tab7)
-table(tab7$phenotype)
-tab7[markername!=leadSNP,table(region)]
-
-tab7[genes == "NGFRAP1", genes:="Z92846.1"]
-tab7[genes == "WBP5", genes:="TCEAL9"]
-tab7[genes == "FAM127A", genes:="TMEM35A"]
-tab7[genes == "FAM58A", genes:="CCNQ"]
-tab7[genes == "KAL1", genes:="ANOS1"]
-tab7[genes == "FAM46D", genes:="TENT5D"]
-tab7[genes == "CXorf57", genes:="RADX"]
-tab7[genes == "KCNE1L", genes:="KCNE5"]
-tab7[genes == "SEPT6", genes:="SEPTIN6"]
-tab7[genes == "TMEM35", genes:="TMEM35A"]
-tab7[genes == "RGAG4", genes:="RTL5"]
-tab7[genes == "FAM122C", genes:="PABIR3"]
-tab7[genes == "BHLHB9", genes:="GPRASP3"]
-tab7[genes == "FAM122B", genes:=" PABIR2"]
-
-candidateGenes = unique(tab7$genes)
-candidateGenes = candidateGenes[candidateGenes!=""]
-myGenTab<-data.table(genename=candidateGenes)
-
-genes38 = fread("../temp/07_HGNC_Download_221124.txt")
-table(is.element(myGenTab$genename, genes38$symbol))
-myGenTab[!is.element(genename,genes38$symbol),]
-myGenTab = myGenTab[is.element(genename,genes38$symbol),]
-m1 <- match(myGenTab$gene, genes38$symbol)
-genes38 = genes38[m1,]
-
-myGenTab[, `:=`(
-  ensg = genes38[, ensembl_gene_id],
-  entrez = genes38[, entrez_id],
-  hgnc = genes38[, hgnc_id],
-  description = genes38[, name],
-  type = genes38[,locus_group],
-  cytoband = genes38[,location_sortable ]
-)]
-myGenTab
-
-table(is.na(myGenTab$ensg))
-table(is.na(myGenTab$entrez))
-setorder(myGenTab,cytoband)
 
 #' # Check data ####
 #' ***
@@ -344,8 +255,104 @@ res2
 #' 
 #' # Plot ####
 #' *** 
-#' To be discussed...
+#' We want to plot the 7 interesting genes in the three relevant tissues for ALL, MALE, FEMALE
 #' 
+#' * rows: tissue_genes
+#' * columns: phenotype_setting
+#' 
+#' --> create a matrix with 10x9 entries!
+#' 
+plotData1 = copy(ColocTable)
+plotData1 = plotData1[gene %in% candidates,]
+plotData1 = plotData1[grepl("Kidney_Cortex_Tubulointerstitial",trait2) | 
+                        grepl("Muscle_Skeletal",trait2) | 
+                        grepl("Whole_Blood",trait2),]
+
+plotData1[,phenotype := gsub("_.*","",trait1)]
+plotData1[,setting := gsub(".*_","",trait1)]
+
+plotData1[,dumID1 := paste(gene,trait2,sep="_")]
+plotData1[,dumID2 := paste(trait1,sep="_")]
+plotData1[,dumID1 := gsub("GE in ","",dumID1)]
+plotData1[,dumID1 := gsub(" ","",dumID1)]
+
+plotData2<-dcast(plotData1,
+               formula = dumID1 ~ dumID2,
+               value.var = c("PP.H4.abf"),
+               sep = "_")
+names(plotData2)
+M4<-as.matrix(plotData2[,-1])
+
+plotData3<-dcast(plotData1,
+                 formula = dumID1 ~ dumID2,
+                 value.var = c("PP.H3.abf"),
+                 sep = "_")
+names(plotData3)
+M3<-as.matrix(plotData3[,-1])
+
+x1 = dim(M4)[1]
+x2 = dim(M4)[2]
+
+M<-matrix(0,x1,x2)
+for (i in 1:x1){
+  for (j in 1:x2){
+    m4<-M4[i,j]
+    m3<-M3[i,j]
+    
+    if(is.na(m3)==T){
+      M[i,j] = 0
+    }else if(m4>m3){
+      M[i,j]<-m4
+    }else{
+      M[i,j]<- -m3
+    }
+  }
+}
+rownames(M)<-plotData3$dumID1
+colnames(M)<-names(plotData3)[-1]
+
+plotData4 = as.data.frame(M)
+plotData4 = cbind(plotData3$dumID1,plotData4)
+names(plotData4)[1] = "dumID"
+
+setDT(plotData4)
+plotData4[,dumID := gsub("_Kidney_Cortex_Tubulointerstitial"," (TI)",dumID)]
+plotData4[,dumID := gsub("_Muscle_Skeletal"," (MS)",dumID)]
+plotData4[,dumID := gsub("_Whole_Blood"," (WB)",dumID)]
+plotData4
+
+#' Change row order manually (ordered by alphabet as default in decast): CDKL5 - NDUF - ARM - TCEAL - MORF - ACSL - SLC
+#' 
+plotData4 = plotData4[c(16:18, 1:3, 10:12, 19:20, 4:6, 13:15, 7:9),]
+
+#' Change row order manually (ordered by alphabet as default in decast): ALL - MALE - FEMALE
+#' 
+plotData4 = plotData4[,c(1,5,7,6,2,4,3)]
+plotData5 = copy(plotData4)
+dummy<-pmax(plotData5$UA_ALL,plotData5$UA_FEMALE,plotData5$UA_MALE,
+            plotData5$eGFR_ALL,plotData5$eGFR_FEMALE,plotData5$eGFR_MALE)
+filt = dummy>=0.75 
+plotData5 = plotData5[filt,]
+plotData5 = plotData5[c(2,3,4,6,5,1,7)]
+
+setDF(plotData4)
+setDF(plotData5)
+colocPlot(x = plotData4,title = "coloc plot")
+colocPlot(x = plotData5,title = "reduced coloc plot")
+
+myPlot1 = colocPlot(x = plotData4,title = "")
+myPlot2 = colocPlot(x = plotData5,title = "")
+
+tiff(filename = "../figures/SupplementalFigure_ColocPlot_long.tiff", 
+     width = 1000, height = 1350, res=250, compression = 'lzw')
+myPlot1
+dev.off()
+
+tiff(filename = "../figures/SupplementalFigure_ColocPlot_reduced.tiff", 
+     width = 1800, height = 1350, res=250, compression = 'lzw')
+myPlot2
+dev.off()
+
 #' # Sessioninfo ####
 #' ***
 sessionInfo()
