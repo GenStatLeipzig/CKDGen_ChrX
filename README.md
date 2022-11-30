@@ -2,7 +2,7 @@
 
 Analyses of X-chromosomal SNPs and kidney traits
 
-**Last Updated: 25/11/2022**
+**Last Updated: 30/11/2022**
 
 Supporting code for the following draft:
 
@@ -48,7 +48,7 @@ If you want to reproduce our results, you will need to customize a source file, 
     * LD estimation: LD between eGFR and UA index SNPs using *PLINK2*
     * Co-localization analyses of eGFR and UA:  test of the associations of eGFR and UA for shared causal signal 
 9) **Replication analysis**: replicate findings of eGFR in *HUNT* study (one-sided)
-10) X-chromosomal heritability: *GCTA* - restricted maximum likelihood (REML) analyses
+10) **X-chromosomal heritability**: *GCTA* - restricted maximum likelihood (REML) analyses
     * Reference data set: *UKBB* (genotyped SNPs)
     * REML: estimation of heritability for eGFR and UA
     * REML bivariate: estimation of genetic correlation between eGFR and UA 
@@ -79,7 +79,7 @@ If you want to reproduce our results, you will need to customize a source file, 
     * 16 SNPs: index SNP per locus + female-specific index SNP of region 7
 3) **Regional Association Plot of region 7**:
     * panel with all, male, female
-4) **Credible Set Size vs. Posterior Probability** (maybe supplement)
+4) **Credible Set Size vs. Posterior Probability** 
 
 ## Supplemental Figures
 
@@ -87,7 +87,7 @@ If you want to reproduce our results, you will need to customize a source file, 
 2) **Beta-Beta-Plot** of sex interaction analysis (--> see script 02)
 3) **Beta-Beta-Plot** of HUNT replication (--> see script 09)
 4) **Forest Plots** of MR-MEGA results (--> see script 12 b)
-5) Co-localization Plots of eQTL results (--> see script 07) 
+5) **Co-localization Plots** of eQTL results (--> see script 07_c) 
 6) **Beta-Beta-Plot** of index SNPs comparing trans-ethnic metaGWAS and Europeans only metaGWAS
 7) **Box-Plot** showing chromosome X coding variants
 
