@@ -122,31 +122,108 @@ matched = match(dummy$rsID,dumTab3$rsID)
 ShorterTable = cbind(dummy,dumTab3[matched,-1])
 
 #' check significance and sign
-ShorterTable[,check_BUN := F]
-ShorterTable[P_oneSided_BUN<0.05 & sign(beta_eGFR)!=sign(beta_BUN) & region<16,check_BUN := T]
-ShorterTable[region>=16,check_BUN := NA]
-ShorterTable$check_BUN
+ShorterTable[,check_BUN_eGFR := F]
+ShorterTable[P_oneSided_BUN<0.05 & sign(beta_eGFR)!=sign(beta_BUN),check_BUN_eGFR := T]
+ShorterTable[,table(check_BUN_eGFR)]
+ShorterTable[,check_BUN_UA := F]
+ShorterTable[P_oneSided_BUN<0.05 & sign(beta_UA)==sign(beta_BUN),check_BUN_UA := T]
+ShorterTable[,table(check_BUN_UA)]
 
-ShorterTable[,check_CKD := F]
-ShorterTable[P_oneSided_CKD<0.05 & sign(beta_eGFR)!=sign(beta_CKD) & region<16,check_CKD := T]
-ShorterTable[region>=16,check_CKD := NA]
-ShorterTable$check_CKD
+ShorterTable[,check_CKD_eGFR := F]
+ShorterTable[P_oneSided_CKD<0.05 & sign(beta_eGFR)!=sign(beta_CKD),check_CKD_eGFR := T]
+ShorterTable[,table(check_CKD_eGFR)]
+ShorterTable[,check_CKD_UA := F]
+ShorterTable[P_oneSided_CKD<0.05 & sign(beta_UA)==sign(beta_CKD),check_CKD_UA := T]
+ShorterTable[,table(check_CKD_UA)]
 
-ShorterTable[,check_Gout := F]
-ShorterTable[P_oneSided_Gout<0.05 & sign(beta_UA)==sign(beta_Gout) & region>=16,check_Gout := T]
-ShorterTable[region<16,check_Gout := NA]
-ShorterTable$check_Gout
+ShorterTable[,check_UACR_eGFR := F]
+ShorterTable[P_oneSided_UACR<0.05 & sign(beta_eGFR)!=sign(beta_UACR),check_UACR_eGFR := T]
+ShorterTable[,table(check_UACR_eGFR)]
+ShorterTable[,check_UACR_UA := F]
+ShorterTable[P_oneSided_UACR<0.05 & sign(beta_UA)==sign(beta_UACR),check_UACR_UA := T]
+ShorterTable[,table(check_UACR_UA)]
+
+ShorterTable[,check_MA_eGFR := F]
+ShorterTable[P_oneSided_MA<0.05 & sign(beta_eGFR)!=sign(beta_MA),check_MA_eGFR := T]
+ShorterTable[,table(check_MA_eGFR)]
+ShorterTable[,check_MA_UA := F]
+ShorterTable[P_oneSided_MA<0.05 & sign(beta_UA)==sign(beta_MA),check_MA_UA := T]
+ShorterTable[,table(check_MA_UA)]
+
+ShorterTable[,check_Gout_eGFR := F]
+ShorterTable[P_oneSided_Gout<0.05 & sign(beta_eGFR)!=sign(beta_Gout),check_Gout_eGFR := T]
+ShorterTable[,table(check_Gout_eGFR)]
+ShorterTable[,check_Gout_UA := F]
+ShorterTable[P_oneSided_Gout<0.05 & sign(beta_UA)==sign(beta_Gout),check_Gout_UA := T]
+ShorterTable[,table(check_Gout_UA)]
 
 names(ShorterTable)
+#' eGFR - UA - BUN - CKD - UACR - MA - Gout
 x = c(5,12,19,26,33,40)
-myNames = names(ShorterTable)[c(1:4,x+6,x,47,x+1,48,x+4,x+2,49)]
+
+myNames = names(ShorterTable)[c(1:4,
+                                x+6,       # eGFR
+                                x+4,       # UA
+                                x,47,48,   # BUN
+                                x+1,49,50, # CKD
+                                x+5,51,52, # UACR
+                                x+3,53,54, # MA
+                                x+2,55,56)]# Gout
 colsOut<-setdiff(colnames(ShorterTable),myNames)
-ShorterTable[,get("colsOut"):=NULL]
+colsOut
 setcolorder(ShorterTable,myNames)
 
 ShorterTable[,P_oneSided_eGFR:=NULL]
 ShorterTable[,P_oneSided_UA:=NULL]
 
+#' Get Markus short table with all settings
+#'
+dumTab_ALL = copy(dumTab)
+dumTab_ALL = dumTab_ALL[grepl("_ALL",phenotype),]
+dumTab_FEM = copy(dumTab)
+dumTab_FEM = dumTab_FEM[grepl("_FEM",phenotype),]
+dumTab_MAL = copy(dumTab)
+dumTab_MAL = dumTab_MAL[grepl("_MAL",phenotype),]
+
+dumTab3_ALL<-dcast(dumTab_ALL,
+                   formula = rsID ~ phenotype,
+                   value.var = c("N","EAF","beta","SE","P","P_oneSided"),
+                   sep = "_")
+dumTab3_FEM<-dcast(dumTab_FEM,
+                   formula = rsID ~ phenotype,
+                   value.var = c("N","EAF","beta","SE","P","P_oneSided"),
+                   sep = "_")
+dumTab3_MAL<-dcast(dumTab_MAL,
+                   formula = rsID ~ phenotype,
+                   value.var = c("N","EAF","beta","SE","P","P_oneSided"),
+                   sep = "_")
+
+matched_all = match(dummy$rsID,dumTab3_ALL$rsID)
+matched_mal = match(dummy$rsID,dumTab3_MAL$rsID)
+matched_fem = match(dummy$rsID,dumTab3_FEM$rsID)
+
+ShorterTable_v2 = cbind(dummy,
+                        dumTab3_ALL[matched_all,c(36,35,37,38,41,40,39)],
+                        dumTab3_MAL[matched_mal,c(36,35,37,38,41,40,39)],
+                        dumTab3_FEM[matched_fem,c(36,35,37,38,41,40,39)])
+x = c(5,12,19)
+
+myNames = names(ShorterTable_v2)[c(1:4,
+                                x,       # eGFR
+                                x+1,       # UA
+                                x+2,   # BUN
+                                x+3, # CKD
+                                x+4, # UACR
+                                x+5, # MA
+                                x+6)]# Gout
+colsOut<-setdiff(colnames(ShorterTable_v2),myNames)
+colsOut
+setcolorder(ShorterTable_v2,myNames)
+
+names(ShorterTable_v2) = gsub("P_oneSided_","",names(ShorterTable_v2))
+names(ShorterTable_v2) = gsub("P_","",names(ShorterTable_v2))
+
+ShorterTable_v2[,5:25] =  -log10(ShorterTable_v2[,5:25])
 
 #' # Save data ####
 #' ***
@@ -159,6 +236,7 @@ WriteXLS(x = c("WideTable","ShorterTable"),
          BoldHeaderRow=T)
 save(WideTable, file = "../results/04_lookup_TopHits_allOtherTraits.RData")
 save(ShorterTable, file = "../results/04_lookup_TopHits_matchingSettings.RData")
+save(ShorterTable_v2, file = "../results/04_lookup_TopHits_allSettings_logP.RData")
 
 #' # Session Info ####
 #' ***
