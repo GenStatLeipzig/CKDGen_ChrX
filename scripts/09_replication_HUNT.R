@@ -237,6 +237,7 @@ myPlot2 = myPlot1 +
                 aes(ymin = beta_HUNT, ymax = beta_HUNT+c_HUNT*SE_HUNT))
 myPlot2
 
+plotData2 = plotData2[!grepl("rs111410539:",SNP),]
 myPlot3 = ggplot(plotData2, aes(x=beta_CKDGen, y=beta_HUNT,color=replicated)) + 
   geom_abline(intercept = 0, slope = 1, color="grey", linetype="dashed", size=1.25)+
   geom_hline(yintercept = 0, color="grey", linetype="dashed", size=1.15)+
