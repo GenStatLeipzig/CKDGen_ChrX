@@ -30,12 +30,12 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_forostar.R")
 
 setwd(paste0(projectpath,"scripts/"))
 
 load("../results/04_lookup_TopHits_allOtherTraits.RData")
-coloc_overlap = fread("../results/08_coloc_overlap.txt")
+coloc_overlap = fread("../results/08_b_coloc_overlap.txt")
 LD_overlap = fread("../results//08_a_LD_overlapping_regions.txt")
 
 coloc_overlap
@@ -52,10 +52,11 @@ LD_overlap2
 #' * cytoband
 #' * index SNP for eGFR and UA 
 #' * best setting for eGFR and UA 
+#' * effect directions for both SNPs per Lokus
 #' 
 
 tab1 = copy(WideTable)
-tab1 = tab1[,c(1:4)]
+tab1 = tab1[,c(1:4,125,128)]
 setnames(tab1,"Cytoband","cytoband")
 setnames(tab1,"rsID","indexSNP")
 setnames(tab1,"topPheno","bestSetting")
@@ -82,6 +83,24 @@ tab2[,bestSettings := paste(bestSetting_eGFR, bestSetting_UA,sep=", ")]
 tab2[,bestSetting_eGFR :=NULL]
 tab2[,bestSetting_UA :=NULL]
 
+matched2 = match(tab2$indexSNP_eGFR,tab1$indexSNP)
+tab2[,effect_SNP1_eGFR := tab1[matched2,beta_eGFR_ALL]]
+tab2[,effect_SNP1_UA := tab1[matched2,beta_UA_ALL]]
+matched3 = match(tab2$indexSNP_UA,tab1$indexSNP)
+tab2[,effect_SNP2_eGFR := tab1[matched3,beta_eGFR_ALL]]
+tab2[,effect_SNP2_UA := tab1[matched3,beta_UA_ALL]]
+
+tab2[,effect_SNP1 := sign(effect_SNP1_eGFR)!=sign(effect_SNP1_UA)]
+tab2[,effect_SNP2 := sign(effect_SNP2_eGFR)!=sign(effect_SNP2_UA)]
+tab2[,table(effect_SNP1,effect_SNP2)]
+tab2[,discordantEffect := effect_SNP1]
+tab2[,effect_SNP1_eGFR :=NULL]
+tab2[,effect_SNP1_UA :=NULL]
+tab2[,effect_SNP2_eGFR :=NULL]
+tab2[,effect_SNP2_UA :=NULL]
+tab2[,effect_SNP1 :=NULL]
+tab2[,effect_SNP2 :=NULL]
+
 tab2[,indexSNP_eGFR := gsub(":.*","",indexSNP_eGFR)]
 tab2[,indexSNP_UA := gsub(":.*","",indexSNP_UA)]
 tab2[8,indexSNP_eGFR := "chr23:152898260"]
@@ -98,14 +117,20 @@ tab2
 
 #' # Get interpretation ####
 #' ***
-#' * overlapping == yes: LD_r2>0.8 or PP_H4>0.75
+#' * overlapping == yes: (LD_r2>0.8 or PP_H4>0.75) and discordant effect direction 
 #' * overlapping == no: LD_r2<0.8 and PP_H3>0.75
-#' * overlapping == inconclusive: LD<0.8 and PP_H3<0.75 and PP_H4<0.75
+#' * overlapping == inconclusive: LD<0.8 and PP_H3<0.75 and PP_H4<0.75  or concordant effect direction
 tab2[,overlapping:="inconclusive"]
-tab2[LD_r2>0.8 | PP_H4>0.75,overlapping:="yes"]
+tab2[(LD_r2>0.8 | PP_H4>0.75) & discordantEffect==T,overlapping:="yes"]
 tab2[LD_r2<0.8 & PP_H3>0.75,overlapping:="no"]
 tab2
 
+#' # Get rounded values ###
+#' 
+tab2[,LD_r2 := round(LD_r2,2)]
+tab2[,PP_H3 := round(PP_H3,2)]
+tab2[,PP_H4 := round(PP_H4,2)]
+tab2
 
 #' # Save ####
 #' ***
