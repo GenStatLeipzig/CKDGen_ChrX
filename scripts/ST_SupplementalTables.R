@@ -20,7 +20,7 @@
 #' 3) Sample Sizes & SNP Numbers, and inflation factor $\lambda$ per phenotype
 #' 4) Comparisons between the sexes (interaction and co-localization --> see script 02 and 03)
 #' 5) Cross-phenotype comparision (--> see script 04)
-#' 6) Genome-wide significant & independent hit per region (--> see script 05)
+#' 6) Genome-wide significant & independent hit per locus (--> see script 05)
 #' 7) Annotation of credible sets (a-e for eGFR and UA in their respective settings)
 #' 8) Co-localization with eQTLs (--> see script 07)
 #' 9) Replication in *HUNT* (--> see script 09)
@@ -37,7 +37,7 @@ source("../SourceFile_forostar.R")
 #' # Get content table (tab0) ####
 #' ***
 {
-  tab0 = data.table(Table = paste0("S",c(1:11)),
+  tab0 = data.table(Table = paste0("S",c(1:12)),
                     Title = c("Study descriptions",
                               "Genotyping & imputation information per study",
                               "Sample sizes, SNP Numbers and inflation factor per phenotype and setting",
@@ -61,7 +61,7 @@ source("../SourceFile_forostar.R")
                                "../results/09_replication_HUNT.RData",
                                "../results/11_Look_Up_GWAS_hits_eGFR_UA_only.txt",
                                "../results/12_SNPs_table1_in_MR_MEGA.txt",
-                               "../../../12_MR-MEGA\01_annotation/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt"))
+                               "../../../12_MR-MEGA/01_annotation/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt"))
   
   tab0
   
@@ -186,6 +186,7 @@ source("../SourceFile_forostar.R")
   setnames(tab4,"Cytoband","cytoband")
   setnames(tab4,"rsID","indexSNP")
   setnames(tab4,"topPheno","bestSetting")
+  setnames(tab4,"region","locus_NR")
   tab4
   
   filt = grepl("UA",tab4$bestSetting)
@@ -200,7 +201,7 @@ source("../SourceFile_forostar.R")
   
   coloc_sexIA = rbind(coloc_sexIA[1:7,],coloc_sexIA[7:22,])
   coloc_sexIA[,region :=gsub("Region ","",locus)]
-  stopifnot(coloc_sexIA$region == tab4$region)
+  stopifnot(coloc_sexIA$region == tab4$locus_NR)
   tab4 = cbind(tab4,coloc_sexIA[,c(4:9)])
   coloc_sexIA = rbind(coloc_sexIA[1:7,],coloc_sexIA[7:22,])
   tab4[,sexIA_coloc:="inconclusive"]
@@ -211,9 +212,9 @@ source("../SourceFile_forostar.R")
   tab4
   
   tab4_annot = data.table(column = names(tab4),
-                          description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                          description = c("Number of associated loci (1-15: eGFR, 16-22: UA)",
                                           "Genomic cytoband of index SNP",
-                                          "SNP with lowest p-value in this region",
+                                          "SNP with lowest p-value in this locus",
                                           "Best phenotype and setting",
                                           "Beta estimate in males (using respective best phenotypes)",
                                           "Standard error in males (using respective best phenotypes)",
@@ -242,52 +243,38 @@ source("../SourceFile_forostar.R")
 #' Cross-phenotype comparision (--> see script 04)
 {
   load("../results/04_lookup_TopHits_matchingSettings.RData")
-  tab5 = ShorterTable
+  tab5_a = ShorterTable
+  load("../results/04_lookup_TopHits_allSettings_logP.RData")
+  tab5_b = ShorterTable_v2
   
-  names(tab5)[1:4] = names(tab4)[1:4]
-  tab5_annot = data.table(column = names(tab5),
-                          description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+  names(tab5_a)[1:4] = names(tab4)[1:4]
+  names(tab5_b)[1:4] = names(tab4)[1:4]
+  dummy = names(tab5_a)[c(1:4,15:22)]
+  tab5_a_annot = data.table(column = dummy,
+                          description = c("Number of associated locus (1-15: eGFR, 16-22: UA)",
                                           "Genomic cytoband of index SNP",
-                                          "SNP with lowest p-value in this region",
+                                          "SNP with lowest p-value in this locus",
                                           "Best phenotype and setting",
-                                          "Sample size in eGFR (using respective best setting)",
-                                          "Effect allele frequency in eGFR (using respective best setting)",
-                                          "Beta estimate in eGFR (using respective best setting)",
-                                          "Standard error in eGFR (using respective best setting)",
-                                          "P-value in eGFR (using respective best setting)",
-                                          "Sample size in BUN (using respective best setting)",
-                                          "Effect allele frequency in BUN (using respective best setting)",
-                                          "Beta estimate in BUN (using respective best setting)",
-                                          "Standard error in BUN (using respective best setting)",
-                                          "P-value in BUN (using respective best setting)",
-                                          "One-sided p-value in BUN (using respective best setting)",
-                                          "TRUE/FALSE flag indicating significant nominal association in BUN with discordant effect direction compared to eGFR (using respective best setting)",
-                                          "Sample size in CKD (using respective best setting)",
-                                          "Effect allele frequency in CKD (using respective best setting)",
-                                          "Beta estimate in CKD (using respective best setting)",
-                                          "Standard error in CKD (using respective best setting)",
-                                          "P-value in CKD (using respective best setting)",
-                                          "One-sided p-value in CKD (using respective best setting)",
-                                          "TRUE/FALSE flag indicating significant nominal association in CKD with discordant effect direction compared to eGFR (using respective best setting)",
-                                          "Sample size in UA (using respective best setting)",
-                                          "Effect allele frequency in UA (using respective best setting)",
-                                          "Beta estimate in UA (using respective best setting)",
-                                          "Standard error in UA (using respective best setting)",
-                                          "P-value in UA (using respective best setting)",
-                                          "Sample size in BUN (using respective best setting)",
-                                          "Effect allele frequency in Gout (using respective best setting)",
-                                          "Beta estimate in Gout (using respective best setting)",
-                                          "Standard error in Gout (using respective best setting)",
-                                          "P-value in Gout (using respective best setting)",
-                                          "One-sided p-value in Gout (using respective best setting)",
-                                          "TRUE/FALSE flag indicating significant nominal association in Gout compared to UA (using respective best setting)"))
+                                          "Sample size in phenotype indicated in column name (using respective best setting)",
+                                          "Effect allele frequency in phenotype indicated in column name (using respective best setting)",
+                                          "Beta estimate in phenotype indicated in column name (using respective best setting)",
+                                          "Standard error in phenotype indicated in column name (using respective best setting)",
+                                          "P-value in phenotype indicated in column name (using respective best setting)",
+                                          "One-sided p-value in phenotype indicated in column name (using respective best setting, not calculated for eGFR and UA)",
+                                          "TRUE/FALSE flag indicating significant nominal association in phenotype indicated in column name with discordant effect direction compared to eGFR (using respective best setting)",
+                                          "TRUE/FALSE flag indicating significant nominal association in phenotype indicated in column name with concordant effect direction compared to UA (using respective best setting)"))
   
-  
+  tab5_b_annot = data.table(column = names(tab5_b)[1:5],
+                            description = c("Number of associated locus (1-15: eGFR, 16-22: UA)",
+                                            "Genomic cytoband of index SNP",
+                                            "SNP with lowest p-value in this locus",
+                                            "Best phenotype and setting",
+                                            "-log10 transformed p-value in phenotype indicated in column name and setting ALL (one-sided p-value for BUN, CKD, UACR, MA, and gout; two-sided for eGFR and UA)"))
 }
 
 #' # Get Sup Tab 6 ####
 #' ***
-#' Genome-wide significant & independent hit per region (--> see script 05)
+#' Genome-wide significant & independent hit per locus (--> see script 05)
 #'
 {
   tab6 = fread("../results/05_b_Cojo_Select_Results.txt")
@@ -308,7 +295,7 @@ source("../SourceFile_forostar.R")
   colsOut<-setdiff(colnames(tab6),myNames)
   tab6[,get("colsOut"):=NULL]
   setcolorder(tab6,myNames)
-  names(tab6) = c("region","size.region","CredSetSize","rsID","SNPID_UKBB","phenotype","position","effect_allele",
+  names(tab6) = c("locus_NR","size.region","CredSetSize","rsID","SNPID_UKBB","phenotype","position","effect_allele",
                   "eaf","beta","SE","pvalue","estimated_Ne",
                   "eaf_UKBB","beta_joint","SE_joint","pvalue_joint","LD_r")
   filt = tab6$LD_r ==0
@@ -322,8 +309,8 @@ source("../SourceFile_forostar.R")
   
   
   tab6_annot = data.table(column = names(tab6),
-                          description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
-                                          "Range of tested region (not necessary centered around the index SNP)",
+                          description = c("Number of associated locus (1-15: eGFR, 16-22: UA)",
+                                          "Range of tested locus (not necessary centered around the index SNP)",
                                           "Number of SNPs in 99% credible set",
                                           "Independent SNP",
                                           "SNP ID as in UKBB data (reference data in GCTA COJO analysis)",
@@ -374,7 +361,7 @@ source("../SourceFile_forostar.R")
     tab = distinct(tab)
     
     myNames2 =  c("snp","CredSet","PostProb","SumProb","cyto","pos","tagger","r2_tagger","tagsnp","effect_allele","other_allele",
-                  "eaf","info","nSamples","beta","SE","logP", "I2",
+                  "eaf","nSamples","info","beta","SE","logP", "I2",
                   "nearestgenes","gene_biotype","nearestgene",
                   "CADD_scaled","regulome_score","regulome_score_numeric","regulome_details",
                   "corinfo_gwas2","cisgene","coremine_genes",
@@ -442,11 +429,12 @@ source("../SourceFile_forostar.R")
   
   tab7 = rbind(tab7_0,dumTab)
   setorder(tab7,-PostProb)
+  tab7[,CredSet := gsub("Region","Locus_NR_",CredSet)]
   
   tab7_annot = data.table(column = names(tab7),
                           description = c("Analyzed phenotype and setting",
                                           "SNP ID of the marker.  Mostly from dbSNP, sometimes constructed like chr1:42147691:D (chromosome, position, alleletype)",
-                                          "ID of the credible set",
+                                          "ID of the credible set (locus number + independent signal incase of multiple signals at a locus)",
                                           "Posterior Probability of the SNP depending of the given phenotype",
                                           "Cummulative sum of Probabilities per credible set",
                                           "Cytoband with 850 resolution",
@@ -459,9 +447,9 @@ source("../SourceFile_forostar.R")
                                           "Effect allele frquency",
                                           "Weighted Imputation info score",
                                           "Sample size per SNP",
-                                          "Beta estimate (conditional in case of region 9, 21, and 22 in setting ALL)",
-                                          "Standard error (conditional in case of region 9, 21, and 22 in setting ALL)",
-                                          "-log10 transformed p-value (conditional in case of region 9, 21, and 22 in setting ALL)",
+                                          "Beta estimate (conditional in case of locus 9, 21, and 22 in setting ALL)",
+                                          "Standard error (conditional in case of locus 9, 21, and 22 in setting ALL)",
+                                          "-log10 transformed p-value (conditional in case of locus 9, 21, and 22 in setting ALL)",
                                           "Heterogenetity I-squared",
                                           "HGNC (Ensembl) symbols of the nearest genes as specified in the settings with information on distance to the marker in SNP including functional relevance if within or within the flanking 5 kb of a gene",
                                           "Functional relevance of the gene and its validation level  for proximate genes(Ensembl)",
@@ -484,8 +472,6 @@ source("../SourceFile_forostar.R")
 #' ***
 #' Co-localization with eQTLs (--> see script 07)
 #' 
-#' Check if conditional data should be used as well!
-#' 
 #' 
 {
   load("../results/07_b_coloc_eQTLs.RData")
@@ -494,14 +480,15 @@ source("../SourceFile_forostar.R")
   names(tab8)
   setnames(tab8,"trait1","GWAMA_phenotype")
   setnames(tab8,"trait2","tissue")
+  setnames(tab8,"region","locus_NR")
   
   tab8_annot = data.table(column = names(tab8),
-                          description = c("Number of associated region (1-15: eGFR, 16-22: UA)",
+                          description = c("Number of associated loci (1-15: eGFR, 16-22: UA)",
                                           "Genomic cytoband of gene",
                                           "Analyzed phenotype and setting",
                                           "Analyzed gene expression of GTEx or NEPTUNE",
                                           "Analyzed tissue for gene expression",
-                                          "Number of SNPs included in co-localization analysis per region",
+                                          "Number of SNPs included in co-localization analysis per locus",
                                           "Posterior probability for hypothesis 0: neither trait associated",
                                           "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
                                           "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
@@ -518,8 +505,10 @@ source("../SourceFile_forostar.R")
 {
   load("../results/09_replication_HUNT_summary.RData")
   tab9 = copy(result)
+  tab9 = tab9[!grepl("rs111410539:",SNP),]
+  setnames(tab9,"region","locus_NR")
   tab9_annot = data.description
-  
+  tab9_annot[1,column := "locus_NR"]
 }
 
 
@@ -529,6 +518,8 @@ source("../SourceFile_forostar.R")
 #' 
 {
   tab10 = fread("../results/11_Look_Up_GWAS_hits_eGFR_BUN_UA_only.txt")
+  tab10_help = fread("../results/11_Look_Up_GWAS_hits_results.txt")
+  
   tab10[grepl("A cross-population atlas of genetic associations for 220",STUDY),Authors := "Sakaue et al. (2021)"]
   tab10[grepl("A cross-population atlas of genetic associations for 220",STUDY),DOI := "10.1038/s41588-021-00931-x"]
   tab10[grepl("Genetic analysis of quantitative traits in the Japanese",STUDY),Authors := "Kanai et al. (2018)"]
@@ -585,8 +576,14 @@ source("../SourceFile_forostar.R")
   tab10[phenotype == "BUN",CKDGen_invalid := BUN.invalid_assoc]
   tab10[phenotype == "BUN",CKDGen_reason := BUN.reason_for_exclusion]
   
-  names(tab10)[c(45,46,2,3,5:10,44,47:58)]
-  tab10 = tab10[,c(45,46,2,3,5:10,44,47:58)]
+  tab10[,cytoband:= tab10_help$REGION]
+  tab10[,pos_hg19:= tab10_help$eGFR.position]
+  tab10[,litCanGene := tab10_help$`REPORTED GENE(S)`]
+  matched = match(tab10$cytoband,tab4$cytoband)
+  tab10[,locus_NR := tab4[matched,locus_NR]]
+  
+  names(tab10)[c(46,47,2,3,5:10,60:63,45,48:59)]
+  tab10 = tab10[,c(46,47,2,3,5:10,60:63,45,48:59)]
   tab10 = tab10[!is.na(CKDGen_invalid),]
   
   tab10_annot = data.table(column = names(tab10),
@@ -594,12 +591,16 @@ source("../SourceFile_forostar.R")
                                            "Digital Object Identifier of looked-up study",
                                            "Analyzed phenotype in looked-up study",
                                            "Sample Size of looked-up study",
-                                           "Base position in looked-up study",
+                                           "Base position in looked-up study (hg38)",
                                            "SNP ID and effect allele in looked-up study",
                                            "SNP ID used for matching",
                                            "Effect allele frequency in looked-up study",
                                            "P-value in looked-up study",
                                            "Odds ratio, Z-score or beta estimate in looked-up study",
+                                           "Genomic cytoband of literature SNP",
+                                           "Base position in our study (hg19)",
+                                           "Candidate Gene as reported in GWAS Catalog",
+                                           "Corresponding locus number in our analyses",
                                            "TRUE/FALSE flag indicating successful replication in CKDGen",
                                            "CKDGen phenotype used for replication",
                                            "Sample size in CKDGen",
@@ -637,8 +638,12 @@ source("../SourceFile_forostar.R")
   tab11[,`P-value_ancestry_het` := chi2_p_anc_het]
   tab11[,`P-value_residual_het` := chi2_p_res_het]
   
+  stopifnot(tab11$rsID == tab4$indexSNP)
+  tab11 = cbind(tab4$locus_NR,tab11)
+  names(tab11)[1] = "locus_NR"
   tab11_annot = data.table(column = names(tab11),
-                           description = c("SNP ID in CKDGen",
+                           description = c("Number of associated locus (1-15: eGFR, 16-22: UA)",
+                                           "SNP ID in CKDGen",
                                            "SNP ID used for matching",
                                            "Chromosome",
                                            "Base position (hg19)",
@@ -753,10 +758,10 @@ source("../SourceFile_forostar.R")
 #' # Save tables ###
 #' ***
 tosave4 = data.table(data = c("tab0",#"tab1","tab2", 
-                              "tab3", "tab4","tab5","tab6","tab7","tab8",
+                              "tab3", "tab4","tab5_a","tab5_b","tab6","tab7","tab8",
                               "tab9","tab10","tab11","tab12"), 
                      SheetNames = c("Content",#"TableS1","TableS2", 
-                                    "TableS3", "TableS4","TableS5", "TableS6","TableS7","TableS8",
+                                    "TableS3", "TableS4","TableS5_a","TableS5_b", "TableS6","TableS7","TableS8",
                                     "TableS9","TableS10","TableS11","TableS12"))
 excel_fn = "../tables/SupplementalTables.xlsx"
 WriteXLS(tosave4$data, 
@@ -766,9 +771,9 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_annot","tab6_annot","tab7_annot","tab8_annot",
+tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_a_annot","tab5_b_annot","tab6_annot","tab7_annot","tab8_annot",
                               "tab9_annot","tab10_annot","tab11_annot","tab12_annot"), 
-                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_annot", "TableS6_annot","TableS7_annot",
+                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_a_annot","TableS5_b_annot", "TableS6_annot","TableS7_annot",
                                     "TableS8_annot", "TableS9_annot","TableS10_annot","TableS11_annot","TableS12_annot"))
 excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
 WriteXLS(tosave4$data, 
@@ -778,8 +783,8 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-save(tab0,tab3,tab4,tab5,tab6,tab7,tab8,tab9,tab10,tab11,tab12,file = "../tables/SupplementalTables.RData")
-save(tab3_annot,tab4_annot,tab5_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,
+save(tab0,tab3,tab4,tab5_a,tab5_b,tab6,tab7,tab8,tab9,tab10,tab11,tab12,file = "../tables/SupplementalTables.RData")
+save(tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,
      file = "../tables/SupplementalTables_annot.RData")
 
 #' # Sessioninfo ####
