@@ -300,7 +300,7 @@ for (i in 1:x1){
     m3<-M3[i,j]
     
     if(is.na(m3)==T){
-      M[i,j] = 0
+      M[i,j] = NA
     }else if(m4>m3){
       M[i,j]<-m4
     }else{
@@ -330,7 +330,7 @@ plotData4 = plotData4[c(16:18, 1:3, 10:12, 19:20, 4:6, 13:15, 7:9),]
 plotData4 = plotData4[,c(1,5,7,6,2,4,3)]
 plotData5 = copy(plotData4)
 dummy<-pmax(plotData5$UA_ALL,plotData5$UA_FEMALE,plotData5$UA_MALE,
-            plotData5$eGFR_ALL,plotData5$eGFR_FEMALE,plotData5$eGFR_MALE)
+            plotData5$eGFR_ALL,plotData5$eGFR_FEMALE,plotData5$eGFR_MALE, na.rm = T)
 filt = dummy>=0.75 
 plotData5 = plotData5[filt,]
 plotData5 = plotData5[c(2,3,4,6,5,1,7)]
