@@ -38,7 +38,8 @@ tab7 = foreach(i=1:dim(ToDoList3)[1])%do%{
   tab = fread(myRow$files)
   
   stopifnot(tab$litsnp == tab$provided_name)
-  
+  tab = distinct(tab)
+ 
   myNames2 =  c("snp","CredSet","PostProb","SumProb","cyto","pos","tagger","r2_tagger","tagsnp",
                 "effect_allele","other_allele","eaf",
                 "beta","SE","logP", "I2","nearestgenes","gene_biotype","nearestgene","Eigen","EigenPC","CADD_scaled","DANN",
@@ -117,6 +118,9 @@ plotData[CADD_scaled>20,  CADD_type :=CADD_type+1]
 setorder(plotData,CADD_type)
 plotData[,CADD_type := as.factor(CADD_type)]
 plotData[,table(CADD_type,missense)]
+
+plotData[,locus := gsub("_.*","",CredSet)]
+plotData[,locus := gsub("Region","",locus)]
 
 #' # Plotting ####
 #' ***
@@ -244,7 +248,7 @@ plotData2 = copy(plotData)
 plotData2[missense==T & CADD_scaled>10,]
 SNPInfo = c("SLC25A5 \np.(Leu111Arg)","SLC25A43 \np.(Pro334Leu)","ARHGAP4 \np.(Glu602=)", "TSPAN6 \np.(Ala108Thr)",
             "MID2 \np.(Ala378Asp)", "SERPINA7 \np.(Leu303Phe)","PLXNB3 \np.(Val1596Glu)")
-plotData2[missense==T & CADD_scaled>10,rsID := paste(rsID, "\n",SNPInfo)]
+plotData2[missense==T & CADD_scaled>10,rsID := paste(locus,":",rsID, "\n",SNPInfo)]
 plotData2 = plotData2[N<400,]
 
 myPlot6 = ggplot(
@@ -299,7 +303,7 @@ dev.off()
 #' ## Plot 7 ####
 #' one plot over all phenotypes (x-axis not limited, missense mutations labeled, shape by phenotype) 
 
-plotData[missense==T & CADD_scaled>10,rsID := paste(rsID, "\n",SNPInfo)]
+plotData[missense==T & CADD_scaled>10,rsID := paste(locus, ":", rsID, "\n",SNPInfo)]
 
 plotData[missense==T & CADD_scaled>10,]
 
@@ -336,20 +340,20 @@ myPlot7 = ggplot(
                    xlim = c(150,Inf), ylim = c(0.5,1.05),box.padding = 0.5, max.overlaps = Inf, 
                    show.legend = FALSE
   )+
-  geom_label_repel(data = subset(plotData, missense==T & CADD_scaled> 10 & N>1500 ),
+  geom_label_repel(data = subset(plotData, missense==T & CADD_scaled> 10 & N>400 & !grepl("ARHGAP4",rsID) ),
                    aes(x=N, y=PostProb, label = rsID),
                    size=3, direction = 'y',
-                   xlim = c(1500,1800), ylim = c(0,0.5),
+                   xlim = c(800,1300), ylim = c(0,Inf),
                    box.padding = 0.5, max.overlaps = Inf, 
                    show.legend = FALSE
   )+
-  geom_label_repel(data = subset(plotData, missense==T & CADD_scaled> 10 & N>400 & N<1500 ),
-                   aes(x=N, y=PostProb, label = rsID),
-                   size=3, direction = 'y',
-                   xlim = c(800,1300), ylim = c(0,0.5),
-                   box.padding = 0.5, max.overlaps = Inf, 
-                   show.legend = FALSE
-  )+
+  # geom_label_repel(data = subset(plotData, missense==T & CADD_scaled> 10 & N>400 & N<1500 ),
+  #                  aes(x=N, y=PostProb, label = rsID),
+  #                  size=3, direction = 'y',
+  #                  xlim = c(800,1300), ylim = c(0,0.5),
+  #                  box.padding = 0.5, max.overlaps = Inf, 
+  #                  show.legend = FALSE
+  # )+
   scale_colour_manual(
     values = c("#000000","#B2182B","#2166AC"),
     labels = c("CAD<=10","CAD in (10,20]","CAD>20"))+
