@@ -30,12 +30,13 @@ loci = fread("../results/01_Locus_Definitions.txt")
 loci
 
 myTab = copy(loci)
-myTab = myTab[,c(1,5,6,8)]
+myTab = myTab[,c(1,5,6,8,17)]
 
 dummy = data.table(region = 7,
                    rsID = "rs149995096:100479327:C:T",
                    phenotype = "eGFR_FEMALE",
-                   position = 100479327)
+                   position = 100479327,
+                   beta = -0.00312952)
 
 myTab = rbind(myTab,dummy)
 setorder(myTab,region,position)
@@ -60,6 +61,7 @@ ToDoList
 dumTab = foreach(i = 1:dim(ToDoList)[1])%do%{
   #i=1
   myRow = ToDoList[i,]
+  message("Woriking on ",myRow$phenotype)
   
   GWAMA = fread(myRow$statistic_path)
   matched = match(myTab[, rsID], GWAMA[, rsID])
@@ -72,6 +74,10 @@ dumTab = foreach(i = 1:dim(ToDoList)[1])%do%{
   GWAMA[,topPheno := myTab[,phenotype]]
   if(myRow$trait %nin% c("eGFR","UA")){
     GWAMA[,P_oneSided := pnorm(-abs(beta/SE))]
+    GWAMA[,beta_toComp := myTab[,beta]]
+    GWAMA[sign(beta)==sign(beta_toComp),P_oneSided := 1-P_oneSided]
+    GWAMA[,beta_toComp := NULL]
+    
   }
   GWAMA
   
