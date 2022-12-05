@@ -14,8 +14,9 @@ colocPlot <- function(x,
   #   ggplot2;
   #   tissues on x axis;
   #   genes on y axis;
-  #   legend at right hand side, red for H3, blue for H4, white neither nor, grey for 'NA'
+  #   legend at right hand side, red for H3, blue for H4, white neither nor, grey for 'NA' values
   
+  # Create matrix with posterior probabilities only (including transposition)
   gene.names             <- as.character(x[, 1])
   tissue.names           <- names(x)[-1]
   coloc.matrix           <- as.matrix(x[, -1])
@@ -23,8 +24,22 @@ colocPlot <- function(x,
   colnames(coloc.matrix) <- tissue.names
   coloc.matrix.t         <- t(coloc.matrix)
   
-  ggcp <- ggcorrplot(coloc.matrix.t,
-                     title = title) +
+  # Create matrix indicating which cells consists of 'NA' values
+  coloc.matrix.t.na                   <- is.na(coloc.matrix.t)
+  coloc.matrix.t.na.numeric           <- apply(coloc.matrix.t.na, 2, as.numeric)
+  rownames(coloc.matrix.t.na.numeric) <- tissue.names
+  colnames(coloc.matrix.t.na.numeric) <- gene.names
+  
+  # Substitute 'NA' values in original data by '0'
+  coloc.matrix.t.nato0                              <- coloc.matrix.t
+  coloc.matrix.t.nato0[is.na(coloc.matrix.t.nato0)] <- 0
+  
+  # Plotting
+  ggcp <- ggcorrplot(coloc.matrix.t.nato0,
+                     title = title,
+                     p.mat = coloc.matrix.t.na.numeric,
+                     sig.level = 0.5,
+                     insig = "pch") +
     scale_fill_gradient2(low = "red", mid = "white", high = "blue", na.value = "grey",
                          limits = c(-1, 1),
                          name = "PP",
@@ -36,8 +51,11 @@ colocPlot <- function(x,
 }
 
 # Example:
+  # # R package 'ggcorrplot' on aman
   # .libPaths("/net/ifs1/san_projekte/projekte/genstat/07_programme/rpackages/amanMRO/")
   # library("ggcorrplot")
+  # 
+  # # Data without 'NA' values
   # gene.names   <- toupper(letters)[c(1 : 10)]
   # tissue.names <- paste0("T", c(1 : 9))
   # test         <- data.frame(Trait = gene.names,
@@ -51,6 +69,12 @@ colocPlot <- function(x,
   #                            T8 = runif(5, -0.5, 1),
   #                            T9 = runif(5, -0.5, 0.75))
   # colocPlot(test, title = "Test")
+  # 
+  # # Data with 'NA' values
+  # test.na        <- test
+  # test.na[8, 3]  <- NA
+  # test.na[10, 5] <- NA
+  # colocPlot(test.na, title = "Test with 'NA' Values")
 
 
 

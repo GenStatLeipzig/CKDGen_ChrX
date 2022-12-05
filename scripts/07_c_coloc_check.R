@@ -255,19 +255,24 @@ res2
 #' 
 #' # Plot ####
 #' *** 
-#' We want to plot the 7 interesting genes in the three relevant tissues for ALL, MALE, FEMALE
+#' We want to plot the 7 interesting genes in the three relevant tissues for ALL, MALE, FEMALE and two additional genes that have kidney relevant function
 #' 
-#' * rows: tissue_genes
+#' * rows: genes_tissues
 #' * columns: phenotype_setting
 #' 
-#' --> create a matrix with 10x9 entries!
+#' --> create a matrix with 9x6 entries!
 #' 
 plotData1 = copy(ColocTable)
-plotData1 = plotData1[gene %in% candidates,]
-plotData1 = plotData1[grepl("Kidney_Cortex_Tubulointerstitial",trait2) | 
-                        grepl("Muscle_Skeletal",trait2) | 
-                        grepl("Whole_Blood",trait2),]
+myTab = data.table(read_excel("../tables/MainTable1_ms.xlsx",sheet=1))
+myTab[,...23:=NULL]
+myTab[,...24:=NULL]
+myTab[,...28:=NULL]
 
+candidate2 = myTab$`Coloc-genes`
+candidate2 = candidate2[!is.na(candidate2)]
+candidate2 = unlist(strsplit(candidate2,", "))
+candidate2
+plotData1 = plotData1[gene %in% candidate2,]
 plotData1[,phenotype := gsub("_.*","",trait1)]
 plotData1[,setting := gsub(".*_","",trait1)]
 
@@ -277,9 +282,9 @@ plotData1[,dumID1 := gsub("GE in ","",dumID1)]
 plotData1[,dumID1 := gsub(" ","",dumID1)]
 
 plotData2<-dcast(plotData1,
-               formula = dumID1 ~ dumID2,
-               value.var = c("PP.H4.abf"),
-               sep = "_")
+                 formula = dumID1 ~ dumID2,
+                 value.var = c("PP.H4.abf"),
+                 sep = "_")
 names(plotData2)
 M4<-as.matrix(plotData2[,-1])
 
@@ -315,42 +320,55 @@ plotData4 = as.data.frame(M)
 plotData4 = cbind(plotData3$dumID1,plotData4)
 names(plotData4)[1] = "dumID"
 
+dummy<-pmax(plotData4$UA_ALL,plotData4$UA_FEMALE,plotData4$UA_MALE,
+            plotData4$eGFR_ALL,plotData4$eGFR_FEMALE,plotData4$eGFR_MALE, na.rm = T)
 setDT(plotData4)
-plotData4[,dumID := gsub("_Kidney_Cortex_Tubulointerstitial"," (TI)",dumID)]
-plotData4[,dumID := gsub("_Muscle_Skeletal"," (MS)",dumID)]
-plotData4[,dumID := gsub("_Whole_Blood"," (WB)",dumID)]
-plotData4
+plotData4[,maxPPH4 := dummy]
+filt = dummy>=0.75 
+plotData5 = plotData4[filt,]
+plotData5[,gene := gsub("_.*","",dumID)]
+setorder(plotData5,-maxPPH4)
+plotData6 = copy(plotData5)
+plotData6 = plotData6[gene %in% c("CDK16","USP11") & !duplicated(gene) ]
 
-#' Change row order manually (ordered by alphabet as default in decast): CDKL5 - NDUF - ARM - TCEAL - MORF - ACSL - SLC
-#' 
-plotData4 = plotData4[c(16:18, 1:3, 10:12, 19:20, 4:6, 13:15, 7:9),]
+plotData7 = copy(plotData5)
+plotData7 = plotData7[gene %nin% c("CDK16","USP11"), ]
+plotData7 = plotData7[grepl("Kidney_Cortex_Tubulointerstitial",dumID) | 
+                        grepl("Muscle_Skeletal",dumID) | 
+                        grepl("Whole_Blood",dumID),]
+
+plotData8 = rbind(plotData7,plotData6)
+for(i in 1:9){
+  #i=1
+  gene = plotData8[i,gene]
+  x = grep(gene,myTab$`Coloc-genes`)
+  plotData8[i,locus := myTab[x,region]]
+}
+setorder(plotData8,-locus)
+
+plotData8[,dumID := gsub("_Kidney_Cortex_Tubulointerstitial"," (TI)",dumID)]
+plotData8[,dumID := gsub("_Muscle_Skeletal"," (MS)",dumID)]
+plotData8[,dumID := gsub("_Whole_Blood"," (WB)",dumID)]
+plotData8[,dumID := gsub("_Thyroid"," (Thy)",dumID)]
+plotData8[,dumID := gsub("_Stomach"," (Sto)",dumID)]
+plotData8[,dumID := paste0(locus,": ",dumID)]
+
+names(plotData8) = gsub("_"," (",names(plotData8))
+names(plotData8) = gsub("ALL","ALL)",names(plotData8))
+names(plotData8) = gsub("MALE","MALE)",names(plotData8))
+plotData8
+
 
 #' Change row order manually (ordered by alphabet as default in decast): ALL - MALE - FEMALE
 #' 
-plotData4 = plotData4[,c(1,5,7,6,2,4,3)]
-plotData5 = copy(plotData4)
-dummy<-pmax(plotData5$UA_ALL,plotData5$UA_FEMALE,plotData5$UA_MALE,
-            plotData5$eGFR_ALL,plotData5$eGFR_FEMALE,plotData5$eGFR_MALE, na.rm = T)
-filt = dummy>=0.75 
-plotData5 = plotData5[filt,]
-plotData5 = plotData5[c(2,3,4,6,5,1,7)]
+setDF(plotData8)
+colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "coloc plot")
 
-setDF(plotData4)
-setDF(plotData5)
-colocPlot(x = plotData4,title = "coloc plot")
-colocPlot(x = plotData5,title = "reduced coloc plot")
+myPlot1 = colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "")
 
-myPlot1 = colocPlot(x = plotData4,title = "")
-myPlot2 = colocPlot(x = plotData5,title = "")
-
-tiff(filename = "../figures/SupplementalFigure_ColocPlot_long.tiff", 
-     width = 1000, height = 1350, res=250, compression = 'lzw')
+tiff(filename = "../figures/MainFigure5_ColocPlot.tiff",
+     width = 1350, height = 1350, res=250, compression = 'lzw')
 myPlot1
-dev.off()
-
-tiff(filename = "../figures/SupplementalFigure_ColocPlot_reduced.tiff", 
-     width = 1800, height = 1350, res=250, compression = 'lzw')
-myPlot2
 dev.off()
 
 #' # Sessioninfo ####
