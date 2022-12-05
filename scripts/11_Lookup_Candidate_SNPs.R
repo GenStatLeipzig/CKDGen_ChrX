@@ -109,7 +109,7 @@ cols2keep = c("STUDY", "DISEASE/TRAIT", "INITIAL SAMPLE SIZE", "REGION" , "CHR_I
 colsOut = setdiff(colnames(knownGWAS), cols2keep)
 knownGWAS[, get("colsOut") := NULL]
 
-cols2keep = c("N", "effect_allele", "EAF", "infoScore", "I2", "beta", "SE", "P", "logP", "invalid_assoc", "reason_for_exclusion")
+cols2keep = c("position", "N", "effect_allele", "EAF", "infoScore", "I2", "beta", "SE", "P", "logP", "invalid_assoc", "reason_for_exclusion")
 
 matched = match(knownGWAS[, SNPS], eGFR[, shortID])
 eGFR = eGFR[matched, ]
@@ -174,7 +174,7 @@ write.table(knownGWAS, file = "../results/11_Look_Up_GWAS_hits_results.txt", col
 #smaller table with only eGFR, BUN and UA
 #plus checks for reproducing hits
 cols2keep = c("STUDY", "DISEASE/TRAIT", "INITIAL SAMPLE SIZE", "STRONGEST SNP-RISK ALLELE", "SNPS", "CHR_ID", "CHR_POS", "RISK ALLELE FREQUENCY", "P-VALUE", "OR or BETA", 
-              "eGFR.N", "eGFR.effect_allele", "eGFR.EAF", "eGFR.infoScore", "eGFR.I2", "eGFR.beta", "eGFR.SE", "eGFR.P", "eGFR.logP", "eGFR.invalid_assoc", 
+              "eGFR.position", "eGFR.N", "eGFR.effect_allele", "eGFR.EAF", "eGFR.infoScore", "eGFR.I2", "eGFR.beta", "eGFR.SE", "eGFR.P", "eGFR.logP", "eGFR.invalid_assoc", 
               "eGFR.reason_for_exclusion", "BUN.N", "BUN.effect_allele", "BUN.EAF", "BUN.infoScore", "BUN.I2", "BUN.beta", "BUN.SE", "BUN.P", "BUN.logP",
               "BUN.invalid_assoc", "BUN.reason_for_exclusion", "UA.N", "UA.effect_allele", "UA.EAF", "UA.infoScore", "UA.I2", "UA.beta", "UA.SE", "UA.P", 
               "UA.logP", "UA.invalid_assoc", "UA.reason_for_exclusion")
