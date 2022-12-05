@@ -90,7 +90,7 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   if(plotGenes==T){
     myGene = x$candidateGene
     myNovelty = x$Novelty
-    mySexIA = x$SexInteraction
+    mySexIA = x$sexIA
     myPD<-data.table(myX,myY,myColor, myLabel,myFlag,myPhenotype,myGene,myNovelty,mySexIA)
   }else{
     myPD<-data.table(myX,myY,myColor, myLabel,myFlag,myPhenotype)
@@ -201,47 +201,41 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   
   #myPlot <- myPlot + geom_segment(data=dumTab, aes(x = breaks, xend = breaks, y = 0, yend = 0 + 0.5), colour = "black")
   #myPlot <- myPlot + geom_text(data=dumTab,aes(x=breaks, y=-0.75, label=label), colour = "black")
-  
+  myPD[grepl("yes",myNovelty)]
   # add genenames 
-  myPlot2 <-myPlot + 
-    # top: novel & sex-unspecific hits
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T & is.na(mySexIA)),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-5,ymax+5),fontface = 'bold') + 
-    # top: novel & male-specific hits
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T & mySexIA == "male-specific"),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-10,ymax),fontface = 'bold.italic',color = "#4575B4" ) + 
+  myPlot2 <- myPlot + 
+    
     # top: novel & female-specific hits
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==T & mySexIA == "female-specific"),
+    geom_label_repel(data = subset(myPD, myY>=7.3 & !is.na(myNovelty) & myNovelty=="yes_sexia" & mySexIA=="female"),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-10,ymax),fontface = 'bold.italic',color = "#D73027") + 
-    # top: known & male-specific hit
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F & mySexIA == "male-specific"),
+                     ylim = c(ymax-1.5,ymax+5),fontface = 'bold.italic',color = "#D73027") + 
+    
+    # top: known & female-specific hits
+    geom_text_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="no_sexia"& mySexIA=="female"),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-15,ymax-10),fontface = 'italic',color = "#4575B4") +
-    # top: known & sex-unspecific hit part 1
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F & is.na(mySexIA) & !grepl("BEX",myGene)),
+                     ylim = c(ymax-1.5,ymax+5),fontface = 'bold.italic',color = "#D73027") + 
+    # top: known & male-specific hits
+    geom_text_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="no_sexia"& mySexIA=="male"),
+                    aes(x=myX, y=myY, label = myGene),
+                    ylim = c(ymax-2.5,ymax+5),fontface = 'bold.italic',color = "#4575B4") + 
+    # bottom: known & male-specific hits
+    geom_text_repel(data = subset(myPD, myY<=-7.3  & !is.na(myNovelty) & myNovelty=="no_sexia"& mySexIA=="male"),
+                    aes(x=myX, y=myY, label = myGene),
+                    ylim = c(ymin+2.5,ymin-5),fontface = 'bold.italic',color = "#4575B4") + 
+    
+    # top: novel & sex-unspecific hits
+    geom_label_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="yes"),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-15,ymax-10)) +
-    # top: known & sex-unspecific hit part 2
-    geom_label_repel(data = subset(myPD, myFlag=="top" & myY>=7.3 & myNovelty==F & is.na(mySexIA) & grepl("BEX",myGene)),
+                     ylim = c(ymax-5,ymax-1.5),fontface = 'bold') + 
+    
+    # top: known & sex-unspecific hits
+    geom_text_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="no"),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-15,ymax-10),xlim = c(79925246,98890204)) +
-    # bottom: novel & sex-unspecific hits
-    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==T),
+                     ylim = c(ymax-15,ymax-5)) + 
+    # bottom: known & sex-unspecific hits
+    geom_text_repel(data = subset(myPD, myY<=-7.3  & !is.na(myNovelty) & myNovelty=="no"),
                      aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymin-5,ymin+5),fontface = 'bold') + 
-    # bottom: known & sex-unspecific hits part 1
-    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==F & !grepl("BEX",myGene) & !grepl("ARM",myGene) & !grepl("DCAF",myGene)),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymin,ymin+10)) +
-    # bottom: known & sex-unspecific hits part 2
-    geom_label_repel(data = subset(myPD, myFlag=="bottom" & myY<=-7.3 & myNovelty==F & 
-                                     (grepl("BEX",myGene) | grepl("ARM",myGene) | grepl("DCAF",myGene))),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymin,ymin+10),xlim = c(106168067,118082383)) 
-  
+                     ylim = c(ymin-5,ymin+5))
   
   myPlot2
   

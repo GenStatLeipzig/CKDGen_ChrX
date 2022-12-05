@@ -32,106 +32,6 @@ UA_male     = fread("../data/CKDGen_ChrX_sumStat_UA_MALE.gz")
 UA_female   = fread("../data/CKDGen_ChrX_sumStat_UA_FEMALE.gz")
 UA_all      = fread("../data/CKDGen_ChrX_sumStat_UA_ALL.gz")
 
-#' # Check sex-specificity ####
-#' ***
-erg1 = rbind(eGFR_male,eGFR_female,eGFR_all,UA_male,UA_female,UA_all)
-mySNPs_eGFR = unique(erg1[grepl("eGFR",phenotype) & P<=5e-8 & invalid_assoc ==F,rsID])
-mySNPs_UA = unique(erg1[grepl("UA",phenotype) & P<=5e-8 & invalid_assoc ==F,rsID])
-
-eGFR_male2 = copy(eGFR_male)[rsID %in% mySNPs_eGFR,]
-eGFR_female2 = copy(eGFR_female)[rsID %in% mySNPs_eGFR,]
-UA_male2 = copy(UA_male)[rsID %in% mySNPs_UA,]
-UA_female2 = copy(UA_female)[rsID %in% mySNPs_UA,]
-table(eGFR_female2$rsID == eGFR_male2$rsID)
-table(UA_female2$rsID == UA_male2$rsID)
-
-dumTab1 = foreach(i = 1:dim(eGFR_female2)[1])%do%{
-  #i=1
-  test = interactionTest(mean1 = eGFR_male2[i,beta],
-                         se1 = eGFR_male2[i,SE],
-                         mean2 = eGFR_female2[i,beta],
-                         se2 = eGFR_female2[i,SE])
-  
-  res = data.table(rsID = eGFR_female2[i,rsID],
-                   pos = eGFR_female2[i,position],
-                   EA = eGFR_female2[i,effect_allele],
-                   OA = eGFR_female2[i,other_allele],
-                   NStudies_F = eGFR_female2[i,numberOfStudies],
-                   NSamples_F = eGFR_female2[i,N],
-                   info_F = eGFR_female2[i,infoScore],
-                   EAF_F = eGFR_female2[i,EAF],
-                   beta_F = eGFR_female2[i,beta],
-                   SE_F = eGFR_female2[i,SE],
-                   pval_F = eGFR_female2[i,P],
-                   I2_F = eGFR_female2[i,I2],
-                   NStudies_M = eGFR_male2[i,numberOfStudies],
-                   NSamples_M = eGFR_male2[i,N],
-                   info_M = eGFR_male2[i,infoScore],
-                   EAF_M = eGFR_male2[i,EAF],
-                   beta_M = eGFR_male2[i,beta],
-                   SE_M = eGFR_male2[i,SE],
-                   pval_M = eGFR_male2[i,P],
-                   I2_M = eGFR_male2[i,I2], 
-                   IA_diff = test$meandiff,
-                   IA_SE = test$meandiff_se, 
-                   IA_pval = test$meandiff_p)
-  
-  res
-}
-IA_eGFR = rbindlist(dumTab1)
-dumTab2 = foreach(i = 1:dim(UA_female2)[1])%do%{
-  #i=1
-  test = interactionTest(mean1 = UA_male2[i,beta],
-                         se1 = UA_male2[i,SE],
-                         mean2 = UA_female2[i,beta],
-                         se2 = UA_female2[i,SE])
-  
-  res = data.table(rsID = UA_female2[i,rsID],
-                   pos = UA_female2[i,position],
-                   EA = UA_female2[i,effect_allele],
-                   OA = UA_female2[i,other_allele],
-                   NStudies_F = UA_female2[i,numberOfStudies],
-                   NSamples_F = UA_female2[i,N],
-                   info_F = UA_female2[i,infoScore],
-                   EAF_F = UA_female2[i,EAF],
-                   beta_F = UA_female2[i,beta],
-                   SE_F = UA_female2[i,SE],
-                   pval_F = UA_female2[i,P],
-                   I2_F = UA_female2[i,I2],
-                   NStudies_M = UA_male2[i,numberOfStudies],
-                   NSamples_M = UA_male2[i,N],
-                   info_M = UA_male2[i,infoScore],
-                   EAF_M = UA_male2[i,EAF],
-                   beta_M = UA_male2[i,beta],
-                   SE_M = UA_male2[i,SE],
-                   pval_M = UA_male2[i,P],
-                   I2_M = UA_male2[i,I2], 
-                   IA_diff = test$meandiff,
-                   IA_SE = test$meandiff_se, 
-                   IA_pval = test$meandiff_p)
-  
-  res
-}
-IA_UA = rbindlist(dumTab2)
-
-IA_eGFR[,phenotype := "eGFR"]
-IA_UA[,phenotype := "UA"]
-IA_eGFR[,IA_pval_adj := p.adjust(p=IA_pval, method = "fdr")]
-IA_UA[,IA_pval_adj := p.adjust(p=IA_pval, method = "fdr")]
-IA_eGFR[,IA_pval_adj2 := p.adjust(p=IA_pval, method = "bonferroni")]
-IA_UA[,IA_pval_adj2 := p.adjust(p=IA_pval, method = "bonferroni")]
-
-IA = rbind(IA_eGFR,IA_UA)
-myFDR<- addHierarchFDR(pvalues = IA[,IA_pval], 
-                       categs = IA[,phenotype],quiet = F)
-IA[,hierFDR := myFDR$hierarch_fdr5proz]
-IA[,table(hierFDR,phenotype)]
-IA[,table(hierFDR,IA_pval_adj<=0.05)]
-IA[,table(hierFDR,IA_pval_adj2<=0.05)]
-
-IA[hierFDR==T & pval_F <5e-8,sexType := "female-specific"]
-IA[hierFDR==T & pval_M <5e-8,sexType := "male-specific"]
-IA[hierFDR==F ,sexType := NA]
 
 #' # Filter data ####
 #' ***
@@ -180,40 +80,43 @@ head(plotData)
 
 #' # Add genes and novelty ####
 #' ***
+#' I use Markus annotation table ...
+#'  
 #' I add the information about candidate genes, novelty, and sex-specificity manually, as there is no other way right now. 
 #'
 #' * Candidate genes: taken from excel sheet table1_2022-10-15.xlsx (stored locally - not pretty!)
 #' * Novelty: taken from excel sheet table1_2022-10-15.xlsx (stored locally - not pretty!)
 #' * IA 
-myTab = fread("../results/01_Locus_Definitions.txt")
-myTab[,CandidateGenes := c("FAM9B","CDKL5","CDK16","EDA2R, \nAR","BRWD3","TSPAN6","ARMCX4, \nBEX4",
-                           "BEX, \nTCEAL","CLDN2","ACSL4","SLC25A43","DCAF12L1","MST4","HPRT1",
-                           "DUSP9","EDA2R, \nAR","CITED1, \nPIN4","ARMCX, \nADH4","BEX, \nTCEAL","DCAF12L1","HPRT1","DUSP9")]
-myTab[,Novelty := c(F,F,F,T,T,T,F,F,T,T,F,F,F,F,F,T,F,F,F,F,F,F)]
-myTab[,SexInteraction := c("male-specific",NA,NA,"male-specific",NA,NA,NA,
-                           NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)]
 
-stopifnot(sum(is.element(myTab$rsID,plotData$SNP))==22)
-stopifnot(sum(is.element(myTab$rsID,IA$rsID))==22)
+myTab = data.table(read_excel("../tables/MainTable1_ms.xlsx",sheet=1))
+myTab[,...23:=NULL]
+myTab[,...24:=NULL]
+myTab[,...28:=NULL]
 
-plotData[SNP %in% myTab$rsID]
+myTab[,CandidateGenes := genes]
+myTab[,CandidateGenes := gsub(", ",",\n",CandidateGenes)]
+
+stopifnot(sum(is.element(myTab$indexSNP,plotData$SNP))==23)
+
+plotData[SNP %in% myTab$indexSNP]
 plotData[,matchID := paste(SNP,phenotype,sep="::")]
-myTab[,matchID := paste(rsID,phenotype,sep="::")]
+myTab[,matchID := paste(indexSNP,bestSetting,sep="::")]
 
 matched1 = match(plotData$matchID,myTab$matchID)
+table(is.na(matched1))
 plotData[,region_num := myTab[matched1,region]]
 plotData[,region_chr := paste("region",myTab[matched1,region])]
 
 plotData[,candidateGene :=myTab[matched1,CandidateGenes]]
-plotData[,Novelty :=myTab[matched1,Novelty]]
-plotData[,SexInteraction := myTab[matched1,SexInteraction]]
-
-plotData[SNP == "rs149995096:100479327:C:T",region_num := 7]
-plotData[SNP == "rs149995096:100479327:C:T",candidateGene := "DRP2"]
-plotData[SNP == "rs149995096:100479327:C:T",Novelty := T]
-plotData[SNP == "rs149995096:100479327:C:T",SexInteraction := "female-specific"]
+plotData[,NoveltySexIA :=myTab[matched1,novelty]]
+table(plotData$NoveltySexIA)
+plotData[!is.na(NoveltySexIA)]
+plotData[grepl("sex",NoveltySexIA)]
+plotData[grepl("sex",NoveltySexIA),sexIA:=c("male","male","female","male","female","male")]
 
 save(plotData,file = "../results/F1_MiamiPlot_PlotData.RData")
+
+plotData[region_num %in% c(7,8) & is.na(sexIA), NoveltySexIA:=NA]
 
 #' # Plot ####
 #' ***
