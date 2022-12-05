@@ -75,7 +75,8 @@ dumTab = foreach(i = 1:dim(ToDoList)[1])%do%{
   if(myRow$trait %nin% c("eGFR","UA")){
     GWAMA[,P_oneSided := pnorm(-abs(beta/SE))]
     GWAMA[,beta_toComp := myTab[,beta]]
-    GWAMA[sign(beta)==sign(beta_toComp),P_oneSided := 1-P_oneSided]
+    GWAMA[region<16 & sign(beta)==sign(beta_toComp),P_oneSided := 1-P_oneSided]
+    GWAMA[region>=16 & sign(beta)!=sign(beta_toComp),P_oneSided := 1-P_oneSided]
     GWAMA[,beta_toComp := NULL]
     
   }
