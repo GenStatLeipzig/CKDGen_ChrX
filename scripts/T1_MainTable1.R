@@ -34,7 +34,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(paste0(projectpath,"scripts/"))
 
@@ -196,6 +196,17 @@ tab1[filt,coloc_sexIA:="male driven"]
 
 tab1
 
+#' # Round ####
+#' ***
+#' For publication, we only want to report two significant digits for EAF, beta, SE, pvalue, explVar, and pvalue_sexIA 
+tab1[,EAF := signif(EAF,2)]
+tab1[,beta := signif(beta,2)]
+tab1[,SE := signif(SE,2)]
+tab1[,pvalue := signif(pvalue,2)]
+tab1[,explVar := signif(explVar,2)]
+tab1[,pvalue_sexIA := signif(pvalue_sexIA,2)]
+tab1
+
 #' # Save ####
 #' ***
 description = data.table(column = names(tab1),
@@ -225,7 +236,7 @@ description = data.table(column = names(tab1),
 tosave4 = data.table(data = c("tab1","description"), 
                      SheetNames = c("Table1","Description"))
 if(dir.exists("../tables/")==F) dir.create("../tables/") 
-excel_fn = "../tables/MainTable1.xlsx"
+excel_fn = "../tables/MainTable1_230130.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
          SheetNames=tosave4$SheetNames, 
