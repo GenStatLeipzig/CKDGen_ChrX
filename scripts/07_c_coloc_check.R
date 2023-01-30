@@ -41,7 +41,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(paste0(projectpath,"scripts/"))
 source("../helperFunctions/colocPlot.R")
@@ -260,7 +260,9 @@ res2
 #' * rows: genes_tissues
 #' * columns: phenotype_setting
 #' 
-#' --> create a matrix with 9x6 entries!
+#' Feedback Markus (30.01.2023): exclude NDUFB11!
+#' 
+#' --> create a matrix with 8x6 entries!
 #' 
 plotData1 = copy(ColocTable)
 myTab = data.table(read_excel("../tables/MainTable1_ms.xlsx",sheet=1))
@@ -272,6 +274,7 @@ candidate2 = myTab$`Coloc-genes`
 candidate2 = candidate2[!is.na(candidate2)]
 candidate2 = unlist(strsplit(candidate2,", "))
 candidate2
+candidate2 = candidate2[-4]
 plotData1 = plotData1[gene %in% candidate2,]
 plotData1[,phenotype := gsub("_.*","",trait1)]
 plotData1[,setting := gsub(".*_","",trait1)]
@@ -338,7 +341,7 @@ plotData7 = plotData7[grepl("Kidney_Cortex_Tubulointerstitial",dumID) |
                         grepl("Whole_Blood",dumID),]
 
 plotData8 = rbind(plotData7,plotData6)
-for(i in 1:9){
+for(i in 1:8){
   #i=1
   gene = plotData8[i,gene]
   x = grep(gene,myTab$`Coloc-genes`)
@@ -366,7 +369,7 @@ colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "coloc plot")
 
 myPlot1 = colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "")
 
-tiff(filename = "../figures/MainFigure5_ColocPlot.tiff",
+tiff(filename = "../figures/MainFigure5_ColocPlot_230130.tiff",
      width = 1350, height = 1350, res=250, compression = 'lzw')
 myPlot1
 dev.off()
