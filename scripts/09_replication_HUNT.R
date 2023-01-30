@@ -20,7 +20,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(paste0(projectpath,"scripts/"))
 
@@ -296,6 +296,8 @@ colsOut<-setdiff(colnames(result),myNames)
 result[,get("colsOut"):=NULL]
 setcolorder(result,myNames)
 result
+
+cor.test(result$beta_CKDGen,result$beta_HUNT)
 
 data.description = data.table(column = names(result),
                               description = c("region according to locus definition (see Table 1)",
