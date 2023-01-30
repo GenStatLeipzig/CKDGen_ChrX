@@ -169,7 +169,7 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
     myPlot <- myPlot + scale_colour_manual(values= rep(rev(brewer.pal(5, "Dark2")), 23))
   }else { 
     myPlot <- myPlot + scale_colour_manual(values=c("#000000", "#666666","#4575B4","#D73027"),
-                                           labels=c("non sig.","ALL",     "MALES", "FEMALES"))
+                                           labels=c("not gw. sig.","ALL",     "MALES", "FEMALES"))
   }
   if(useBasePosition == T){
     myPlot <- myPlot + coord_cartesian(xlim=c(min(myX)-1,max(myX)+1),ylim=c(ymin-1,ymax+1), expand = FALSE)
@@ -180,79 +180,22 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   myPlot <- myPlot + scale_x_continuous(name=xlabel,labels=xAL, breaks=xAP)
   myPlot <- myPlot + scale_y_continuous(name=ylabel,breaks=pretty_breaks(n=num_breaks_y)) 
   myPlot <- myPlot + ggtitle(title,subtitle = mySubtitle)
-  myPlot <- myPlot + labs(color = "Legend")
-  # myPlot <- myPlot + theme(legend.position = c(0.8, 0.9)) 
-  myPlot <- myPlot + guides(color="none")
+  myPlot <- myPlot + labs(color = "Best setting")
+  myPlot <- myPlot + theme(legend.position = c(0.1,0.1)) 
   myPlot <- myPlot + theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
   myPlot <- myPlot + theme(axis.text.y = element_text(colour="black",size = 12),axis.line.y = element_line(colour="black"))
   myPlot <- myPlot + theme(panel.background = element_blank())
   myPlot <- myPlot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
   #myPlot <- myPlot + theme(axis.line = element_line(colour="black"))
-  myPlot <- myPlot + geom_hline(yintercept = 0)
+  #myPlot <- myPlot + geom_hline(yintercept = 0)
   if (!is.null(hline1)) {myPlot <- myPlot + geom_hline(yintercept = hline1,colour="#990000", linetype="dashed")}
   if (!is.null(hline2)) {myPlot <- myPlot + geom_hline(yintercept = hline2,colour="#990000", linetype="dashed")}
   if (!is.null(sugline1)) {myPlot <- myPlot + geom_hline(yintercept = sugline1,colour="#000099", linetype="dotted")}
   if (!is.null(sugline2)) {myPlot <- myPlot + geom_hline(yintercept = sugline2,colour="#000099", linetype="dotted")}
+  myPlot
   
-  # x axis line
-  # myPlot <- myPlot + geom_segment(x = xAP[1], xend = xAP[1], y = 0, yend = 0 + 0.5, colour = "black")
-  # myPlot <- myPlot + geom_text(x=xAP[1], y=-0.5, label=xAL[1], colour = "black")
-  #dumTab<-data.table(label=xAL,num=1:23,breaks=xAP)
   
-  #myPlot <- myPlot + geom_segment(data=dumTab, aes(x = breaks, xend = breaks, y = 0, yend = 0 + 0.5), colour = "black")
-  #myPlot <- myPlot + geom_text(data=dumTab,aes(x=breaks, y=-0.75, label=label), colour = "black")
-  myPD[grepl("yes",myNovelty)]
-  # add genenames 
-  myPlot2 <- myPlot + 
-    
-    # top: novel & female-specific hits
-    geom_label_repel(data = subset(myPD, myY>=7.3 & !is.na(myNovelty) & myNovelty=="yes_sexia" & mySexIA=="female"),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-1.5,ymax+5),fontface = 'bold.italic',color = "#D73027") + 
-    
-    # top: known & female-specific hits
-    geom_text_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="no_sexia"& mySexIA=="female"),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-1.5,ymax+5),fontface = 'bold.italic',color = "#D73027") + 
-    # top: known & male-specific hits
-    geom_text_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="no_sexia"& mySexIA=="male"),
-                    aes(x=myX, y=myY, label = myGene),
-                    ylim = c(ymax-2.5,ymax+5),fontface = 'bold.italic',color = "#4575B4") + 
-    # bottom: known & male-specific hits
-    geom_text_repel(data = subset(myPD, myY<=-7.3  & !is.na(myNovelty) & myNovelty=="no_sexia"& mySexIA=="male"),
-                    aes(x=myX, y=myY, label = myGene),
-                    ylim = c(ymin+2.5,ymin-5),fontface = 'bold.italic',color = "#4575B4") + 
-    
-    # top: novel & sex-unspecific hits
-    geom_label_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="yes"),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-5,ymax-1.5),fontface = 'bold') + 
-    
-    # top: known & sex-unspecific hits
-    geom_text_repel(data = subset(myPD, myY>=7.3  & !is.na(myNovelty) & myNovelty=="no"),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymax-15,ymax-5)) + 
-    # bottom: known & sex-unspecific hits
-    geom_text_repel(data = subset(myPD, myY<=-7.3  & !is.na(myNovelty) & myNovelty=="no"),
-                     aes(x=myX, y=myY, label = myGene),
-                     ylim = c(ymin-5,ymin+5))
-  
-  myPlot2
-  
-  # check time for saving plot!
-  timeplot0 = Sys.time()
-  message("Create PDF")
-  
-  pdf_from_png(code2parseOrPlot = myPlot2, 
-               pdf_filename = out_name,
-               weite = 12,
-               laenge = 8,
-               einheiten = "in",
-               resolution = 150)
-  
-  message("\nTOTAL TIME : " ,formateTimediff(Sys.time()-timeplot0))
-  
-  if(returnObject) return(myPlot2)
-  if(returnObject ==F) print(myPlot2)
+  if(returnObject) return(myPlot)
+  if(returnObject ==F) print(myPlot)
   
 }
