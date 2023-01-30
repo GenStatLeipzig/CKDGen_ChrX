@@ -246,6 +246,7 @@ source("../SourceFile_forostar.R")
   tab5_a = ShorterTable
   load("../results/04_lookup_TopHits_allSettings_logP.RData")
   tab5_b = ShorterTable_v2
+  tab5_c = fread("../results/08_b_coloc_overlap.txt")
   
   names(tab5_a)[1:4] = names(tab4)[1:4]
   names(tab5_b)[1:4] = names(tab4)[1:4]
@@ -270,6 +271,31 @@ source("../SourceFile_forostar.R")
                                             "SNP with lowest p-value in this locus",
                                             "Best phenotype and setting",
                                             "-log10 transformed p-value in phenotype indicated in column name and setting ALL (one-sided p-value for BUN, CKD, UACR, MA, and gout; two-sided for eGFR and UA)"))
+  
+  tab5_c[,region1 := gsub("Region ","",region1)]
+  tab5_c[,region2 := gsub("Region ","",region2)]
+  tab5_c[,region1 := as.numeric(region1)]
+  tab5_c[,region2 := as.numeric(region2)]
+  setnames(tab5_c,"region1","locus1")
+  setnames(tab5_c,"region2","locus2")
+  
+  matched = match(tab5_c$locus1,tab4$locus_NR)
+  tab5_c[,cytoband := tab4[matched,cytoband]]
+  tab5_c = tab5_c[,c(1,2,11,3:10)]
+  
+  tab5_c_annot = data.table(column = names(tab5_c),
+                          description = c("Number of associated loci for eGFR",
+                                          "Number of associated loci for UA",
+                                          "Genomic cytoband of gene",
+                                          "Analyzed phenotype and setting of eGFR",
+                                          "Analyzed phenotype and setting of UA",
+                                          "Number of SNPs included in co-localization analysis per locus",
+                                          "Posterior probability for hypothesis 0: neither trait associated",
+                                          "Posterior probability for hypothesis 1: only trait 1 associated (eGFR)",
+                                          "Posterior probability for hypothesis 2: only trait 2 associated (UA)",
+                                          "Posterior probability for hypothesis 3: both trait associated, but different signals",
+                                          "Posterior probability for hypothesis 4: both trait associated, shared signal"))
+  
 }
 
 #' # Get Sup Tab 6 ####
