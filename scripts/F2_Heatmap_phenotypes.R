@@ -73,6 +73,9 @@ MALE[, Cytoband := paste0("MALE - ", Cytoband)]
 toPlot = rbindlist(list(ALL, FEMALE, MALE), use.names = T)
 setkey(toPlot, "Locus")
 
+#plot -beta_eGFR so that colours are easier to compare
+toPlot[, beta_eGFR := beta_eGFR * (-1)]
+
 #short rsIDs
 shorts = apply(toPlot, 1, function(x) return(unlist(strsplit(x[3], split =":"))[1]))
 shorts[shorts == "chr23"] = "chr23:152898260"
