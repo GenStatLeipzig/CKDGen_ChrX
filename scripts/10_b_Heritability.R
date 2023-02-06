@@ -20,7 +20,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_angmar.R")
 
 setwd(paste0(projectpath,"scripts/"))
 
@@ -85,7 +85,7 @@ ggplot(plotdata, aes(x=phenotype, y=h2, fill=sex)) +
            position=position_dodge()) +
   geom_errorbar(aes(ymin=lowerbound, ymax=upperbound), width=.2,
                 position=position_dodge(.9)) + 
-  scale_fill_manual(values=c("#B2182B","#2166AC"),labels = c("females","males"))+
+  scale_fill_manual(values=c("#82B446","#B2182B","#2166AC"),labels = c("combined","females","males"))+
   labs(x="phenotype",
        y = "heritability",
        fill = "sex") +
@@ -100,15 +100,13 @@ ggplot(plotdata, aes(x=phenotype, y=h2, fill=sex)) +
 
 plotdata2 = copy(plotdata)
 plotdata2 = plotdata2[adjustment == "Adj"]
-plotdata2 = rbind(plotdata2,plotdata[c(1,3)])
-plotdata2[c(5,6),sex := "combined"]
 
-ggplot(plotdata2, aes(x=phenotype, y=h2, fill=sex)) + 
+myPlot = ggplot(plotdata2, aes(x=phenotype, y=h2, fill=sex)) + 
   geom_bar(stat="identity", color="black", 
            position=position_dodge()) +
   geom_errorbar(aes(ymin=lowerbound, ymax=upperbound), width=.2,
                 position=position_dodge(.9)) + 
-  scale_fill_manual(values=c("#82B446","#B2182B","#2166AC"),labels = c("combined","females","males"))+
+  scale_fill_manual(values=c("#82B446","#B2182B","#2166AC"),labels = c("ALL","FEMALES","MALES"))+
   labs(x="phenotype",
        y = "X-heritability",
        fill = "sex") +
@@ -121,11 +119,27 @@ ggplot(plotdata2, aes(x=phenotype, y=h2, fill=sex)) +
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 12))
 
-#' # Save results ####
+myPlot
+
+tiff(filename = "../figures/SupplementalFigure_Heritability_UKBB.tiff", 
+     width = 2400, height = 1800, res=300, compression = 'lzw')
+myPlot
+dev.off()
+
+#' # Check difference ####
 #' ***
 myTab = copy(dumTab)
 myTab[,path_fn := NULL]
 myTab[,results := NULL]
+
+#' Difference in eGFR
+interactionTest(mean1 = myTab[2,h2],se1 = myTab[2,h2_se],mean2 = myTab[6,h2], se2 = myTab[6,h2_se]) 
+
+#' Difference in UA
+interactionTest(mean1 = myTab[4,h2],se1 = myTab[4,h2_se],mean2 = myTab[8,h2], se2 = myTab[8,h2_se]) 
+
+#' # Save results ####
+#' ***
 
 write.table(myTab, file = "../results/10_GCTA_heritability.txt")
 
