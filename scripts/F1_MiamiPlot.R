@@ -18,7 +18,7 @@
 #' ***
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_angmar.R")
 source("../helperFunctions/miamiPlot.R")
 
 setwd(paste0(projectpath,"scripts/"))
@@ -115,12 +115,11 @@ plotData[grepl("sex",NoveltySexIA)]
 plotData[grepl("sex",NoveltySexIA),sexIA:=c("male","male","female","male","male","female")]
 
 save(plotData,file = "../results/F1_MiamiPlot_PlotData.RData")
-
-#plotData[region_num %in% c(7,8) & is.na(sexIA), NoveltySexIA:=NA]
+load("../results/F1_MiamiPlot_PlotData.RData")
 
 #' # Plot ####
 #' ***
-mytitle = paste0("Miami Plot; top: eGFR, buttom: UA") 
+#mytitle = paste0("Miami Plot; top: eGFR, buttom: UA") 
 
 ymaxpar1 = ifelse(plotData[flag=="top",max(logP,na.rm=T)] <7, 8,plotData[flag=="top",max(logP,na.rm=T)]+1)
 ymaxpar2 = ifelse(plotData[flag=="bottom",max(logP,na.rm=T)] <7, 8,plotData[flag=="bottom",max(logP,na.rm=T)]+1)
@@ -128,9 +127,9 @@ ymaxpar2 = ifelse(plotData[flag=="bottom",max(logP,na.rm=T)] <7, 8,plotData[flag
 plot1 = miamiPlot(x=copy(plotData),
                  ymax = ymaxpar1,
                  ymin = -ymaxpar2,
-                 title = mytitle,
+                 title = "",
                  xlabel = "",
-                 ylabel=expression(paste("UA: ",log[10](p),"; eGFR: ",-log[10](p))),
+                 ylabel=expression(paste("UA: ",log[10](p),"                                                                                 eGFR: ",-log[10](p))),
                  hline1=-log10(5e-8),hline2=log10(5e-8),
                  sugline1=-log10(1e-6),sugline2=log10(1e-6),
                  highlight=T, diffsize = T,num_breaks_y=10,
@@ -148,8 +147,15 @@ cyto = cyto[!duplicated(cytoband)]
 cyto = cyto[,c(2,5)]
 setorder(cyto,position)
 cyto[,cytoband := gsub("X","",cytoband)]
+cyto =rbind(cyto,cyto[c(8,14)])
+cyto[16,cytoband := "q22.1-3"]
+cyto[16,position := 103029136]
+cyto[17,cytoband := "q26.2-3"]
+cyto[17,position := 132524288]
+cyto = cyto[c(1:6,10:12,15:17)]
+setorder(cyto,position)
 
-plot2 <- plot1 + geom_text(data=cyto,aes(x=position, y=0, label=cytoband), colour = "black",size=2.5)
+plot2 <- plot1 + geom_text(data=cyto,aes(x=position, y=0, label=cytoband), colour = "black",size=4)
 plot2
 
 # add gene names
@@ -188,7 +194,7 @@ plot3 <- plot2 +
   
   # top: known & sex-unspecific hits
   geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "top" & 
-                                  candidateGene %nin% c( "ARMCX2,\nARMCX4" , "MORF4L2,\nTCEAL3")),
+                                  candidateGene %nin% c( "ARMCX2,\nARMCX4" , "MORF4L2,\nTCEAL3","DCAF12L1")),
                   aes(x=BP, y=logP, label = candidateGene),
                   ylim = c(15,Inf)) + 
   geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "top" & candidateGene == "ARMCX2,\nARMCX4"),
@@ -197,6 +203,9 @@ plot3 <- plot2 +
   geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "top" & candidateGene == "MORF4L2,\nTCEAL3"),
                   aes(x=BP, y=logP, label = candidateGene),
                   ylim = c(7.3,15),xlim =c(-Inf,99000000) ) + 
+  geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "top" & candidateGene == "DCAF12L1"),
+                  aes(x=BP, y=logP, label = candidateGene),
+                  ylim = c(7.3,Inf),nudge_x= -10000, nudge_y= 3 ) + 
   
   # bottom: known & sex-unspecific hits
   geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "bottom"),
@@ -206,34 +215,36 @@ plot3 <- plot2 +
 plot3
 
 # add legend for labels
-dummy = data.table(lab = c("novel","sex \ninteraction"),
+dummy = data.table(lab = c("novel \nloci","sex \ninteraction"),
                    yaxis = c(-11,-15),
                    xaxis = c(30082665,30082665))
 
-plot4 = plot3 +   geom_text(data = subset(dummy, lab=="sex \ninteraction"),
-                          aes(x=xaxis, y=yaxis, label = lab),
-                          fontface = 'bold.italic') +   
+plot4 = plot3 + annotate("rect", 
+                           xmin = 10012628, xmax = 37482665, 
+                           ymin = -25, ymax = -8,
+                           fill = "#F2F2F2")+   
+  geom_text(data = subset(dummy, lab=="sex \ninteraction"),
+            aes(x=xaxis, y=yaxis, label = lab),
+            fontface = 'bold.italic') +   
   geom_label(data = subset(dummy, lab!="sex \ninteraction"),  
-                   aes(x=xaxis, y=yaxis, label = lab),
-                   fontface = 'bold') + 
-  annotate("rect", 
-           xmin = 10912628, xmax = 37482665, 
-           ymin = -25, ymax = -7.5,
-           alpha = .1,fill = "blue")
+             aes(x=xaxis, y=yaxis, label = lab),
+             fontface = 'bold') 
+
+plot4
 
 # save plot
 message("Create PDF")
 
 pdf_from_png(code2parseOrPlot = plot4, 
-             pdf_filename = "../figures/MainFigure1_MiamiPlot_230130.pdf",
+             pdf_filename = "../figures/MainFigure1_MiamiPlot_230206.pdf",
              weite = 12,
              laenge = 8,
              einheiten = "in",
              resolution = 150)
 
 
-tiff(filename = "../figures/MainFigure1_MiamiPlot_230130.tiff", 
-     width = 4800, height = 2313, res=300, compression = 'lzw')
+tiff(filename = "../figures/MainFigure1_MiamiPlot_230206.tiff", 
+     width = 4800, height = 2440, res=300, compression = 'lzw')
 plot4
 dev.off()
 
