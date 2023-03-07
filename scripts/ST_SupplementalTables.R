@@ -26,18 +26,20 @@
 #' 9) Replication in *HUNT* (--> see script 09)
 #' 10) Replication of *Graham et al*, *Kanai et al* and *Sakaue et al* results (--> see script 11)
 #' 11) Summary of MR-Mega results (--> see scripts 12)**
+#' 12) Annotation of additional MR-Mega results 
+#' 13) Summary of Lookup of sex-biased gene expression of candidate genes (--> see script 13)
 #' 
 #' # Initialize ####
 #' ***
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 #' # Get content table (tab0) ####
 #' ***
 {
-  tab0 = data.table(Table = paste0("S",c(1:12)),
+  tab0 = data.table(Table = paste0("S",c(1:13)),
                     Title = c("Study descriptions",
                               "Genotyping & imputation information per study",
                               "Sample sizes, SNP Numbers and inflation factor per phenotype and setting",
@@ -49,7 +51,8 @@ source("../SourceFile_forostar.R")
                               "Replication of eGFR ALL hits in HUNT",
                               "Replication of known associations provided in GWAS Catalog",
                               "Summary of MR-Mega results of all index SNPs",
-                              "Annotation of additional MR-Mega results"),
+                              "Annotation of additional MR-Mega results",
+                              "Lookup of sex-biased gene expression"),
                     Source = c("done manually",
                                "done manually",
                                "done within script ST_SupplementalTables.R",
@@ -61,7 +64,8 @@ source("../SourceFile_forostar.R")
                                "../results/09_replication_HUNT.RData",
                                "../results/11_Look_Up_GWAS_hits_eGFR_UA_only.txt",
                                "../results/12_SNPs_table1_in_MR_MEGA.txt",
-                               "../../../12_MR-MEGA/01_annotation/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt"))
+                               "../../../12_MR-MEGA/01_annotation/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt",
+                               "done with script 13_Lookup-SexBiasedGeneExpression.R"))
   
   tab0
   
@@ -780,15 +784,35 @@ source("../SourceFile_forostar.R")
                                           "Analysis for nominally significant enrichment of genes in  nearest genes, cis-eQTL genes and trans-eQTL genes according to pathway enrichment specific settings in GO categories pathways"))
 }
 
+#' # Get Sup Tabs 13 ###
+#' ***
+#' Results of sex biased genes
+#' 
+{
+  tab13 = data.table(candidate_genes = c("AR", "DCAF12L1", "DRP2", "EDA2R", "FAM9B", "HPRT1", "MST4"), 
+                     number_tissues_higher_female = c(26, 1, 20, 0, 0, 11, 0), 
+                     number_tissues_higher_male = c(2, 3, 0, 8, 0, 1, 0), 
+                     kidney_cortex_sig = c("no","yes","yes","no","no","no","no"), 
+                     gender_higher_expression_in_kidney_cortex = c(NA,"male","female",NA,NA,NA,NA))
+  
+  
+  tab13_annot = data.table(column = names(tab13),
+                           description = c("Name of candidate gene", 
+                           "Number of tissues with a sex differential gene expression where expression is higher in females",
+                           "Number of tissues with a sex differential gene expression where expression is higher in males",
+                           "Is there a significant sex differential gene expression in the tissue kidney cortex?",
+                           "Is the sex differential gene expression in kidney cortex higher in females or males?"))
+}
+
   
 #' # Save tables ###
 #' ***
 tosave4 = data.table(data = c("tab0",#"tab1","tab2", 
-                              "tab3", "tab4","tab5_a","tab5_b","tab6","tab7","tab8",
-                              "tab9","tab10","tab11","tab12"), 
+                              "tab3", "tab4","tab5_a","tab5_b","tab5_c","tab6","tab7","tab8",
+                              "tab9","tab10","tab11","tab12", "tab13"), 
                      SheetNames = c("Content",#"TableS1","TableS2", 
-                                    "TableS3", "TableS4","TableS5_a","TableS5_b", "TableS6","TableS7","TableS8",
-                                    "TableS9","TableS10","TableS11","TableS12"))
+                                    "TableS3", "TableS4","TableS5_a","TableS5_b","TableS5_c","TableS6","TableS7","TableS8",
+                                    "TableS9","TableS10","TableS11","TableS12", "TableS13"))
 excel_fn = "../tables/SupplementalTables.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
@@ -797,10 +821,10 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_a_annot","tab5_b_annot","tab6_annot","tab7_annot","tab8_annot",
-                              "tab9_annot","tab10_annot","tab11_annot","tab12_annot"), 
-                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_a_annot","TableS5_b_annot", "TableS6_annot","TableS7_annot",
-                                    "TableS8_annot", "TableS9_annot","TableS10_annot","TableS11_annot","TableS12_annot"))
+tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_a_annot","tab5_b_annot","tab5_c_annot","tab6_annot","tab7_annot","tab8_annot",
+                              "tab9_annot","tab10_annot","tab11_annot","tab12_annot","tab13_annot"), 
+                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_a_annot","TableS5_b_annot","TableS5_c_annot","TableS6_annot","TableS7_annot",
+                                    "TableS8_annot", "TableS9_annot","TableS10_annot","TableS11_annot","TableS12_annot", "TableS13_annot"))
 excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
@@ -809,8 +833,8 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-save(tab0,tab3,tab4,tab5_a,tab5_b,tab6,tab7,tab8,tab9,tab10,tab11,tab12,file = "../tables/SupplementalTables.RData")
-save(tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,
+save(tab0,tab3,tab4,tab5_a,tab5_b,tab5_c,tab6,tab7,tab8,tab9,tab10,tab11,tab12,tab13,file = "../tables/SupplementalTables.RData")
+save(tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab5_c_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,tab13_annot,
      file = "../tables/SupplementalTables_annot.RData")
 
 #' # Sessioninfo ####
