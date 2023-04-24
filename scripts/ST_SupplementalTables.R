@@ -40,19 +40,19 @@ source("../SourceFile_aman.R")
 #' ***
 {
   tab0 = data.table(Table = paste0("S",c(1:13)),
-                    Title = c("Study descriptions",
-                              "Genotyping & imputation information per study",
-                              "Sample sizes, SNP Numbers and inflation factor per phenotype and setting",
-                              "Within-phenotype comparisons of eGFR and UA associations between the sexes",
-                              "Cross-phenotype comparisions",
-                              "List of all independent signals per locus",
-                              "Annotation of credible sets (sub table for each phenotype and setting)",
-                              "Co-localization with eQTLs",
-                              "Replication of eGFR ALL hits in HUNT",
-                              "Replication of known associations provided in GWAS Catalog",
-                              "Summary of MR-Mega results of all index SNPs",
-                              "Annotation of additional MR-Mega results",
-                              "Lookup of sex-biased gene expression"),
+                    Title = c("Description of participating studies",
+                              "Details of genotyping, genotype imputation, quality control and association analyses",
+                              "Number of data sets, samples and SNPs contributing to the different association analyses",
+                              "Comparisons between the sexes",
+                              "Comparison between the phenotypes",
+                              "Independent variants per locus and analysis group",
+                              "Annotation of 99% Credible Sets",
+                              "Co-localization of genetic association signals and eQTLs",
+                              "Validation of eGFR associations in HUNT",
+                              "Look-up of SNP previously reported for UA, eGFR, creatinine and BUN",
+                              "Results of meta-regression analysis of the 23 index SNPs",
+                              "New genome-wide significant associations due to meta-regression",
+                              "Look-up of sex-biased gene-expressions of candidate genes assigned to genetic sex-interaction effects"),
                     Source = c("done manually",
                                "done manually",
                                "done within script ST_SupplementalTables.R",
@@ -208,11 +208,6 @@ source("../SourceFile_aman.R")
   stopifnot(coloc_sexIA$region == tab4$locus_NR)
   tab4 = cbind(tab4,coloc_sexIA[,c(4:9)])
   coloc_sexIA = rbind(coloc_sexIA[1:7,],coloc_sexIA[7:22,])
-  tab4[,sexIA_coloc:="inconclusive"]
-  tab4[PP.H4.abf>0.75,sexIA_coloc:="both sexes - shared"]
-  tab4[PP.H3.abf>0.75,sexIA_coloc:="both sexes - independent"]
-  tab4[PP.H2.abf>0.75,sexIA_coloc:="female driven"]
-  tab4[PP.H1.abf>0.75,sexIA_coloc:="male driven"]
   tab4
   
   tab4_annot = data.table(column = names(tab4),
@@ -236,8 +231,7 @@ source("../SourceFile_aman.R")
                                           "Posterior probability for hypothesis 1: only trait 1 associated (males)",
                                           "Posterior probability for hypothesis 2: only trait 2 associated (females)",
                                           "Posterior probability for hypothesis 3: both trait associated, but different signals",
-                                          "Posterior probability for hypothesis 4: both trait associated, shared signal",
-                                          "Summary of co-localization result, using 0.75 as threshold"))
+                                          "Posterior probability for hypothesis 4: both trait associated, shared signal"))
   
   
 }
@@ -251,6 +245,7 @@ source("../SourceFile_aman.R")
   load("../results/04_lookup_TopHits_allSettings_logP.RData")
   tab5_b = ShorterTable_v2
   tab5_c = fread("../results/08_b_coloc_overlap.txt")
+  tab5_c = unique(tab5_c)
   
   names(tab5_a)[1:4] = names(tab4)[1:4]
   names(tab5_b)[1:4] = names(tab4)[1:4]
@@ -285,7 +280,7 @@ source("../SourceFile_aman.R")
   
   matched = match(tab5_c$locus1,tab4$locus_NR)
   tab5_c[,cytoband := tab4[matched,cytoband]]
-  tab5_c = tab5_c[,c(1,2,11,3:10)]
+  tab5_c = tab5_c[,c(1,2,11,3:10)] 
   
   tab5_c_annot = data.table(column = names(tab5_c),
                           description = c("Number of associated loci for eGFR",
