@@ -71,11 +71,103 @@ source("../SourceFile_aman.R")
   
 }
 
+#' # Annotation for Sub Tabs 1 and 2
+#' ***
+#' Sub Tab 1: Description of participating studies
+#' Sub Tab 2: Details of genotyping, genotype imputation, quality control and association analyses
+{
+  tab1_annot = data.table(column = c("Study", 
+                                     "Full name of the study",
+                                     "Subgroup", 
+                                     "Study Design (if not population-based, please specify selection and/or enrichment strategy)",
+                                     "Important study references, e.g. design paper (PMID)",
+                                     "Male %",
+                                     "Diabetes %",
+                                     "eGFR - Age median",
+                                     "eGFR - Age mean (SD)",
+                                     "eGFR N",
+                                     "eGFR crea median (Q1, Q3)",
+                                     "Serum creatinine assay and year of measurement, baseline",
+                                     "BUN N",
+                                     "BUN median (Q1, Q3)",
+                                     "urea measurement method",
+                                     "CKD N",
+                                     "CKD N(cases)",
+                                     "Serum urate, Age mean (SD)",
+                                     "Serum urate, mean(SD)",
+                                     "Serum urate, N",
+                                     "Gout N",
+                                     "Gout N(cases)",
+                                     "Urinary creatinine assay",
+                                     "Urinary albumin assay",
+                                     "age at urine sampling, mean (SD)",
+                                     "UACR overall: median (25th, 75th percentile)",
+                                     "Sample size UACR",
+                                     "Number of individuals with MA (cases)",
+                                     "Total sample size in MA GWAS (cases+controls)"),
+                          description = c("short study name",
+                                          "full name of a study",
+                                          "specifying the subgroup of a cohort (if used for analysis)",
+                                          "short description of study design",
+                                          "important study references",
+                                          "percentage of male samples in cohort",
+                                          "percantage of samples with Diabetes in cohort",
+                                          "Median of age (in years) for phenotype eGFR",
+                                          "Mean and SD of age (in years) for phenotype eGFR",
+                                          "sample size of phenotype eGFR",
+                                          "Median and quartiles of eGFR creatinine",
+                                          "Year of serum creatinine measurement and assay used",
+                                          "sample size of phenotype BUN",
+                                          "Median and quartiles of BUN",
+                                          "Method used for urea measurement",
+                                          "sample size of phenotype CKD",
+                                          "number of cases of phenotype CKD",
+                                          "Mean and SD of age (in years) for serum urate measurement",
+                                          "Mean and SD of serum urate",
+                                          "sample size of serum urate measurement",
+                                          "sample size of Gout",
+                                          "number of cases of phenotype Gout",
+                                          "Assay used to measure creatinine in urine",
+                                          "Assay used to measure albumin in urine",
+                                          "Mean and SD of age (in years) at urine measurement",
+                                          "Median and quartiles of phenotype UACR",
+                                          "sample size of phenotypbe UACR",
+                                          "number of cases of phenotype MA",
+                                          "sample size of phenotypbe MA"))
+  
+  tab2_annot = data.table(column = c("Study",
+                                     "Exclusions prior to genotyping and/or genetic analysis",
+                                     "Genotyping Array",
+                                     "Genotype calling",
+                                     "QC filters for genotyped SNPs used for imputation",
+                                     "No of SNPs used for imputation",
+                                     "Pre-phasing software",
+                                     "Imputation Software",
+                                     "Imputation reference panel",
+                                     "Filtering of imputed genotypes",
+                                     "Software used for GWAS",
+                                     "Handling of population stratification",
+                                     "Type of reported imputation quality"),
+                          description = c("short study name",
+                                          "exclusion criteria prior to genotyping and/or genetic analysis",
+                                          "Genotyping Array used",
+                                          "Algorithm/Software used for genotype calling",
+                                          "Quality control filters for genotyped SNPs used for imputation",
+                                          "number of SNPs used for imputation",
+                                          "Pre-phasing software used (if any)",
+                                          "Imputation software used",
+                                          "Reference panel for imputation",
+                                          "Filter criteria for imputed genotypes",
+                                          "software used for GWAS",
+                                          "handling of population stratification",
+                                          "type of reported imputation quality"))
+}
+
 #' # Get Sup Tab 3 ####
 #' ***
 #' Sample Sizes & SNP Numbers, and inflation factor $\lambda$ per phenotype
 #' 
-#' Number of cases & controls for CKD and BUN will be added later (extract information out of autosomal publications)
+#' Number of cases & controls for CKD and BUN will be mentioned in paper draft only
 #' 
 #' Please note: I load the initial meta-analyses files. These files will not be shared later. We only provide statistics for SNPs valid in at least one phenotype (e.g. valid in UA but not eGFR --> listed). SNPs that are invalid in all phenotypes are not listed in the data files. However, we want to report with how many SNPs we started, and how many remained after filtering. A total of 325,770 SNPs had at least on valid association. 
 #' 
@@ -159,13 +251,13 @@ source("../SourceFile_aman.R")
   tab3[,table(n_samples_unfiltered == n_samples_filtered)]
   tab3[,n_studies_filtered:=NULL]
   tab3[,n_samples_filtered:=NULL]
-  setnames(tab3,"n_studies_unfiltered","n_studies")
+  setnames(tab3,"n_studies_unfiltered","n_data_sets")
   setnames(tab3,"n_samples_unfiltered","n_samples")
   tab3
   
   tab3_annot = data.table(column = names(tab3),
                           description = c("Analyzed phenotype and setting",
-                                          "Maximal number of participating studies",
+                                          "Maximal number of available data sets",
                                           "Maximal number of individuals",
                                           "Number of SNPs before any QC was applied (number of SNPs analyzed in raw meta-analysis)",
                                           "Inflation factor lambda before any QC was applied",
@@ -816,10 +908,11 @@ WriteXLS(tosave4$data,
          BoldHeaderRow=T,
          FreezeRow=1)
 
-tosave4 = data.table(data = c("tab3_annot", "tab4_annot","tab5_a_annot","tab5_b_annot","tab5_c_annot","tab6_annot","tab7_annot","tab8_annot",
-                              "tab9_annot","tab10_annot","tab11_annot","tab12_annot","tab13_annot"), 
-                     SheetNames = c("TableS3_annot", "TableS4_annot","TableS5_a_annot","TableS5_b_annot","TableS5_c_annot","TableS6_annot","TableS7_annot",
-                                    "TableS8_annot", "TableS9_annot","TableS10_annot","TableS11_annot","TableS12_annot", "TableS13_annot"))
+tosave4 = data.table(data = c("tab1_annot", "tab2_annot","tab3_annot", "tab4_annot","tab5_a_annot","tab5_b_annot","tab5_c_annot","tab6_annot",
+                              "tab7_annot","tab8_annot", "tab9_annot","tab10_annot","tab11_annot","tab12_annot","tab13_annot"), 
+                     SheetNames = c("TableS1_annot","TableS2_annot","TableS3_annot", "TableS4_annot","TableS5_a_annot","TableS5_b_annot",
+                                    "TableS5_c_annot","TableS6_annot","TableS7_annot","TableS8_annot", "TableS9_annot","TableS10_annot",
+                                    "TableS11_annot","TableS12_annot", "TableS13_annot"))
 excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
@@ -829,7 +922,7 @@ WriteXLS(tosave4$data,
          FreezeRow=1)
 
 save(tab0,tab3,tab4,tab5_a,tab5_b,tab5_c,tab6,tab7,tab8,tab9,tab10,tab11,tab12,tab13,file = "../tables/SupplementalTables.RData")
-save(tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab5_c_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,tab13_annot,
+save(tab1_annot,tab2_annot,tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab5_c_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,tab13_annot,
      file = "../tables/SupplementalTables_annot.RData")
 
 #' # Sessioninfo ####
