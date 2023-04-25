@@ -45,7 +45,10 @@ colsOut = setdiff(colnames(ALL), cols2keep)
 ALL[, get("colsOut") := NULL]
 setcolorder(ALL, cols2keep)
 setnames(ALL, cols2keep, c("Locus", "Cytoband", "rsID", "beta_eGFR", "eGFR", "beta_UA", "UA", "beta_BUN", "BUN", "beta_CKD", "CKD", "beta_UACR", "UACR", "beta_MA", "MA"))
-ALL[, Cytoband := paste0("ALL - ", Cytoband)]
+ALL[, Locus2 := as.character(Locus)]
+ALL[Locus2 == "7", Locus2 := "7A"]
+ALL[, Cytoband := paste0(Locus2, ": ALL - ", Cytoband)]
+ALL[, Locus2 := NULL]
 
 #FEMALE
 FEMALE = copy(WideTable)
@@ -56,7 +59,10 @@ colsOut = setdiff(colnames(FEMALE), cols2keep)
 FEMALE[, get("colsOut") := NULL]
 setcolorder(FEMALE, cols2keep)
 setnames(FEMALE, cols2keep, c("Locus", "Cytoband", "rsID", "beta_eGFR", "eGFR", "beta_UA", "UA", "beta_BUN", "BUN", "beta_CKD", "CKD", "beta_UACR", "UACR", "beta_MA", "MA"))
-FEMALE[, Cytoband := paste0("FEMALE - ", Cytoband)]
+FEMALE[, Locus2 := as.character(Locus)]
+FEMALE[Locus2 == 7, Locus2 := "7B"]
+FEMALE[, Cytoband := paste0(Locus2, ": FEMALE - ", Cytoband)]
+FEMALE[, Locus2 := NULL]
   
 #MALE
 MALE = copy(WideTable)
@@ -67,7 +73,7 @@ colsOut = setdiff(colnames(MALE), cols2keep)
 MALE[, get("colsOut") := NULL]
 setcolorder(MALE, cols2keep)
 setnames(MALE, cols2keep, c("Locus", "Cytoband", "rsID", "beta_eGFR", "eGFR", "beta_UA", "UA", "beta_BUN", "BUN", "beta_CKD", "CKD", "beta_UACR", "UACR", "beta_MA", "MA"))
-MALE[, Cytoband := paste0("MALE - ", Cytoband)]
+MALE[, Cytoband := paste0(Locus, ": MALE - ", Cytoband)]
 
 #combine to one object
 toPlot = rbindlist(list(ALL, FEMALE, MALE), use.names = T)
@@ -75,6 +81,7 @@ setkey(toPlot, "Locus")
 
 #plot -beta_eGFR so that colours are easier to compare
 toPlot[, beta_eGFR := beta_eGFR * (-1)]
+toPlot[, ]
 
 #short rsIDs
 shorts = apply(toPlot, 1, function(x) return(unlist(strsplit(x[3], split =":"))[1]))
@@ -98,6 +105,9 @@ table(toPlot2[, phenotype], toPlot2[, phenotype2])
 toPlot2[, rsID := NULL]
 toPlot2[, phenotype2 := NULL]
 
+#add * to eGFR label (for later reference in paper, -eGFR is ploted)
+toPlot2[phenotype == "eGFR", phenotype := "eGFR*"]
+
 #change scale (three different levels of significance)
 toPlot2[, signif := "missing"]
 toPlot2[!is.na(Pvalue), signif := "none"]
@@ -119,11 +129,13 @@ toPlot2 = as.data.frame(toPlot2)
 toPlot2$significance = factor(toPlot2$significance, levels=c("genome-wide, beta > 0", "nominal, beta > 0", "not significant, beta > 0", 
                                                              "genome-wide, beta < 0", "nominal, beta < 0", "not significant, beta < 0", 
                                                              "missing"))
+toPlot2$phenotype = factor(toPlot2$phenotype, levels=c("eGFR*", "UA", "BUN", "CKD", "UACR", "MA"))
 
 #add main phenotype of top hit to data object
 toPlot2$topPheno = "eGFR"
-UA_SNPs = c("ALL - Xq12  -  rs6625094", "ALL - Xq13.1  -  rs34687188", "ALL - Xq22.1  -  rs34884874", "ALL - Xq22.1  -  rs34815154",
-            "ALL - Xq25  -  rs112708523", "ALL - Xq26.3  -  rs202138804", "ALL - Xq28  -  rs4328011")
+UA_SNPs = c("16: ALL - Xq12  -  rs6625094", "17: ALL - Xq13.1  -  rs34687188", "18: ALL - Xq22.1  -  rs34884874", 
+            "19: ALL - Xq22.1  -  rs34815154", "20: ALL - Xq25  -  rs112708523", "21: ALL - Xq26.3  -  rs202138804", 
+            "22: ALL - Xq28  -  rs4328011")
 toPlot2$topPheno[is.element(toPlot2$SNP, UA_SNPs)] = "UA"
 
 #same order of SNPs as in main table 1
@@ -134,8 +146,8 @@ toPlot2$nr.SNP[grep("rs72616719", toPlot2$SNP)] = 21
 toPlot2$nr.SNP[grep("rs189618857", toPlot2$SNP)] = 20
 toPlot2$nr.SNP[grep("rs2063579", toPlot2$SNP)] = 19
 toPlot2$nr.SNP[grep("rs1802288", toPlot2$SNP)] = 18
-toPlot2$nr.SNP[grep("rs149995096", toPlot2$SNP)] = 17
-toPlot2$nr.SNP[grep("rs3850318", toPlot2$SNP)] = 16
+toPlot2$nr.SNP[grep("rs3850318", toPlot2$SNP)] = 17
+toPlot2$nr.SNP[grep("rs149995096", toPlot2$SNP)] = 16
 toPlot2$nr.SNP[grep("rs11092455", toPlot2$SNP)] = 15
 toPlot2$nr.SNP[grep("rs181497961", toPlot2$SNP)] = 14
 toPlot2$nr.SNP[grep("rs5942852", toPlot2$SNP)] = 13
@@ -158,7 +170,6 @@ head(toPlot2)
 col_red = colorRamp2(c(0, 3), c("coral1", "white"))
 col_blue = colorRamp2(c(0, 3), c("dodgerblue", "white"))
 MyColors = c(col_red(seq(0, 2)), col_blue(seq(0, 3)))
-#MyColors = c("dodgerblue", "coral1", "lightblue", "pink", "grey90", "white")
 
 p = ggplot(data = toPlot2, aes(x=phenotype, y=SNP, fill=significance)) + geom_tile(colour = "grey40") + 
   facet_grid(rows = "topPheno", scales = "free_y", space = "free_y") +
@@ -167,10 +178,13 @@ p = ggplot(data = toPlot2, aes(x=phenotype, y=SNP, fill=significance)) + geom_ti
   theme(axis.text.y = element_text(size = 7), strip.text = element_text(size = 5)) +
   scale_fill_manual(values = MyColors) + theme(legend.position = "right") + 
   theme(legend.text = element_text(size = 7), legend.title = element_text(size = 7)) + 
-  theme(plot.margin = margin(0.1,0.15,0.1,0.1, "cm")) + theme(legend.key.size = unit(0.3, "cm"), legend.key.width = unit(0.5,"cm"))
+  theme(plot.margin = margin(0.1, 0.15, 0.1 ,0.1, "cm")) + theme(legend.key.size = unit(0.3, "cm"), legend.key.width = unit(0.5,"cm")) +
+  labs(tag = "*Effect direction for\neGFR is reversed") +
+  coord_cartesian(clip = "off") + theme(plot.tag.position = c(.8, .3), plot.tag = element_text(size = 7))
+
 p
 
-tiff(file="../figures/MainFigure2_Heatmap.tiff", width = 1400, height = 800, res = 300, compression = 'lzw')
+tiff(file="../figures/MainFigure2_Heatmap_230425.tiff", width = 1400, height = 800, res = 300, compression = 'lzw')
 p
 dev.off()
 
