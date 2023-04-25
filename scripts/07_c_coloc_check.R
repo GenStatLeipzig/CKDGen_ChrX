@@ -361,6 +361,8 @@ names(plotData8) = gsub("ALL","ALL)",names(plotData8))
 names(plotData8) = gsub("MALE","MALE)",names(plotData8))
 plotData8
 
+#update locus label for locus 7: -> 7A:
+plotData8$dumID[plotData8$dumID == "7: ARMCX2 (TI)"] = "7A: ARMCX2 (TI)"
 
 #' Change row order manually (ordered by alphabet as default in decast): ALL - MALE - FEMALE
 #' 
@@ -369,7 +371,7 @@ colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "coloc plot")
 
 myPlot1 = colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "")
 
-tiff(filename = "../figures/MainFigure5_ColocPlot_230130.tiff",
+tiff(filename = "../figures/MainFigure5_ColocPlot_230425.tiff",
      width = 1350, height = 1350, res=250, compression = 'lzw')
 myPlot1
 dev.off()
