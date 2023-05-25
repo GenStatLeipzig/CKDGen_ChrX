@@ -9,7 +9,7 @@ Supporting code for the following draft:
 * **Working title**: Chromosome X genetic association analysis of kidney traits in up to 908,697 subjects revealed six novel loci and sex-specific hits in genes regulated by androgen response elements
 * **Short title**: CKDGen ChrX
 * **Analysis Team / Repository Contributor**: Markus Scholz, Katrin Horn, Andreas Kühnapfel and Janne Pott
-* **Writing Team**: Markus Scholz, Katrin Horn, Afshin Parsa, Pascal Schlosser, Anna Köttgen, Cristian Pattaro
+* **Writing Team**: Markus Scholz, Katrin Horn, Afshin Parsa, Anna Köttgen, Pascal Schlosser, Cristian Pattaro
 
 We performed a **trans-ethnic X-chromosome-wide association study of 7 kidney traits** (estimated glomerular filtration rate (eGFR), serum uric acid (UA), urine albumin-creatinine ratio (UACR), blood urea nitrogen (BUN), chronic kidney disease (CKD), gout and microalbuminuria (MA)). **Sex-stratified and combined analyses** were performed in up to 46 different studies including up to 908,697 subjects considering up to 1,032,701 SNPs. Genome-wide significant loci were tested for sex-interactions and were compared between traits. A number of secondary analyses were performed to allocate candidate genes to the discovered loci. 
 
