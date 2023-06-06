@@ -21,7 +21,7 @@
 rm(list = setdiff(ls(), "allinfo"))
 time0 = Sys.time()
 
-source("../SourceFile_forostar.R")
+source("../SourceFile_aman.R")
 
 setwd(projectpath_main)
 
@@ -213,10 +213,12 @@ myPlotData[,gene2:=""]
 myPlotData[meandiff_p_FDR<0.05,gene2:=gsub(":.*","",rs_id)]
 myPlotData[,gene3:=""]
 myPlotData[meandiff_p<0.05,gene3:=gsub(":.*","",rs_id)]
+myPlotData[, sex.higherEffect := "none"]
+myPlotData[(abs(beta_female) > abs(beta_male)) & sig != "no", sex.higherEffect := "female"]
+myPlotData[(abs(beta_male) > abs(beta_female)) & sig != "no", sex.higherEffect := "male"]
 
 
-
-myPlot1 = ggplot(myPlotData, aes(x=beta_male, y=beta_female,color=sig)) + 
+myPlot1 = ggplot(myPlotData, aes(x=beta_male, y=beta_female, color=sex.higherEffect)) + 
   facet_wrap(~trait, scales = "free") +
   geom_abline(intercept = 0, slope = 1, color="grey", linetype="dashed", size=1.25)+
   geom_hline(yintercept = 0, color="grey", linetype="dashed", size=1.15)+
@@ -224,24 +226,24 @@ myPlot1 = ggplot(myPlotData, aes(x=beta_male, y=beta_female,color=sig)) +
   geom_point(size = 3) +
   geom_errorbar(aes(ymin = beta_female- 1.96*se_female, ymax = beta_female+ 1.96*se_female)) +
   geom_errorbarh(aes(xmin = beta_male- 1.96*se_male, xmax = beta_male + 1.96*se_male)) +
-  theme_bw(base_size = 10)+
-  scale_colour_manual(values=c("#000000","#B2182B","#2166AC"),
-                      labels=c("no","yes","yes (FDR 5%)"))+
+  theme_bw(base_size = 10) +
+  scale_colour_manual(values=c("#B2182B","#2166AC","#000000"),
+                      labels=c("female","male", "none")) +
   theme(plot.title = element_text(hjust = 0, size=22,face="bold"),
         axis.title.x = element_text(size=12,face="bold"),
         axis.title.y = element_text(size=12,face="bold"),
         axis.text = element_text(size=12,face="bold"),
-        strip.text = element_text(size = 20))+
+        strip.text = element_text(size = 20)) +
   labs(x="Effect Size Male", 
        y = "Effect Size Female",
-       color = "SNPs with \nsex interaction")+
+       color = "SNPs with \nsex interaction") +
   geom_label_repel(data = subset(myPlotData, sig!="no" & beta_male>-0.02),
                    aes(x=beta_male, y=beta_female, label = gene3),
                    xlim = c(-0.02,-0.005),nudge_y = 0.001)+
   geom_label_repel(data = subset(myPlotData, sig!="no" & beta_male< -0.02),
                    aes(x=beta_male, y=beta_female, label = gene3),
                    ylim = c(0,0.02),nudge_x = 0.01)+
-  guides(label="none",color="none")
+  guides(label="none", color="none")
 myPlot1
 
 tiff(filename = "../figures/SupplementalFigure_BetaBeta_sexIA.tiff", 
