@@ -169,7 +169,7 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
     myPlot <- myPlot + scale_colour_manual(values= rep(rev(brewer.pal(5, "Dark2")), 23))
   }else { 
     myPlot <- myPlot + scale_colour_manual(values=c("#000000", "#666666","#4575B4","#D73027"),
-                                           labels=c("not gw. sig.","ALL",     "MALES", "FEMALES"))
+                                           labels=c("not gw. sig.","gw. sig. - ALL",     "gw. sig. - MALES", "gw. sig. - FEMALES"))
   }
   if(useBasePosition == T){
     myPlot <- myPlot + coord_cartesian(xlim=c(min(myX)-1,max(myX)+1),ylim=c(ymin-1,ymax+1), expand = FALSE)
@@ -180,12 +180,19 @@ miamiPlot<-function(x,ymax=NULL,ymin=NULL,
   myPlot <- myPlot + scale_x_continuous(name=xlabel,labels=xAL, breaks=xAP)
   myPlot <- myPlot + scale_y_continuous(name=ylabel,breaks=pretty_breaks(n=num_breaks_y)) 
   myPlot <- myPlot + ggtitle(title,subtitle = mySubtitle)
-  myPlot <- myPlot + labs(color = "Best setting")
+  myPlot <- myPlot + labs(color = "Symbol description")
   myPlot <- myPlot + theme(legend.position = c(0.1,0.1)) 
   myPlot <- myPlot + theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
-  myPlot <- myPlot + theme(axis.text.y = element_text(colour="black",size = 12),axis.line.y = element_line(colour="black"))
+  myPlot <- myPlot + theme(axis.text.y = element_text(colour="black",size = 14),axis.line.y = element_line(colour="black"))
+  myPlot <- myPlot + theme(axis.title.y = element_text(colour = "black", size = 16, hjust = 0.15))
   myPlot <- myPlot + theme(panel.background = element_blank())
   myPlot <- myPlot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  myPlot <- myPlot + theme(legend.background = element_rect(size=5, fill = "#F2F2F2"))
+  #myPlot <- myPlot + theme(legend.box.margin = margin(0, 0, 0, 50))
+  
+  #myPlot <- myPlot + theme(legend.key = element_rect(fill = "#F2F2F2"))
+  myPlot <- myPlot + guides(colour = guide_legend(override.aes = list(size=6)))
+  
   #myPlot <- myPlot + theme(axis.line = element_line(colour="black"))
   #myPlot <- myPlot + geom_hline(yintercept = 0)
   if (!is.null(hline1)) {myPlot <- myPlot + geom_hline(yintercept = hline1,colour="#990000", linetype="dashed")}
