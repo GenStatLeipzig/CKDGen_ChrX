@@ -41,7 +41,7 @@
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_angmar.R")
 
 setwd(paste0(projectpath,"scripts/"))
 source("../helperFunctions/colocPlot.R")
@@ -371,10 +371,21 @@ colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "coloc plot")
 
 myPlot1 = colocPlot(x = plotData8[,c(1,5,7,6,2,4,3)],title = "")
 
-tiff(filename = "../figures/MainFigure5_ColocPlot_230425.tiff",
+tag = format(Sys.time(), "%Y-%m-%d")
+tag = gsub("2023-","23-",tag)
+tag = gsub("-","",tag)
+
+tiff(filename = paste0("../figures/MainFigure5_ColocPlot_",tag,".tiff"),
      width = 1350, height = 1350, res=250, compression = 'lzw')
 myPlot1
 dev.off()
+
+pdf_from_png(code2parseOrPlot = myPlot1, 
+             pdf_filename = paste0("../figures/MainFigure5_ColocPlot_",tag,".pdf"),
+             weite = 8,
+             laenge = 8,
+             einheiten = "in",
+             resolution = 250)
 
 #' # Sessioninfo ####
 #' ***
