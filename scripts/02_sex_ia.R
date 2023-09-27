@@ -21,7 +21,7 @@
 rm(list = setdiff(ls(), "allinfo"))
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_angmar.R")
 
 setwd(projectpath_main)
 
@@ -117,11 +117,18 @@ df = data.frame(union_unique,
 df$mean_diff = rep(NA, nrow(df))
 df$se_diff = rep(NA, nrow(df))
 df$p_diff = rep(NA, nrow(df))
+df$mean_diff_no_inact = rep(NA, nrow(df))
+df$se_diff_no_inact = rep(NA, nrow(df))
+df$p_diff_no_inact = rep(NA, nrow(df))
 
 names(df) = c("SNP","Trait",
               "Male_Beta", "Male_SE", "Male_P",
               "Female_Beta", "Female_SE", "Female_P",
-              "mean_diff","se_diff","p_diff")
+              "mean_diff","se_diff","p_diff",
+              "mean_diff_no_inact","se_diff_no_inact","p_diff_no_inact")
+
+df$Female_Beta_no_inact = 0.5* df$Female_Beta
+df$Female_SE_no_inact = 0.5* df$Female_SE
 
 union_r        = c(meta_male$rsID, meta_female$rsID)
 union_unique_r = unique(union_r)
@@ -139,6 +146,15 @@ for (i in 1 : nrow(df)) {
   df$mean_diff[i] = diff_i
   df$se_diff[i] = diff_se_i
   df$p_diff[i] = p_i
+  
+  z_i = (df$"Male_Beta"[i] - df$"Female_Beta_no_inact"[i]) / sqrt(df$"Male_SE"[i]^2 + df$"Female_SE_no_inact"[i]^2 - 2 * r * df$"Male_SE"[i] * df$"Female_SE_no_inact"[i])
+  p_i = 2 * pnorm(abs(z_i), lower.tail = FALSE)
+  diff_i = (df$"Male_Beta"[i] - df$"Female_Beta_no_inact"[i])
+  diff_se_i = sqrt(df$"Male_SE"[i]^2 + df$"Female_SE_no_inact"[i]^2 - 2 * r * df$"Male_SE"[i] * df$"Female_SE_no_inact"[i])
+  
+  df$mean_diff_no_inact[i] = diff_i
+  df$se_diff_no_inact[i] = diff_se_i
+  df$p_diff_no_inact[i] = p_i
   
 }
 
@@ -250,6 +266,63 @@ tiff(filename = "../figures/SupplementalFigure_BetaBeta_sexIA.tiff",
      width = 3000, height = 1800, res=300, compression = 'lzw')
 myPlot1
 dev.off()
+
+#' Plot 2: compare the significant interaction with those obtained with no X inactivation
+#' 
+myPlotData<-data.table(rs_id=sexIA$SNP,
+                       trait=sexIA$Trait,
+                       meandiff = sexIA$mean_diff,
+                       meandiff_se = sexIA$se_diff,
+                       meandiff_p = sexIA$p_diff,
+                       meandiff_p_FDR = sexIA$fdr_diff,
+                       meandiff_no_inact = sexIA$mean_diff_no_inact,
+                       meandiff_no_inact_se = sexIA$se_diff_no_inact,
+                       meandiff_no_inact_p = sexIA$p_diff_no_inact)
+
+myPlotData[,sig:="no"]
+myPlotData[meandiff_p<0.05 & meandiff_no_inact_p>=0.05,sig:="yes (nom sig, inactivation only)"]
+#myPlotData[meandiff_p>=0.05 & meandiff_no_inact_p<0.05,sig:="yes (nom sig, no inactivation)"]
+myPlotData[meandiff_p<0.05 & meandiff_no_inact_p<0.05,sig:="yes (nom sig, both)"]
+myPlotData[meandiff_p_FDR<0.05 & meandiff_no_inact_p>=0.05,sig:="yes (FDR 5%, inactivation only)"]
+myPlotData[meandiff_p_FDR<0.05 & meandiff_no_inact_p<0.05,sig:="yes (FDR 5%, both)"]
+myPlotData[,gene2:=""]
+myPlotData[meandiff_p_FDR<0.05,gene2:=gsub(":.*","",rs_id)]
+myPlotData[,gene3:=""]
+myPlotData[meandiff_p<0.05,gene3:=gsub(":.*","",rs_id)]
+
+myPlot2 = ggplot(myPlotData, aes(x=meandiff, y=meandiff_no_inact, color=sig)) + 
+  facet_wrap(~trait, scales = "free") +
+  geom_abline(intercept = 0, slope = 1, color="grey", linetype="dashed", size=1.25)+
+  geom_hline(yintercept = 0, color="grey", linetype="dashed", size=1.15)+
+  geom_vline(xintercept = 0, color="grey", linetype="dashed", size=1.15)+
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = meandiff_no_inact-1.96*meandiff_no_inact_se, 
+                    ymax = meandiff_no_inact+ 1.96*meandiff_no_inact_se)) +
+  geom_errorbarh(aes(xmin = meandiff- 1.96*meandiff_se, 
+                     xmax = meandiff + 1.96*meandiff_se)) +
+  theme_bw(base_size = 10) +
+  scale_colour_manual(values=c("#000000","#E41A1C","#377EB8", "#4DAF4A", "#984EA3"))+
+  theme(plot.title = element_text(hjust = 0, size=22,face="bold"),
+        axis.title.x = element_text(size=12,face="bold"),
+        axis.title.y = element_text(size=12,face="bold"),
+        axis.text = element_text(size=12,face="bold"),
+        strip.text = element_text(size = 20)) +
+  labs(x="Difference X inactivation", 
+       y = "Difference no X inactivation",
+       color = "Significance in \nX inactivation model") +
+  geom_label_repel(data = subset(myPlotData, sig!="no"),
+                   aes(x=meandiff, y=meandiff_no_inact, label = gene3))+
+  # geom_label_repel(data = subset(myPlotData, sig!="no"),
+  #                  aes(x=beta_male, y=beta_female, label = gene3),
+  #                  ylim = c(0,0.02),nudge_x = 0.01)+
+  guides(label="none")
+myPlot2
+
+tiff(filename = "../figures/SupplementalFigure_BetaBeta_sexIA_Xact_Xinact_230919.tiff", 
+     width = 3000, height = 1800, res=300, compression = 'lzw')
+myPlot2
+dev.off()
+
 
 #' # Session Info ####
 #' ***
