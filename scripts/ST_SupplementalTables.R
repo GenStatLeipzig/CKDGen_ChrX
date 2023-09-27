@@ -28,18 +28,20 @@
 #' 11) Summary of MR-Mega results (--> see scripts 12)**
 #' 12) Annotation of additional MR-Mega results 
 #' 13) Summary of Lookup of sex-biased gene expression of candidate genes (--> see script 13)
+#' 14) Co-localization with testosterone (--> see script 07_d)
+#' 15) Look-up of eQTLs (--> see script 13_Lookup_eQTLs_leadSNPs)
 #' 
 #' # Initialize ####
 #' ***
 rm(list = ls())
 time0 = Sys.time()
 
-source("../SourceFile_aman.R")
+source("../SourceFile_angmar.R")
 
 #' # Get content table (tab0) ####
 #' ***
 {
-  tab0 = data.table(Table = paste0("S",c(1:13)),
+  tab0 = data.table(Table = paste0("S",c(1:15)),
                     Title = c("Description of participating studies",
                               "Details of genotyping, genotype imputation, quality control and association analyses",
                               "Number of data sets, samples and SNPs contributing to the different association analyses",
@@ -52,7 +54,9 @@ source("../SourceFile_aman.R")
                               "Look-up of SNP previously reported for UA, eGFR, creatinine and BUN",
                               "Results of meta-regression analysis of the 23 index SNPs",
                               "New genome-wide significant associations due to meta-regression",
-                              "Look-up of sex-biased gene-expressions of candidate genes assigned to genetic sex-interaction effects"),
+                              "Look-up of sex-biased gene-expressions of candidate genes assigned to genetic sex-interaction effects",
+                              "Co-localization of genetic association signals and testosterone",
+                              "Look-up of effect directions of eQTLs of lead SNPs and tested genes"),
                     Source = c("done manually",
                                "done manually",
                                "done within script ST_SupplementalTables.R",
@@ -65,7 +69,9 @@ source("../SourceFile_aman.R")
                                "../results/11_Look_Up_GWAS_hits_eGFR_UA_only.txt",
                                "../results/12_SNPs_table1_in_MR_MEGA.txt",
                                "../../../12_MR-MEGA/01_annotation/gwasresults_V6/synopsis/topliste_tabdelim/topliste_2022-11-24_credSets.txt",
-                               "done with script 13_Lookup-SexBiasedGeneExpression.R"))
+                               "../results/13_lookup_sexbiased_GE_eQTLs.txt",
+                               "../results/07_d_coloc_testo.RData",
+                               "../results/13_lookup_eQTL_effect_directions_230927.xlsx"))
   
   tab0
   
@@ -172,12 +178,13 @@ source("../SourceFile_aman.R")
 #' Please note: I load the initial meta-analyses files. These files will not be shared later. We only provide statistics for SNPs valid in at least one phenotype (e.g. valid in UA but not eGFR --> listed). SNPs that are invalid in all phenotypes are not listed in the data files. However, we want to report with how many SNPs we started, and how many remained after filtering. A total of 325,770 SNPs had at least on valid association. 
 #' 
 {
-  statistics = list.files(path = "../data/",pattern = ".gz", recursive = TRUE)
+  statistics = list.files(path = "../data/",pattern = ".gz", recursive = FALSE)
   pheno = gsub("CKDGen_ChrX_sumStat_","",statistics)
   pheno = gsub(".gz","",pheno)
   dummy = unlist(strsplit(pheno,"_"))
   
-  oldGWAMA = list.files(path = "../../../10_metaGWAS/",pattern = "GWASMA_", recursive = TRUE)
+  path_GWASAnnot = gsub("10_metaGWAS/.*","10_metaGWAS/",path_GWASAnnot_allTraits)
+  oldGWAMA = list.files(path = path_GWASAnnot,pattern = "GWASMA_", recursive = TRUE)
   oldGWAMA = oldGWAMA[grepl(".RData",oldGWAMA)]
   oldGWAMA = oldGWAMA[!grepl("archiv",oldGWAMA)]
   oldGWAMA = oldGWAMA[!grepl("onlyEA",oldGWAMA)]
@@ -204,10 +211,10 @@ source("../SourceFile_aman.R")
   ToDoList2[,phenotype := paste(pheno,setting,sep="_")]
   table(is.element(ToDoList$phenotype,ToDoList2$phenotype))
   matched = match(ToDoList$phenotype,ToDoList2$phenotype)
-  ToDoList[,oldGWAMA:=paste0("../../../10_metaGWAS/",ToDoList2[matched,oldGWAMA])]
+  ToDoList[,oldGWAMA:=paste0(path_GWASAnnot,ToDoList2[matched,oldGWAMA])]
   
   tab3 = foreach(i=1:dim(ToDoList)[1])%do%{
-    #i=1
+    #i=7
     myRow = ToDoList[i,]
     message("Working on phenotype ",myRow$phenotype," (",i," of ",dim(ToDoList)[1],")")
     
@@ -255,10 +262,19 @@ source("../SourceFile_aman.R")
   setnames(tab3,"n_samples_unfiltered","n_samples")
   tab3
   
+  ethnic_info = fread("../helperScripts/ST3_samplesize_by_ethnicity.txt")
+  stopifnot(ethnic_info$phenotype == tab3$phenotype)
+  tab3 = cbind(tab3[,1:3],ethnic_info[,3:7],tab3[,4:6])
+  
   tab3_annot = data.table(column = names(tab3),
                           description = c("Analyzed phenotype and setting",
                                           "Maximal number of available data sets",
                                           "Maximal number of individuals",
+                                          "Maximal number of individuals with African ancestry",
+                                          "Maximal number of individuals with European ancestry",
+                                          "Maximal number of individuals with East Asian ancestry",
+                                          "Maximal number of individuals with Hispanic ancestry",
+                                          "Maximal number of individuals with South Asian ancestry",
                                           "Number of SNPs before any QC was applied (number of SNPs analyzed in raw meta-analysis)",
                                           "Inflation factor lambda before any QC was applied",
                                           "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)"))
@@ -291,15 +307,15 @@ source("../SourceFile_aman.R")
   sexIA[,fdr_diff := p.adjust(p_diff, method = "fdr")]
   
   stopifnot(sexIA$SNP == tab4$indexSNP)
-  tab4 = cbind(tab4,sexIA[,c(3:12)])
+  tab4 = cbind(tab4,sexIA[,c(3:11,17,14)])
   tab4[,sexIA_FDRsig :=F]
   tab4[fdr_diff<0.05,sexIA_FDRsig :=T]
+  tab4 = tab4[,c(1:14,16,15)]
   
   coloc_sexIA = rbind(coloc_sexIA[1:7,],coloc_sexIA[7:22,])
   coloc_sexIA[,region :=gsub("Region ","",locus)]
   stopifnot(coloc_sexIA$region == tab4$locus_NR)
   tab4 = cbind(tab4,coloc_sexIA[,c(4:9)])
-  coloc_sexIA = rbind(coloc_sexIA[1:7,],coloc_sexIA[7:22,])
   tab4
   
   tab4_annot = data.table(column = names(tab4),
@@ -318,6 +334,7 @@ source("../SourceFile_aman.R")
                                           "P-value of difference",
                                           "FDR corrected p-value of difference",
                                           "TRUE/FALSE flag indicating significant sex-interaction after FDR correction",
+                                          "P-value of difference assuming no X inactivation",
                                           "Number of SNPs included in co-localization analysis per loci",
                                           "Posterior probability for hypothesis 0: neither trait associated",
                                           "Posterior probability for hypothesis 1: only trait 1 associated (males)",
@@ -330,7 +347,7 @@ source("../SourceFile_aman.R")
 
 #' # Get Sup Tab 5 ####
 #' ***
-#' Cross-phenotype comparision (--> see script 04)
+#' Cross-phenotype comparison (--> see script 04)
 {
   load("../results/04_lookup_TopHits_matchingSettings.RData")
   tab5_a = ShorterTable
@@ -876,12 +893,21 @@ source("../SourceFile_aman.R")
 #' Results of sex biased genes
 #' 
 {
-  tab13 = data.table(candidate_genes = c("AR", "DCAF12L1", "DRP2", "EDA2R", "FAM9B", "HPRT1", "MST4"), 
-                     number_tissues_higher_female = c(26, 1, 20, 0, 0, 11, 0), 
-                     number_tissues_higher_male = c(2, 3, 0, 8, 0, 1, 0), 
-                     kidney_cortex_sig = c("no","yes","yes","no","no","no","no"), 
-                     gender_higher_expression_in_kidney_cortex = c(NA,"male","female",NA,NA,NA,NA))
+  tab13 = fread("../results/13_lookup_sexbiased_GE_eQTLs.txt")
+  tab13 = tab13[genes %in% c("AR", "DCAF12L1", "DRP2", "EDA2R", "FAM9B", "HPRT1", "MST4")]
+  tab13[,sex_biased_eQTLs := NULL]
+  names(tab13) = c("candidate_genes","number_tissues_higher_female","number_tissues_higher_male","gender_higher_expression_in_kidney_cortex")
+  tab13[,kidney_cortex_sig := "yes"]
+  tab13[gender_higher_expression_in_kidney_cortex == "",kidney_cortex_sig := "no"]
+  tab13 = tab13[,c(1,2,3,5,4)]
   
+  dummy = data.table(candidate_genes = "FAM9B",
+                     number_tissues_higher_female = 0,
+                     number_tissues_higher_male = 0,
+                     kidney_cortex_sig = NA,
+                     gender_higher_expression_in_kidney_cortex = NA)
+  tab13 = rbind(tab13,dummy)
+  tab13 = tab13[c(3,4,1,6,7,5,2)]
   
   tab13_annot = data.table(column = names(tab13),
                            description = c("Name of candidate gene", 
@@ -891,16 +917,94 @@ source("../SourceFile_aman.R")
                            "Is the sex differential gene expression in kidney cortex higher in females or males?"))
 }
 
+#' # Get Sup Tabs 14 ###
+#' ***
+#' Co-localization with testosterone (--> see script 07_d)
+#' 
+{
+  load("../results/07_d_coloc_testo.RData")
+  tab14 = copy(ColocTable)
   
+  names(tab14)
+  setnames(tab14,"trait1","GWAMA_phenotype")
+  setnames(tab14,"trait2","testosterone trait")
+  setnames(tab14,"cytoband","locus_NR")
+  matched = match(tab14$locus_NR,tab4$locus_NR)
+  tab14[,cytoband := tab4[matched,cytoband]]
+  tab14 = tab14[,c(7,10,8,9,1:6)]
+  
+  # Filter for best trait per locus
+  tab14 = tab14[GWAMA_phenotype != "UA_MALE"]
+  tab14 = tab14[GWAMA_phenotype != "UA_FEMALE"]
+  tab14 = tab14[!(GWAMA_phenotype == "eGFR_MALE" & locus_NR %nin% c(1,4)),]
+  tab14 = tab14[!(GWAMA_phenotype == "eGFR_FEMALE" & locus_NR %nin% c(7)),]
+  tab14 = tab14[!(grepl("UA",GWAMA_phenotype) & locus_NR<16)]
+  tab14 = tab14[!(grepl("eGFR",GWAMA_phenotype) & locus_NR>15)]
+  
+  tab14_annot = data.table(column = names(tab14),
+                          description = c("Number of associated loci (1-15: eGFR, 16-22: UA)",
+                                          "Genomic cytoband of gene",
+                                          "Analyzed phenotype and setting",
+                                          "Analyzed testosterone subgroup",
+                                          "Number of SNPs included in co-localization analysis per locus",
+                                          "Posterior probability for hypothesis 0: neither trait associated",
+                                          "Posterior probability for hypothesis 1: only trait 1 associated (CKDGen)",
+                                          "Posterior probability for hypothesis 2: only trait 2 associated (gene expression)",
+                                          "Posterior probability for hypothesis 3: both trait associated, but different signals",
+                                          "Posterior probability for hypothesis 4: both trait associated, shared signal"))
+  
+  
+}
+
+#' # Get Sup Tabs 15 ###
+#' ***
+#' Look-up of eQTLs effect directions (--> see script 13_Lookup_eQTLs_leadSNPs)
+#' 
+{
+  load("../results/13_lookup_eQTL_leadSNPs_230927.RData")
+  
+  tab15 = copy(eQTL_lookup2)
+  names(tab15)[c(21,1,20,22,2,16,17,13,12,5,7,6,14,26,29,33,32,31,30)]
+  
+  tab15 = tab15[,c(21,1,20,22,2,16,17,13,12,5,7,6,14,26,29,33,32,31,30)]
+  tab15[CKD_EAF>0.5,CKD_EAF := 1-CKD_EAF]
+  setnames(tab15,"CKD_EAF","CKD_MAF")
+  setnames(tab15,"CKD_beta2","CKD_beta")
+  setnames(tab15,"maf","eQTL_MAF")
+  setnames(tab15,"beta","eQTL_beta")
+  setnames(tab15,"pval","eQTL_pval")
+  setnames(tab15,"n_samples","eQTL_N")
+  
+  setorder(tab15,pos_b37,gene)
+  
+  tab15_annot = data.table(column = names(tab15),
+                           description = c("Genomic cytoband of gene","ENSG ID","Gene name", "Analyzed tissue","Distance eQTL to gene start",
+                                           "SNP ID as given in GTEx (using hg19 base positions)",
+                                           "SNP position (hg19)", "effect allele","other allele", 
+                                           "eQTL Minor allele frequency","eQTL beta","eQTL pvalue","eQTL number of samples",
+                                           "CKD Minor allele frequency", "CKD beta", "CKD pvalue","CKD number of samples","CKD Phenotype",
+                                           "Same effect direction (after correcting the CKD beta for same effect allele)?"))    
+  
+}
+
 #' # Save tables ###
 #' ***
+
+tag = format(Sys.time(), "%Y-%m-%d")
+tag = gsub("2023-","23-",tag)
+tag = gsub("-","",tag)
+
+excel_fn = paste0("../tables/SupplementalTables_",tag,".xlsx")
+excel_fn_annot = paste0("../tables/SupplementalTables_Annotation_",tag,".xlsx")
+RData_fn = paste0("../tables/SupplementalTables_",tag,".RData")
+RData_fn_annot = paste0("../tables/SupplementalTables_Annotation_",tag,".RData")
+
 tosave4 = data.table(data = c("tab0",#"tab1","tab2", 
                               "tab3", "tab4","tab5_a","tab5_b","tab5_c","tab6","tab7","tab8",
-                              "tab9","tab10","tab11","tab12", "tab13"), 
+                              "tab9","tab10","tab11","tab12", "tab13","tab14","tab15"), 
                      SheetNames = c("Content",#"TableS1","TableS2", 
                                     "TableS3", "TableS4","TableS5_a","TableS5_b","TableS5_c","TableS6","TableS7","TableS8",
-                                    "TableS9","TableS10","TableS11","TableS12", "TableS13"))
-excel_fn = "../tables/SupplementalTables.xlsx"
+                                    "TableS9","TableS10","TableS11","TableS12", "TableS13","TableS14","TableS15"))
 WriteXLS(tosave4$data, 
          ExcelFileName=excel_fn, 
          SheetNames=tosave4$SheetNames, 
@@ -909,21 +1013,22 @@ WriteXLS(tosave4$data,
          FreezeRow=1)
 
 tosave4 = data.table(data = c("tab1_annot", "tab2_annot","tab3_annot", "tab4_annot","tab5_a_annot","tab5_b_annot","tab5_c_annot","tab6_annot",
-                              "tab7_annot","tab8_annot", "tab9_annot","tab10_annot","tab11_annot","tab12_annot","tab13_annot"), 
+                              "tab7_annot","tab8_annot", "tab9_annot","tab10_annot","tab11_annot","tab12_annot","tab13_annot","tab14_annot","tab15_annot"), 
                      SheetNames = c("TableS1_annot","TableS2_annot","TableS3_annot", "TableS4_annot","TableS5_a_annot","TableS5_b_annot",
                                     "TableS5_c_annot","TableS6_annot","TableS7_annot","TableS8_annot", "TableS9_annot","TableS10_annot",
-                                    "TableS11_annot","TableS12_annot", "TableS13_annot"))
-excel_fn = "../tables/SupplementalTables_Annotation.xlsx"
+                                    "TableS11_annot","TableS12_annot", "TableS13_annot","TableS14_annot","TableS15_annot"))
 WriteXLS(tosave4$data, 
-         ExcelFileName=excel_fn, 
+         ExcelFileName=excel_fn_annot, 
          SheetNames=tosave4$SheetNames, 
          AutoFilter=T, 
          BoldHeaderRow=T,
          FreezeRow=1)
 
-save(tab0,tab3,tab4,tab5_a,tab5_b,tab5_c,tab6,tab7,tab8,tab9,tab10,tab11,tab12,tab13,file = "../tables/SupplementalTables.RData")
-save(tab1_annot,tab2_annot,tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab5_c_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,tab13_annot,
-     file = "../tables/SupplementalTables_annot.RData")
+save(tab0,tab3,tab4,tab5_a,tab5_b,tab5_c,tab6,tab7,tab8,tab9,tab10,tab11,tab12,tab13,tab14,tab15,
+     file = RData_fn)
+
+save(tab1_annot,tab2_annot,tab3_annot,tab4_annot,tab5_a_annot,tab5_b_annot,tab5_c_annot,tab6_annot,tab7_annot,tab8_annot,tab9_annot,tab10_annot,tab11_annot,tab12_annot,tab13_annot,tab14_annot,tab15_annot,
+     file = RData_fn_annot)
 
 #' # Sessioninfo ####
 #' ***
