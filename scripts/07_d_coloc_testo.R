@@ -33,10 +33,11 @@ source("../helperFunctions/colocFunction_jp.R")
 #' ***
 #' PMID: 32042192
 #' 
-#' * GCST90012112
-#' * GCST90012113
+#' * GCST90012112 (Testosterone in females)
+#' * GCST90012113 (Testosterone in males)
+#' * GCST90012114 (Testosterone sex-combined)
 #' 
-TT = fread("../../../../2204_meta_steroidhormones/_literatur/UKBB/32042192-GCST90012112-EFO_0004908-Build37.f.tsv.gz") 
+TT = fread(paste0(path_Testosterone,"32042192-GCST90012112-EFO_0004908-Build37.f.tsv.gz")) 
 TT = TT[chromosome==23,]
 TT = TT[effect_allele_frequency>=0.01,]
 TT = TT[effect_allele_frequency<=0.99,]
@@ -45,7 +46,7 @@ TT[,N := 230454 ]
 TT[,phenotype := "testosterone_females" ]
 TT_fem = copy(TT)
 
-TT = fread("../../../../2204_meta_steroidhormones/_literatur/UKBB/32042192-GCST90012113-EFO_0004908-Build37.f.tsv.gz") 
+TT = fread(paste0(path_Testosterone,"32042192-GCST90012113-EFO_0004908-Build37.f.tsv.gz")) 
 TT = TT[chromosome==23,]
 TT = TT[effect_allele_frequency>=0.01,]
 TT = TT[effect_allele_frequency<=0.99,]
@@ -54,16 +55,32 @@ TT[,N := 194453 ]
 TT[,phenotype := "testosterone_males" ]
 TT_mal = copy(TT)
 
+TT = fread(paste0(path_Testosterone,"32042192-GCST90012114-EFO_0004908-Build37.f.tsv.gz")) 
+TT = TT[chromosome==23,]
+TT = TT[effect_allele_frequency>=0.01,]
+TT = TT[effect_allele_frequency<=0.99,]
+TT[,pval2 := as.numeric(p_value)]
+TT[,N := 425097 ]
+TT[,phenotype := "testosterone_all" ]
+TT_all = copy(TT)
+
 TT_fem[,dumID := paste(chromosome,base_pair_location,effect_allele,other_allele,sep=":")]
 TT_mal[,dumID := paste(chromosome,base_pair_location,effect_allele,other_allele,sep=":")]
+TT_all[,dumID := paste(chromosome,base_pair_location,effect_allele,other_allele,sep=":")]
 
 table(duplicated(TT_fem$dumID))
 table(duplicated(TT_mal$dumID))
+table(duplicated(TT_all$dumID))
+
 table(is.element(TT_mal$dumID,TT_fem$dumID))
-TT_fem = TT_fem[dumID %in% TT_mal$dumID]
-TT_mal = TT_mal[dumID %in% TT_fem$dumID]
+table(is.element(TT_all$dumID,TT_fem$dumID))
+
+TT_fem = TT_fem[dumID %in% TT_mal$dumID & dumID %in% TT_all$dumID,]
+TT_mal = TT_mal[dumID %in% TT_fem$dumID & dumID %in% TT_all$dumID,]
+TT_all = TT_all[dumID %in% TT_fem$dumID & dumID %in% TT_mal$dumID,]
 
 table(TT_fem$dumID == TT_mal$dumID)
+table(TT_fem$dumID == TT_all$dumID)
 
 plot(TT_fem$effect_allele_frequency, TT_mal$effect_allele_frequency)
 plot(TT_fem$beta, TT_mal$beta)
@@ -71,7 +88,7 @@ abline(0,1)
 plot(-log10(TT_fem$pval2), -log10(TT_mal$pval2))
 abline(0,1)
 
-TT = rbind(TT_fem,TT_mal)
+TT = rbind(TT_fem,TT_mal,TT_all)
 save(TT, file = "../temp/07_TestoAssoc.RData")
 
 #' # Match to CKDGen data ####
@@ -97,6 +114,16 @@ setnames(TT2,"pval2","pval")
 setnames(TT2,"N","n_samples")
 TT2[,maf:= effect_allele_frequency]
 TT2[effect_allele_frequency>0.5,maf:= 1-effect_allele_frequency]
+
+TT2[pval<5e-8,.N,by=c("region","phenotype")]
+plot(TT2[grepl("female",phenotype),effect_allele_frequency], TT2[grepl("_male",phenotype),effect_allele_frequency],
+     xlab = "EAF in females",ylab = "EAF in males")
+plot(TT2[grepl("female",phenotype),beta], TT2[grepl("_male",phenotype),beta],
+     xlab = "beta in females",ylab = "beta in males")
+abline(0,1)
+plot(TT2[grepl("female",phenotype),-log10(pval)], TT2[grepl("_male",phenotype),-log10(pval)],
+     xlab = "-log10(pval) in females",ylab = "-log10(pval) in males")
+abline(0,1)
 
 #' # Run coloc ####
 #' ***
