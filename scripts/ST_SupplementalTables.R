@@ -250,7 +250,8 @@ source("../SourceFile_angmar.R")
                      lambda_unfiltered = round(lambda_unfiltered,3),
                      n_studies_filtered = n_studies_filtered,
                      n_samples_filtered = trunc(n_samples_filtered),
-                     n_SNPs_filtered = n_SNPs_filtered)
+                     n_SNPs_filtered = n_SNPs_filtered,
+                     lambda_filtered = round(lambda_filtered,3))
     res
   }
   tab3 = rbindlist(tab3)
@@ -262,10 +263,23 @@ source("../SourceFile_angmar.R")
   setnames(tab3,"n_samples_unfiltered","n_samples")
   tab3
   
-  ethnic_info = fread("../helperScripts/ST3_samplesize_by_ethnicity.txt")
-  stopifnot(ethnic_info$phenotype == tab3$phenotype)
-  tab3 = cbind(tab3[,1:3],ethnic_info[,3:7],tab3[,4:6])
+  ethnic_info = fread("../helperScripts/ST3_samplesize_by_ethnicity_ak.txt")
+  ethnic_info[phenotype == "EGFR", phenotype := "eGFR"]
+  ethnic_info[,dumID := paste(phenotype,group,sep="_")]
+  stopifnot(ethnic_info$dumID == tab3$phenotype)
+  tab3 = cbind(tab3[,1:3],ethnic_info[,4:8],tab3[,4:7])
   
+  # Sanity check that lambdas are the same as in plot
+  tab3_2 = fread("../tables/ST3.txt")
+  tab3_2[phenotype == "EGFR", phenotype := "eGFR"]
+  tab3_2[,dumID := paste(phenotype,subgroup,sep="_")]
+  stopifnot(tab3_2$dumID == tab3$phenotype)
+  table(tab3$n_SNPs_unfiltered == tab3_2$n_SNPs_unfiltered)
+  table(tab3$n_SNPs_filtered == tab3_2$n_SNPs_filtered)
+  table(tab3$lambda_unfiltered == round(tab3_2$lambda_unfiltered,3))
+  table(tab3$lambda_filtered == round(tab3_2$lambda_filtered,3))
+  
+  tab3[,lambda_unfiltered := NULL]
   tab3_annot = data.table(column = names(tab3),
                           description = c("Analyzed phenotype and setting",
                                           "Maximal number of available data sets",
@@ -276,8 +290,9 @@ source("../SourceFile_angmar.R")
                                           "Maximal number of individuals with Hispanic ancestry",
                                           "Maximal number of individuals with South Asian ancestry",
                                           "Number of SNPs before any QC was applied (number of SNPs analyzed in raw meta-analysis)",
-                                          "Inflation factor lambda before any QC was applied",
-                                          "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)"))
+                                          "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)",
+                                          "Inflation factor lambda after QC"
+                                          ))
   
   
 }
@@ -934,12 +949,13 @@ source("../SourceFile_angmar.R")
   tab14 = tab14[,c(7,10,8,9,1:6)]
   
   # Filter for best trait per locus
-  tab14 = tab14[GWAMA_phenotype != "UA_MALE"]
-  tab14 = tab14[GWAMA_phenotype != "UA_FEMALE"]
-  tab14 = tab14[!(GWAMA_phenotype == "eGFR_MALE" & locus_NR %nin% c(1,4)),]
-  tab14 = tab14[!(GWAMA_phenotype == "eGFR_FEMALE" & locus_NR %nin% c(7)),]
+  # tab14 = tab14[GWAMA_phenotype != "UA_MALE"]
+  # tab14 = tab14[GWAMA_phenotype != "UA_FEMALE"]
+  # tab14 = tab14[!(GWAMA_phenotype == "eGFR_MALE" & locus_NR %nin% c(1,4)),]
+  # tab14 = tab14[!(GWAMA_phenotype == "eGFR_FEMALE" & locus_NR %nin% c(7)),]
   tab14 = tab14[!(grepl("UA",GWAMA_phenotype) & locus_NR<16)]
   tab14 = tab14[!(grepl("eGFR",GWAMA_phenotype) & locus_NR>15)]
+  setorder(tab14,locus_NR)
   
   tab14_annot = data.table(column = names(tab14),
                           description = c("Number of associated loci (1-15: eGFR, 16-22: UA)",
