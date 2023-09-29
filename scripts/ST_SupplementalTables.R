@@ -279,7 +279,7 @@ source("../SourceFile_angmar.R")
   table(tab3$lambda_unfiltered == round(tab3_2$lambda_unfiltered,3))
   table(tab3$lambda_filtered == round(tab3_2$lambda_filtered,3))
   
-  tab3[,lambda_unfiltered := NULL]
+  tab3[,lambda_filtered := NULL]
   tab3_annot = data.table(column = names(tab3),
                           description = c("Analyzed phenotype and setting",
                                           "Maximal number of available data sets",
@@ -290,8 +290,8 @@ source("../SourceFile_angmar.R")
                                           "Maximal number of individuals with Hispanic ancestry",
                                           "Maximal number of individuals with South Asian ancestry",
                                           "Number of SNPs before any QC was applied (number of SNPs analyzed in raw meta-analysis)",
-                                          "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)",
-                                          "Inflation factor lambda after QC"
+                                          "Inflation factor lambda before any QC was applied",
+                                          "Number of SNPs after QC (filtering for number of studies >=10, imputation info score >=0.8, minor allele frequency >=0.02, heterogeneity I^2 <=0.8)"
                                           ))
   
   
