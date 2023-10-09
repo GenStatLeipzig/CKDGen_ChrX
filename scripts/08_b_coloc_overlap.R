@@ -85,17 +85,34 @@ index_1 = c(index_1[c(1 : 3)], 7, index_1[c(4 : 7)])
 index_2 = c(index_2[c(1 : 3)], 18, index_2[c(4 : 7)])
 #
 
+# Enlarge each pair for all possible phenotype combinations
+index_1 = rep(index_1, each = 9)
+index_2 = rep(index_2, each = 9)
+#
+
 data_1 = data[index_1, ]
 data_2 = data[index_2, ]
 
-# Manual inclusion of female eGFR locus
-sumStat_2_egfr_female = sumStat_2[(sumStat_2$rsID == "rs149995096:100479327:C:T"), ]
-levels(data_1$snp)    = c(levels(data_1$snp), sumStat_2_egfr_female$rsID)
-data_1$snp[4]         = sumStat_2_egfr_female$rsID
-data_1$pos[4]         = sumStat_2_egfr_female$position
-levels(data_1$trait)  = c(levels(data_1$trait), "eGFR_FEMALE")
-data_1$trait[4]       = "eGFR_FEMALE"
-data_1$trait2[4]      = 2
+# Add all possible phenotype combinations
+dum_egfr_trait       = rep(rep(c("eGFR_MALE", "eGFR_FEMALE", "eGFR_ALL"), each = 3), times = 8)
+dum_egfr_trait2      = rep(rep(c("1", "2", "3"), each = 3), times = 8)
+data_1$trait         = dum_egfr_trait
+data_1$trait2        = dum_egfr_trait2
+dum_uric_acid_trait  = rep(c("UA_MALE", "UA_FEMALE", "UA_ALL"), times = (3 * 8))
+dum_uric_acid_trait2 = rep(c("4", "5", "6"), times = (3 * 8))
+data_2$trait         = dum_uric_acid_trait
+data_2$trait2        = dum_uric_acid_trait2
+#
+
+# Manual inclusion of female eGFR locus, and factorisation of 'trait' and 'trait2'
+sumStat_2_egfr_female  = sumStat_2[(sumStat_2$rsID == "rs149995096:100479327:C:T"), ]
+levels(data_1$snp)     = c(levels(data_1$snp), sumStat_2_egfr_female$rsID)
+data_1$snp[c(28 : 36)] = sumStat_2_egfr_female$rsID
+data_1$pos[c(28 : 36)] = sumStat_2_egfr_female$position
+data_1$trait           = factor(data_1$trait, levels = c("eGFR_MALE", "eGFR_FEMALE", "eGFR_ALL"))
+data_1$trait2          = as.numeric(data_1$trait2)
+data_2$trait           = factor(data_2$trait, levels = c("UA_MALE", "UA_FEMALE", "UA_ALL"))
+data_2$trait2          = as.numeric(data_2$trait2)
 #
 
 coloc = list()
@@ -266,8 +283,8 @@ names(res_summary) = c("nsnps",
                        "PP.H4.abf")
 res_summary        = data.frame(region1 = paste0("Region ", data_1$region),
                                 region2 = paste0("Region ", data_2$region),
-                                trait1 = c("eGFR (MALE)", rep("eGFR (ALL)", 2), "eGFR (FEMALE)", rep("eGFR (ALL)", 4)),
-                                trait2 = rep("Uric Acid (ALL)", 8),
+                                trait1 = data_1$trait,
+                                trait2 = data_2$trait,
                                 res_summary)
 
 # for (i in 1 : nrow(res_h3_h4)) {
