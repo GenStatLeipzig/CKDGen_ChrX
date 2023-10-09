@@ -52,6 +52,7 @@ temp/*
 scripts/*.Rout
 scripts/*.out
 scripts/*.html
+scripts/Rplots.pdf
 tables/*_check.xlsx
 tables/*.RData
 scripts/_files4RegionAssocPlots/*
