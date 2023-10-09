@@ -18,7 +18,7 @@
 #' ***
 time0 = Sys.time()
 
-source("../SourceFile_angmar.R")
+source("../SourceFile_aman.R")
 source("../helperFunctions/miamiPlot.R")
 
 setwd(paste0(projectpath,"scripts/"))
@@ -129,9 +129,9 @@ plot1 = miamiPlot(x=copy(plotData),
                  ymin = -ymaxpar2,
                  title = "",
                  xlabel = "",
-                 ylabel=expression(paste("UA: ",log[10](p),"                                                                                 eGFR: ",-log[10](p))),
+                 ylabel=expression(paste("UA: ",log[10](p),"                              eGFR: ",-log[10](p))),
                  hline1=-log10(5e-8),hline2=log10(5e-8),
-                 sugline1=-log10(1e-6),sugline2=log10(1e-6),
+                 sugline1=NULL,sugline2=NULL,
                  highlight=T, diffsize = T,num_breaks_y=10,
                  plotGenes=T,
                  out_name="../figures/MainFigure1_MiamiPlot_230130.pdf",
@@ -236,14 +236,14 @@ plot4
 message("Create PDF")
 
 pdf_from_png(code2parseOrPlot = plot4, 
-             pdf_filename = "../figures/MainFigure1_MiamiPlot_230206.pdf",
+             pdf_filename = "../figures/MainFigure1_MiamiPlot_230321.pdf",
              weite = 12,
              laenge = 8,
              einheiten = "in",
              resolution = 150)
 
 
-tiff(filename = "../figures/MainFigure1_MiamiPlot_230206.tiff", 
+tiff(filename = "../figures/MainFigure1_MiamiPlot_230321.tiff", 
      width = 4800, height = 2440, res=300, compression = 'lzw')
 plot4
 dev.off()
