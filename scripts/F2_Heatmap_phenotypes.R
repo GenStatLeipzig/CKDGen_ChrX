@@ -80,7 +80,7 @@ toPlot = rbindlist(list(ALL, FEMALE, MALE), use.names = T)
 setkey(toPlot, "Locus")
 
 #plot -beta_eGFR so that colours are easier to compare
-toPlot[, beta_eGFR := beta_eGFR * (-1)]
+#toPlot[, beta_eGFR := beta_eGFR * (-1)]
 toPlot[, ]
 
 #short rsIDs
@@ -106,7 +106,7 @@ toPlot2[, rsID := NULL]
 toPlot2[, phenotype2 := NULL]
 
 #add * to eGFR label (for later reference in paper, -eGFR is ploted)
-toPlot2[phenotype == "eGFR", phenotype := "eGFR*"]
+#toPlot2[phenotype == "eGFR", phenotype := "eGFR*"]
 
 #change scale (three different levels of significance)
 toPlot2[, signif := "missing"]
@@ -129,7 +129,8 @@ toPlot2 = as.data.frame(toPlot2)
 toPlot2$significance = factor(toPlot2$significance, levels=c("genome-wide, beta > 0", "nominal, beta > 0", "not significant, beta > 0", 
                                                              "genome-wide, beta < 0", "nominal, beta < 0", "not significant, beta < 0", 
                                                              "missing"))
-toPlot2$phenotype = factor(toPlot2$phenotype, levels=c("eGFR*", "UA", "BUN", "CKD", "UACR", "MA"))
+#toPlot2$phenotype = factor(toPlot2$phenotype, levels=c("eGFR*", "UA", "BUN", "CKD", "UACR", "MA"))
+toPlot2$phenotype = factor(toPlot2$phenotype, levels=c("eGFR", "UA", "BUN", "CKD", "UACR", "MA"))
 
 #add main phenotype of top hit to data object
 toPlot2$topPheno = "eGFR"
@@ -179,12 +180,12 @@ p = ggplot(data = toPlot2, aes(x=phenotype, y=SNP, fill=significance)) + geom_ti
   scale_fill_manual(values = MyColors) + theme(legend.position = "right") + 
   theme(legend.text = element_text(size = 7), legend.title = element_text(size = 7)) + 
   theme(plot.margin = margin(0.1, 0.15, 0.1 ,0.1, "cm")) + theme(legend.key.size = unit(0.3, "cm"), legend.key.width = unit(0.5,"cm")) +
-  labs(tag = "*Effect direction for\neGFR is reversed") +
+  #labs(tag = "*Effect direction for\neGFR is reversed") +
   coord_cartesian(clip = "off") + theme(plot.tag.position = c(.8, .3), plot.tag = element_text(size = 7))
 
 p
 
-tiff(file="../figures/MainFigure2_Heatmap_230425.tiff", width = 1400, height = 800, res = 300, compression = 'lzw')
+tiff(file="../figures/MainFigure2_Heatmap_230510.tiff", width = 1400, height = 800, res = 300, compression = 'lzw')
 p
 dev.off()
 
