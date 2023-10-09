@@ -277,9 +277,7 @@ source("../SourceFile_angmar.R")
   table(tab3$n_SNPs_unfiltered == tab3_2$n_SNPs_unfiltered)
   table(tab3$n_SNPs_filtered == tab3_2$n_SNPs_filtered)
   table(tab3$lambda_unfiltered == round(tab3_2$lambda_unfiltered,3))
-  table(tab3$lambda_filtered == round(tab3_2$lambda_filtered,3))
   
-  tab3[,lambda_filtered := NULL]
   tab3_annot = data.table(column = names(tab3),
                           description = c("Analyzed phenotype and setting",
                                           "Maximal number of available data sets",
