@@ -79,10 +79,6 @@ MALE[, Cytoband := paste0(Locus, ": MALE - ", Cytoband)]
 toPlot = rbindlist(list(ALL, FEMALE, MALE), use.names = T)
 setkey(toPlot, "Locus")
 
-#plot -beta_eGFR so that colours are easier to compare
-#toPlot[, beta_eGFR := beta_eGFR * (-1)]
-toPlot[, ]
-
 #short rsIDs
 shorts = apply(toPlot, 1, function(x) return(unlist(strsplit(x[3], split =":"))[1]))
 shorts[shorts == "chr23"] = "chr23:152898260"
@@ -105,9 +101,6 @@ table(toPlot2[, phenotype], toPlot2[, phenotype2])
 toPlot2[, rsID := NULL]
 toPlot2[, phenotype2 := NULL]
 
-#add * to eGFR label (for later reference in paper, -eGFR is ploted)
-#toPlot2[phenotype == "eGFR", phenotype := "eGFR*"]
-
 #change scale (three different levels of significance)
 toPlot2[, signif := "missing"]
 toPlot2[!is.na(Pvalue), signif := "none"]
@@ -129,7 +122,6 @@ toPlot2 = as.data.frame(toPlot2)
 toPlot2$significance = factor(toPlot2$significance, levels=c("genome-wide, beta > 0", "nominal, beta > 0", "not significant, beta > 0", 
                                                              "genome-wide, beta < 0", "nominal, beta < 0", "not significant, beta < 0", 
                                                              "missing"))
-#toPlot2$phenotype = factor(toPlot2$phenotype, levels=c("eGFR*", "UA", "BUN", "CKD", "UACR", "MA"))
 toPlot2$phenotype = factor(toPlot2$phenotype, levels=c("eGFR", "UA", "BUN", "CKD", "UACR", "MA"))
 
 #add main phenotype of top hit to data object
@@ -174,18 +166,17 @@ MyColors = c(col_red(seq(0, 2)), col_blue(seq(0, 3)))
 
 p = ggplot(data = toPlot2, aes(x=phenotype, y=SNP, fill=significance)) + geom_tile(colour = "grey40") + 
   facet_grid(rows = "topPheno", scales = "free_y", space = "free_y") +
-  theme_bw() +  theme(axis.title.x = element_blank(), axis.text.x = element_text(size = 7, angle = 50, hjust = 1), 
-        axis.ticks.x = element_blank(), axis.title.y = element_text(size = 7)) + 
-  theme(axis.text.y = element_text(size = 7), strip.text = element_text(size = 5)) +
+  theme_bw() +  theme(axis.title.x = element_blank(), axis.text.x = element_text(size = 12, angle = 50, hjust = 1), 
+        axis.ticks.x = element_blank(), axis.title.y = element_text(size = 12)) + 
+  theme(axis.text.y = element_text(size = 12), strip.text = element_text(size = 10)) +
   scale_fill_manual(values = MyColors) + theme(legend.position = "right") + 
-  theme(legend.text = element_text(size = 7), legend.title = element_text(size = 7)) + 
+  theme(legend.text = element_text(size = 12), legend.title = element_text(size = 12)) + 
   theme(plot.margin = margin(0.1, 0.15, 0.1 ,0.1, "cm")) + theme(legend.key.size = unit(0.3, "cm"), legend.key.width = unit(0.5,"cm")) +
-  #labs(tag = "*Effect direction for\neGFR is reversed") +
   coord_cartesian(clip = "off") + theme(plot.tag.position = c(.8, .3), plot.tag = element_text(size = 7))
 
 p
 
-tiff(file="../figures/MainFigure2_Heatmap_230510.tiff", width = 1400, height = 800, res = 300, compression = 'lzw')
+pdf(file="../figures/Figure4.pdf", width = 9, height = 8)
 p
 dev.off()
 
