@@ -21,7 +21,7 @@
 rm(list = setdiff(ls(), "allinfo"))
 time0 = Sys.time()
 
-source("../SourceFile_angmar.R")
+source("../SourceFile_aman.R")
 
 setwd(projectpath_main)
 
@@ -202,7 +202,7 @@ write.table(df,
 }
 
 
-#' # Supplemental Figure: Beta-Beta Plot ####
+#' # Main Figure 3: Beta-Beta Plot ####
 #' ***
 sexIA_eGFR = fread("../results/02_sex_ia_egfr.txt")
 sexIA_UA = fread("../results/02_sex_ia_uric_acid.txt")
@@ -262,8 +262,7 @@ myPlot1 = ggplot(myPlotData, aes(x=beta_male, y=beta_female, color=sex.higherEff
   guides(label="none", color="none")
 myPlot1
 
-tiff(filename = "../figures/SupplementalFigure_BetaBeta_sexIA.tiff", 
-     width = 3000, height = 1800, res=300, compression = 'lzw')
+pdf(file = "../figures/Figure3.pdf", width = 10, height = 6)
 myPlot1
 dev.off()
 
