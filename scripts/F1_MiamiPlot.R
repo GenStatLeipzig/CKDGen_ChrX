@@ -134,7 +134,7 @@ plot1 = miamiPlot(x=copy(plotData),
                  sugline1=NULL,sugline2=NULL,
                  highlight=T, diffsize = T,num_breaks_y=10,
                  plotGenes=T,
-                 out_name="../figures/MainFigure1_MiamiPlot_230130.pdf",
+                 out_name="../figures/MainFigure1_MiamiPlot_231121.pdf",
                  returnObject = T,
                  overall_max = 40, overall_min = -40,useBasePosition = T)
 
@@ -172,7 +172,7 @@ plot3 <- plot2 +
   # top: known & female-specific hits
   geom_text_repel(data = subset(genes, NoveltySexIA=="no_sexia" & sexIA=="female"),
                   aes(x=BP, y=logP, label = candidateGene),
-                  ylim = c(31,40),fontface = 'bold.italic',color = "#D73027") + 
+                  ylim = c(30,40), xlim = c(Inf, 135000000), fontface = 'bold.italic',color = "#D73027") + 
   
   # top: known & male-specific hits
   geom_text_repel(data = subset(genes, NoveltySexIA=="no_sexia"& sexIA=="male" & flag == "top"),
@@ -202,7 +202,7 @@ plot3 <- plot2 +
                   ylim = c(12,25),xlim =c(-Inf,98000000) ) + 
   geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "top" & candidateGene == "MORF4L2,\nTCEAL3"),
                   aes(x=BP, y=logP, label = candidateGene),
-                  ylim = c(7.3,15),xlim =c(-Inf,99000000) ) + 
+                  ylim = c(7.3,15),xlim =c(-Inf,100000000) ) + 
   geom_text_repel(data = subset(genes, NoveltySexIA=="no" & flag == "top" & candidateGene == "DCAF12L1"),
                   aes(x=BP, y=logP, label = candidateGene),
                   ylim = c(7.3,Inf),nudge_x= -10000, nudge_y= 3 ) + 
@@ -217,10 +217,10 @@ plot3
 # add legend for labels
 dummy = data.table(lab = c("novel \nloci","sex \ninteraction"),
                    yaxis = c(-11,-15),
-                   xaxis = c(30082665,30082665))
+                   xaxis = c(35092665,35092665))
 
 plot4 = plot3 + annotate("rect", 
-                           xmin = 10012628, xmax = 37482665, 
+                           xmin = 10012628, xmax = 41482665,
                            ymin = -25, ymax = -8,
                            fill = "#F2F2F2")+   
   geom_text(data = subset(dummy, lab=="sex \ninteraction"),
@@ -236,15 +236,19 @@ plot4
 message("Create PDF")
 
 pdf_from_png(code2parseOrPlot = plot4, 
-             pdf_filename = "../figures/MainFigure1_MiamiPlot_230321.pdf",
+             pdf_filename = "../figures/MainFigure1_MiamiPlot_231121.pdf",
              weite = 12,
              laenge = 8,
              einheiten = "in",
              resolution = 150)
 
 
-tiff(filename = "../figures/MainFigure1_MiamiPlot_230321.tiff", 
+tiff(filename = "../figures/MainFigure1_MiamiPlot_231121.tiff", 
      width = 4800, height = 2440, res=300, compression = 'lzw')
+plot4
+dev.off()
+
+pdf(file = "../figures/Figure1.pdf", width = 12, height = 8)
 plot4
 dev.off()
 
