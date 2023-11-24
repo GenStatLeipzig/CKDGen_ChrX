@@ -176,7 +176,7 @@ p = ggplot(data = toPlot2, aes(x=phenotype, y=SNP, fill=significance)) + geom_ti
 
 p
 
-pdf(file="../figures/Figure4.pdf", width = 9, height = 8)
+pdf(file="../figures/Figure4.pdf", width = 9, height = 6)
 p
 dev.off()
 
